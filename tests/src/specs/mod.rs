@@ -1,5 +1,5 @@
-mod simple_case;
-pub use simple_case::*;
+mod ckb_asset;
+pub use ckb_asset::*;
 
 // use crate::Node;
 // use ckb_app_config::CKBAppConfig;

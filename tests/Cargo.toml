@@ -6,11 +6,13 @@ edition = "2018"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
+regex = "1.5.4"
 clap = { version = "2" }
-lazy_static = "1.4.0"
+# lazy_static = "1.4.0"
 crossbeam-channel = "0.5"
 parking_lot = "0.11"
 log = "0.4.14"
+
 
 
 # an excellent crate for displaying useful and pretty errors

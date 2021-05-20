@@ -1,6 +1,6 @@
 use parking_lot::Mutex;
 use clap::{App, Arg, value_t};
-use godwoken_test::specs::{SimpleCase};
+use godwoken_test::specs::{CkbAsset};
 use godwoken_test::{worker::{Notify, Workers}, Spec};
 use std::any::Any;
 use std::env;
@@ -177,7 +177,7 @@ fn main() {
 /// all test cases
 fn all_specs() -> Vec<Box<dyn Spec>> {
   vec![
-    Box::new(SimpleCase),
+    Box::new(CkbAsset),
     // Box::new(ReadConfig)
   ]
   //TODO: shuffle
