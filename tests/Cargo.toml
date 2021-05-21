@@ -12,11 +12,9 @@ clap = { version = "2" }
 crossbeam-channel = "0.5"
 parking_lot = "0.11"
 log = "0.4.14"
-
-
-
 # an excellent crate for displaying useful and pretty errors
 anyhow = "1.0"
+
 # # home directories vary depending on the user's operating system
 # home = "0.5"
 # # Parse command line arguments by defining a struct. It combines clap with custom derive.
