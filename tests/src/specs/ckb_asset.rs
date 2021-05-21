@@ -1,5 +1,6 @@
 use anyhow::{anyhow, Result};
-use std::process::{Command};
+use std::{io::{BufRead, BufReader},
+		 process::{Command, Stdio}};
 use crate::{Spec};
 use std::env;
 use regex::{Regex};
@@ -25,7 +26,7 @@ impl GodwokenUser {
 		}
 		// FIXME: get gw_account_id
 		let pattern: Regex = Regex::new(r"[B|b]alance: (\d+)").unwrap();
-		let mut balance_output = account_cli()
+		let balance_output = account_cli()
 		  .args(&["get-balance", &self.gw_account_id.unwrap().to_string()])
 			.output()
 			.expect("failed to get-balance");
@@ -37,6 +38,8 @@ impl GodwokenUser {
 		self.ckb_balance = u128::from_str_radix(balance_str, 10).unwrap();
 		Ok(self.ckb_balance)
 	}
+
+	fn deposit()
 }
 
 pub struct CkbAsset;
@@ -75,40 +78,79 @@ impl Spec for CkbAsset {
 		// call account-cli to deposit
     //TODO: deposit and get the script hash when the deposition finished.
 
-		let mut output = account_cli()
-			.arg("deposit")
-			.args(&["--rpc", &ckb_rpc])
-			.args(&["-p", &miner.private_key])
-			.args(&["-c", "60000000000"]) // 600 CKBytes = 60,000,000,000 Shannons
-			.output()
-			.expect("failed to deposit CKB from layer1 to layer2");
+		// let mut output = account_cli()
+		// 	.arg("deposit")
+		// 	.args(&["--rpc", &ckb_rpc])
+		// 	.args(&["-p", &miner.private_key])
+		// 	.args(&["-c", "60000000000"]) // 600 CKBytes = 60,000,000,000 Shannons
+		// 	.output()
+		// 	.expect("failed to deposit CKB from layer1 to layer2");
 
 		let script_hash_pattern = Regex::new(r"script hash: (0x.{64})").unwrap();
 		let ckb_balance_pattern = Regex::new(r"ckb balance in godwoken is: (\d+)").unwrap();
 	  let account_id_pattern = Regex::new(r"Your account id: (\d+)").unwrap();
 
-		miner.ckb_balance = String::from_utf8(output.stdout).unwrap()
-			.lines()
+		// miner.ckb_balance = String::from_utf8(output.stdout).unwrap()
+		// 	.lines()
+		// 	.filter_map(|line| {
+		// 		println!("{}", line);
+		// 		// update account_script_hash from log
+		// 		if miner.account_script_hash.is_none() {
+		// 			if let Some(cap) = script_hash_pattern.captures(line) {
+		// 				miner.account_script_hash = Some(cap.get(1).unwrap().as_str().to_string());
+		// 			}
+		// 			println!("update miner.account_script_hash to {:?}", miner.account_script_hash);
+		// 		}
+		// 		// update gw_account_id 
+		// 		if miner.gw_account_id.is_none() {
+		// 			if let Some(cap) = account_id_pattern.captures(line) {
+		// 				miner.gw_account_id = cap.get(1).unwrap().as_str().parse::<u32>().ok();
+		// 			}
+		// 			println!("update miner.gw_account_id to {:?}", miner.gw_account_id);
+		// 		}
+		// 		// filter the balance lines
+		// 		ckb_balance_pattern.captures(line)
+		// 	}) // update ckb balance
+		// 	.last().unwrap().get(1).unwrap().as_str().parse::<u128>().unwrap();
+		// 	println!("udpate miner.ckb_balance to {:?}", miner.ckb_balance);
+
+		let user1_deposit_stdout = account_cli()
+			.arg("deposit")
+			.args(&["--rpc", &ckb_rpc])
+			.args(&["-p", &user1.private_key])
+			.args(&["-c", "30000000000"]) // 300 CKBytes = 30,000,000,000 Shannons
+			.stdout(Stdio::piped())
+			.spawn().unwrap()
+			.stdout.unwrap();		
+		
+		let last_ckb_balance_line = BufReader::new(user1_deposit_stdout).lines()
+	    .filter_map(|line| line.ok())
 			.filter_map(|line| {
-				println!("{}", line);
-				// update account_script_hash from log
-				if miner.account_script_hash.is_none() {
-					if let Some(cap) = script_hash_pattern.captures(line) {
-						miner.account_script_hash = Some(cap.get(1).unwrap().as_str().to_string());
+				println!("{}", &line);
+				// update account_script_hash
+				if user1.account_script_hash.is_none() {
+					if let Some(cap) = script_hash_pattern.captures(&line) {
+						user1.account_script_hash = Some(cap.get(1).unwrap().as_str().to_string());
+						println!("update user1.account_script_hash to {:?}", user1.account_script_hash);
 					}
-					println!("update miner.account_script_hash to {:?}", miner.account_script_hash);
 				}
 				// update gw_account_id 
-				if miner.gw_account_id.is_none() {
-					if let Some(cap) = account_id_pattern.captures(line) {
-						miner.gw_account_id = cap.get(1).unwrap().as_str().parse::<u32>().ok();
+				if user1.gw_account_id.is_none() {
+					if let Some(cap) = account_id_pattern.captures(&line) {
+						user1.gw_account_id = cap.get(1).unwrap().as_str().parse::<u32>().ok();
+						println!("update user1.gw_account_id to {:?}", user1.gw_account_id);
 					}
-					println!("update miner.gw_account_id to {:?}", miner.gw_account_id);
 				}
-				ckb_balance_pattern.captures(line)
-			}) // update ckb balance
-			.last().unwrap().get(1).unwrap().as_str().parse::<u128>().unwrap();
-			println!("udpate miner.ckb_balance to {:?}", miner.ckb_balance);
+				// filter the balance lines
+				if line.starts_with("ckb balance") { Some(line) } else { None }
+			}).last();
+
+		if let Some(cap) = 
+			ckb_balance_pattern.captures(last_ckb_balance_line.unwrap().clone().as_str()) {
+				user1.ckb_balance = cap.get(1).unwrap().as_str().parse::<u128>().unwrap();
+			};
+
+		return;
 		
 	
 		// let first_balance  = if let Some(cap) = balance_lines.next() {			
