@@ -8,7 +8,7 @@ export GODWOKEN_CONFIG_PATH=${PWD}/configs/godwoken-config.toml
 git clone --depth 1 --branch pkg https://github.com/Flouse/godwoken-examples examples
 
 # use node@14
-cd examples && yarn && yarn build-all 
+cd examples && git pull && yarn && yarn build-all 
 # copy and convert config format
 yarn copy-configs
 yarn convert-config-format # convert `godwoken-config.toml` to `godwoken-config.json`
