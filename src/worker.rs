@@ -107,9 +107,11 @@ impl Worker {
     fn run_spec(&self, spec: &dyn Spec, retried: usize) {
         let outbox = self.outbox.clone();
         let now = Instant::now();
-        outbox.send(Notify::Start {
-            spec_name: spec.name().to_string(),
-        }).unwrap();
+        outbox
+            .send(Notify::Start {
+                spec_name: spec.name().to_string(),
+            })
+            .unwrap();
 
         // let mut nodes = spec.before_run();
         // let node_paths = nodes

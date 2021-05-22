@@ -3,7 +3,7 @@ pub use specs::Spec;
 pub mod worker;
 
 /// The 32-byte fixed-length binary data, Represent 256 bits
-/// 
+///
 /// The name comes from the number of bits in the data.
 ///
 /// In JSONRPC, it is encoded as a 0x-prefixed hex string.
