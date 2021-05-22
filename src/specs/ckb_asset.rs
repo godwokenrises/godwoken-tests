@@ -14,30 +14,31 @@ pub const CKB_SUDT_ACCOUNT_ID: u32 = 1;
 pub struct CkbAsset;
 impl Spec for CkbAsset {
     /// Case:
-    /// 	1. deposit CKB from layer1 to layer2
-    ///		2. godwoken transfer from MINER to USER1
+    ///   1. deposit CKB from layer1 to layer2
+    ///   2. godwoken transfer from MINER to USER1
     ///   3. withdraw CKB from layer2 to layer1
     fn run(&self) {
         println!("\nCkbAsset Test Case: invoke account-cli to deposit -> transfer -> withdraw");
 
-        let ckb_rpc: String = env::var("CKB_RPC").unwrap_or("http://127.0.0.1:8114".to_string());
+        let ckb_rpc: String =
+            env::var("CKB_RPC").unwrap_or_else(|_| "http://127.0.0.1:8114".to_string());
 
         let mut miner = GodwokenUser {
-            private_key: env::var("MINER_PRIVATE_KEY").unwrap_or(
-                "0xdd50cac37ec6dd12539a968c1a2cbedda75bd8724f7bcad486548eaabb87fc8b".to_string(),
-            ),
+            private_key: env::var("MINER_PRIVATE_KEY").unwrap_or_else(|_| {
+                "0xdd50cac37ec6dd12539a968c1a2cbedda75bd8724f7bcad486548eaabb87fc8b".to_string()
+            }),
             pub_ckb_addr: env::var("MINER_CKB_ADDR")
-                .unwrap_or("ckt1qyqy84gfm9ljvqr69p0njfqullx5zy2hr9kq0pd3n5".to_string()),
+                .unwrap_or_else(|_| "ckt1qyqy84gfm9ljvqr69p0njfqullx5zy2hr9kq0pd3n5".to_string()),
             ckb_balance: 0,
             account_script_hash: None,
             gw_account_id: None,
         };
         let mut user1 = GodwokenUser {
-            private_key: env::var("USER1_PRIVATE_KEY").unwrap_or(
-                "0x6cd5e7be2f6504aa5ae7c0c04178d8f47b7cfc63b71d95d9e6282f5b090431bf".to_string(),
-            ),
+            private_key: env::var("USER1_PRIVATE_KEY").unwrap_or_else(|_| {
+                "0x6cd5e7be2f6504aa5ae7c0c04178d8f47b7cfc63b71d95d9e6282f5b090431bf".to_string()
+            }),
             pub_ckb_addr: env::var("USER1_CKB_ADDR")
-                .unwrap_or("ckt1qyqf22qfzaer95xm5d2m5km0f6k288x9warqnhsf4m".to_string()),
+                .unwrap_or_else(|_| "ckt1qyqf22qfzaer95xm5d2m5km0f6k288x9warqnhsf4m".to_string()),
             ckb_balance: 0,
             account_script_hash: None,
             gw_account_id: None,
@@ -191,12 +192,10 @@ impl Spec for CkbAsset {
         // TODO: query balance after confirm and assert
         println!("miner_balance_record: {:?}", miner.get_balance());
         println!("user1_balance_record: {:?}", user1.get_balance());
-        /**
-        FIXME
-        thread '<unnamed>' panicked at 'assertion failed: `(left == right)`
-        left: `1529999987500`,
-        right: `1519999987499`', tests/src/specs/ckb_asset.rs:206:9
-        */
+        // FIXME:
+        // thread '<unnamed>' panicked at 'assertion failed: `(left == right)`
+        // left: `1529999987500`,
+        // right: `1519999987499`', tests/src/specs/ckb_asset.rs:206:9
         // assert_eq!(miner.ckb_balance, miner_balance_record - 10000000001 - 40000000000);
         // assert_eq!(user1.ckb_balance, user1_balance_record + 10000000001);
 
@@ -271,21 +270,4 @@ fn account_cli() -> Command {
         .env("LUMOS_CONFIG_FILE", &lumos_config_file_path)
         .args(&["--godwoken-rpc", &godwoken_rpc]);
     account_cli
-}
-/// godwoken_cli is built from godwoken-examples/packages/tools
-fn godwoken_cli() -> Command {
-    let mut godwoken_cli = if cfg!(target_os = "linux") {
-        Command::new("./godwoken-cli-linux")
-    } else if cfg!(target_os = "macos") {
-        Command::new("./godwoken-cli-macos")
-    } else {
-        panic!("This OS is NOT supported yet.");
-    };
-    let godwoken_rpc: String =
-        env::var("GODWOKEN_RPC").unwrap_or("http://127.0.0.1:8119".to_string());
-    let ckb_rpc: String = env::var("CKB_RPC").unwrap_or("http://127.0.0.1:8114".to_string());
-    godwoken_cli
-        .args(&["--rpc", &godwoken_rpc])
-        .args(&["--ckb-rpc", &ckb_rpc]);
-    godwoken_cli
 }
