@@ -10,7 +10,6 @@ use regex::{Regex};
 pub const CKB_SUDT_ACCOUNT_ID: u32 = 1;
 
 pub struct CkbAsset;
-
 impl Spec for CkbAsset {
 	/// Case: 
 	/// 	1. deposit CKB from layer1 to layer2
