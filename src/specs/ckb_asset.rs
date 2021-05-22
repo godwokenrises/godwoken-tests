@@ -9,45 +9,6 @@ use regex::{Regex};
 
 pub const CKB_SUDT_ACCOUNT_ID: u32 = 1;
 
-pub struct GodwokenUser {
-	private_key: String,
-	pub_ckb_addr: String,
-	gw_account_id: Option<u32>,  // FIXME: get account_id
-	ckb_balance: u128,
-	account_script_hash: Option<String>
-	//TODO: sudt_balance[]
-}
-
-impl GodwokenUser {
-	fn get_balance(&mut self) -> Result<u128>{
-		if self.gw_account_id.is_none() {
-			// println!("missing gw_account_id");
-			return Err(anyhow!("Missing gw_account_id: {:?}", self.gw_account_id));
-		}
-		// FIXME: get gw_account_id
-		let pattern: Regex = Regex::new(r"[B|b]alance: (\d+)").unwrap();
-		let balance_output = account_cli()
-		  .arg("get-balance")
-			.args(&["--account-id", &self.gw_account_id.unwrap().to_string()])
-			.output()
-			.expect("failed to get-balance");
-		let stdout_text = String::from_utf8(balance_output.stdout)
-			.unwrap_or("".to_string());
-		let balance_str = if let Some(cap) = pattern.captures(&stdout_text) {
-			if cap.len() > 1 { cap.get(1).unwrap().as_str() } else { "0" }
-		} else { 
-			let err_text = String::from_utf8(balance_output.stderr)
-				.unwrap_or_default();
-			return Err(anyhow!("no balance logs returned: {} || {}",
-																		&err_text, &stdout_text));
-		};
-		self.ckb_balance = u128::from_str_radix(balance_str, 10).unwrap();
-		Ok(self.ckb_balance)
-	}
-
-	//TODO: fn deposit()
-}
-
 pub struct CkbAsset;
 
 impl Spec for CkbAsset {
@@ -223,6 +184,45 @@ impl Spec for CkbAsset {
 	}
 }
 
+pub struct GodwokenUser {
+	private_key: String,
+	pub_ckb_addr: String,
+	gw_account_id: Option<u32>,  // FIXME: get account_id
+	ckb_balance: u128,
+	account_script_hash: Option<String>
+	//TODO: sudt_balance[]
+}
+
+impl GodwokenUser {
+	fn get_balance(&mut self) -> Result<u128>{
+		if self.gw_account_id.is_none() {
+			// println!("missing gw_account_id");
+			return Err(anyhow!("Missing gw_account_id: {:?}", self.gw_account_id));
+		}
+		// FIXME: get gw_account_id
+		let pattern: Regex = Regex::new(r"[B|b]alance: (\d+)").unwrap();
+		let balance_output = account_cli()
+		  .arg("get-balance")
+			.args(&["--account-id", &self.gw_account_id.unwrap().to_string()])
+			.output()
+			.expect("failed to get-balance");
+		let stdout_text = String::from_utf8(balance_output.stdout)
+			.unwrap_or("".to_string());
+		let balance_str = if let Some(cap) = pattern.captures(&stdout_text) {
+			if cap.len() > 1 { cap.get(1).unwrap().as_str() } else { "0" }
+		} else { 
+			let err_text = String::from_utf8(balance_output.stderr)
+				.unwrap_or_default();
+			return Err(anyhow!("no balance logs returned: {} || {}",
+																		&err_text, &stdout_text));
+		};
+		self.ckb_balance = u128::from_str_radix(balance_str, 10).unwrap();
+		Ok(self.ckb_balance)
+	}
+
+	//TODO: fn deposit()
+}
+
 /// account_cli is built from godwoken-examples/packages/tools
 fn account_cli() -> Command {
 	let mut account_cli = if cfg!(target_os = "linux") {
@@ -241,7 +241,6 @@ fn account_cli() -> Command {
 		.args(&["--godwoken-rpc", &godwoken_rpc]);
 	account_cli
 }
-
 /// godwoken_cli is built from godwoken-examples/packages/tools
 fn godwoken_cli() -> Command {
 	let mut godwoken_cli = if cfg!(target_os = "linux") {
