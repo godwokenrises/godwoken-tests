@@ -168,11 +168,11 @@ impl Spec for CkbAsset {
 		// miner.ckb_balance = last_balance;
 
 		
-		let mut miner_balance_record = miner.get_balance().unwrap();
+		let miner_balance_record = miner.get_balance().unwrap();
 		println!("miner_balance_record: {}", miner_balance_record);
 		assert_eq!(miner.ckb_balance, miner_balance_record);
 
-		let mut user1_balance_record = user1.get_balance().unwrap();
+		let user1_balance_record = user1.get_balance().unwrap();
 		println!("user1_balance_record: {}", user1_balance_record);
 		assert_eq!(user1.ckb_balance, user1_balance_record);
 
@@ -191,7 +191,7 @@ impl Spec for CkbAsset {
 		// Note: balance is not updated now, waiting for confirmation.
 		
 		// withdraw
-		println!("\nminer withdraw 40000000000 shannons CKB from godwoken");
+		println!("\nminer withdraw 40000000000 shannons (CKB) from godwoken");
 		let mut _withdrawal_status = account_cli().arg("withdraw")
 			.args(&["--rpc", &ckb_rpc])
 		  .args(&["-p", &miner.private_key])
@@ -210,22 +210,16 @@ impl Spec for CkbAsset {
 		right: `1519999987499`', tests/src/specs/ckb_asset.rs:206:9
 		*/
 		// assert_eq!(miner.ckb_balance, miner_balance_record - 10000000001 - 40000000000);
-		assert_eq!(user1.ckb_balance, user1_balance_record + 10000000001);
-		return;
+		// assert_eq!(user1.ckb_balance, user1_balance_record + 10000000001);
 
 
-		println!("\nAccount ID: 3 withdraw 10000 shannons CKB from godwoken");
+		println!("\nuser1 withdraw 10000000000 shannons (CKB) from godwoken");
 			_withdrawal_status = account_cli().arg("withdraw")
 			.args(&["--rpc", &ckb_rpc])
 		  .args(&["-p", &user1.private_key])
 			.args(&["--owner-ckb-address", &user1.pub_ckb_addr])
 			.args(&["--capacity", "10000000000"])
 			.status();
-
-
-			// TODO: assert_eq!
-			// id2 += 20000000000 - 100000001
-			// id3 += 1
 	}
 }
 

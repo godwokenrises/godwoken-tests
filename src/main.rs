@@ -1,7 +1,7 @@
 use parking_lot::Mutex;
 use clap::{App, Arg, value_t};
-use godwoken_test::specs::{CkbAsset};
-use godwoken_test::{worker::{Notify, Workers}, Spec};
+use godwoken_tests::specs::{Spec, CkbAsset};
+use godwoken_tests::worker::{Notify, Workers};
 use std::any::Any;
 use std::env;
 // use std::io::{self, Write};
