@@ -62,7 +62,7 @@ impl Spec for CkbAsset {
         let mut last_ckb_balance_line = BufReader::new(miner_deposit_stdout)
             .lines()
             .filter_map(|line| line.ok())
-            .filter_map(|line| {
+            .filter(|line| {
                 println!("{}", &line);
                 // update account_script_hash
                 if miner.account_script_hash.is_none() {
@@ -82,16 +82,10 @@ impl Spec for CkbAsset {
                     }
                 }
                 // filter the balance lines
-                if line.starts_with("ckb balance") {
-                    Some(line)
-                } else {
-                    None
-                }
+                line.starts_with("ckb balance")
             })
             .last();
-        if let Some(cap) =
-            ckb_balance_pattern.captures(last_ckb_balance_line.unwrap().clone().as_str())
-        {
+        if let Some(cap) = ckb_balance_pattern.captures(last_ckb_balance_line.unwrap().as_str()) {
             miner.ckb_balance = cap.get(1).unwrap().as_str().parse::<u128>().unwrap();
             // TODO: println
         };
@@ -109,7 +103,7 @@ impl Spec for CkbAsset {
         last_ckb_balance_line = BufReader::new(user1_deposit_stdout)
             .lines()
             .filter_map(|line| line.ok())
-            .filter_map(|line| {
+            .filter(|line| {
                 println!("{}", &line);
                 // update account_script_hash
                 if user1.account_script_hash.is_none() {
@@ -129,16 +123,10 @@ impl Spec for CkbAsset {
                     }
                 }
                 // filter the balance lines
-                if line.starts_with("ckb balance") {
-                    Some(line)
-                } else {
-                    None
-                }
+                line.starts_with("ckb balance")
             })
             .last();
-        if let Some(cap) =
-            ckb_balance_pattern.captures(last_ckb_balance_line.unwrap().clone().as_str())
-        {
+        if let Some(cap) = ckb_balance_pattern.captures(last_ckb_balance_line.unwrap().as_str()) {
             user1.ckb_balance = cap.get(1).unwrap().as_str().parse::<u128>().unwrap();
         };
 
@@ -231,7 +219,7 @@ impl GodwokenUser {
             .args(&["--account-id", &self.gw_account_id.unwrap().to_string()])
             .output()
             .expect("failed to get-balance");
-        let stdout_text = String::from_utf8(balance_output.stdout).unwrap_or("".to_string());
+        let stdout_text = String::from_utf8(balance_output.stdout).unwrap_or_default();
         let balance_str = if let Some(cap) = pattern.captures(&stdout_text) {
             if cap.len() > 1 {
                 cap.get(1).unwrap().as_str()
@@ -263,9 +251,9 @@ fn account_cli() -> Command {
         panic!("This OS is NOT supported yet.");
     };
     let godwoken_rpc: String =
-        env::var("GODWOKEN_RPC").unwrap_or("http://127.0.0.1:8119".to_string());
+        env::var("GODWOKEN_RPC").unwrap_or_else(|_| "http://127.0.0.1:8119".to_string());
     let lumos_config_file_path: String =
-        env::var("LUMOS_CONFIG_FILE").unwrap_or("configs/lumos-config.json".to_string());
+        env::var("LUMOS_CONFIG_FILE").unwrap_or_else(|_| "configs/lumos-config.json".to_string());
     account_cli
         .env("LUMOS_CONFIG_FILE", &lumos_config_file_path)
         .args(&["--godwoken-rpc", &godwoken_rpc]);
