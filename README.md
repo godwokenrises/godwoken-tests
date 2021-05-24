@@ -7,8 +7,8 @@ Before tests can be run locally, a godwoken dev chain should be runing.
 Please update your godwoken configs into `configs/`, including `godwoken-config.toml`, `scripts-deploy-result.json` and `lumos-config.json`.
 
 ```bash
-chmod +x init.sh && ./init.sh
-source <example.env> # use your own env file containing RPC URLs and private keys etc.
+chmod +x init.sh && ./init.sh # build tools for testing
+source <example.env> 					# use your own env file containing RPC URLs and private keys etc.
 cargo run
 ```
 

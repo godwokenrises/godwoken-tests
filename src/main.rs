@@ -1,5 +1,5 @@
 use clap::{value_t, App, Arg};
-use godwoken_tests::specs::{CkbAsset, Spec};
+use godwoken_tests::specs::*;
 use godwoken_tests::worker::{Notify, Workers};
 use parking_lot::Mutex;
 use std::any::Any;
@@ -94,7 +94,7 @@ fn main() {
                 if err.is_timeout() {
                     continue;
                 }
-                panic!(err);
+                std::panic::panic_any(err)
             }
         };
         match msg {
@@ -183,6 +183,7 @@ fn main() {
 fn all_specs() -> Vec<Box<dyn Spec>> {
     vec![
         Box::new(CkbAsset),
+        Box::new(SudtAsset),
         // add new specs here
     ]
     //TODO: shuffle

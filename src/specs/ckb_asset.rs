@@ -1,15 +1,13 @@
-use crate::Spec;
-use anyhow::{anyhow, Result};
+use crate::{account_cli, GodwokenUser, Spec, CKB_SUDT_ID};
+// TODO: use crate::util::envs;
 use regex::Regex;
 use std::env;
 use std::{
     io::{BufRead, BufReader},
-    process::{Command, Stdio},
+    process::Stdio,
 };
 //TODO: https://docs.rs/env_logger/0.8.3/env_logger/
 //TODO: Redirect both stdout and stderr of child process to the same file
-
-pub const CKB_SUDT_ACCOUNT_ID: u32 = 1;
 
 pub struct CkbAsset;
 impl Spec for CkbAsset {
@@ -32,6 +30,7 @@ impl Spec for CkbAsset {
             ckb_balance: 0,
             account_script_hash: None,
             gw_account_id: None,
+            sudt_script_args: None,
         };
         let mut user1 = GodwokenUser {
             private_key: env::var("USER1_PRIVATE_KEY").unwrap_or_else(|_| {
@@ -42,9 +41,11 @@ impl Spec for CkbAsset {
             ckb_balance: 0,
             account_script_hash: None,
             gw_account_id: None,
+            sudt_script_args: None,
         };
 
-        // call account-cli to deposit and get the script hash when the deposition finished.
+        // call account-cli to deposit, get the script hash and gw_account_id
+        // when the deposition finished.
         let script_hash_pattern = Regex::new(r"script hash: (0x.{64})").unwrap();
         let ckb_balance_pattern = Regex::new(r"ckb balance in godwoken is: (\d+)").unwrap();
         let account_id_pattern = Regex::new(r"Your account id: (\d+)").unwrap();
@@ -157,9 +158,9 @@ impl Spec for CkbAsset {
             .args(&["--rpc", &ckb_rpc])
             .args(&["-p", &miner.private_key])
             .args(&["--amount", "10000000001"])
-            .args(&["--fee", "100"])
+            .args(&["--fee", "40000000000"])
             .args(&["--to-id", &user1.gw_account_id.unwrap().to_string()])
-            .args(&["--sudt-id", &CKB_SUDT_ACCOUNT_ID.to_string()])
+            .args(&["--sudt-id", &CKB_SUDT_ID.to_string()])
             .status()
             .expect("failed to transfer");
         // Note: balance is not updated now, waiting for confirmation.
@@ -184,7 +185,10 @@ impl Spec for CkbAsset {
         // thread '<unnamed>' panicked at 'assertion failed: `(left == right)`
         // left: `1529999987500`,
         // right: `1519999987499`', tests/src/specs/ckb_asset.rs:206:9
-        // assert_eq!(miner.ckb_balance, miner_balance_record - 10000000001 - 40000000000);
+        assert_eq!(
+            miner.ckb_balance,
+            miner_balance_record - 10000000001 - 40000000000
+        );
         // assert_eq!(user1.ckb_balance, user1_balance_record + 10000000001);
 
         println!("\nuser1 withdraw 10000000000 shannons (CKB) from godwoken");
@@ -196,66 +200,4 @@ impl Spec for CkbAsset {
             .args(&["--capacity", "10000000000"])
             .status();
     }
-}
-
-pub struct GodwokenUser {
-    private_key: String,
-    pub_ckb_addr: String,
-    gw_account_id: Option<u32>, // FIXME: get account_id
-    ckb_balance: u128,
-    account_script_hash: Option<String>, //TODO: sudt_balance[]
-}
-
-impl GodwokenUser {
-    fn get_balance(&mut self) -> Result<u128> {
-        if self.gw_account_id.is_none() {
-            // println!("missing gw_account_id");
-            return Err(anyhow!("Missing gw_account_id: {:?}", self.gw_account_id));
-        }
-        // FIXME: get gw_account_id
-        let pattern: Regex = Regex::new(r"[B|b]alance: (\d+)").unwrap();
-        let balance_output = account_cli()
-            .arg("get-balance")
-            .args(&["--account-id", &self.gw_account_id.unwrap().to_string()])
-            .output()
-            .expect("failed to get-balance");
-        let stdout_text = String::from_utf8(balance_output.stdout).unwrap_or_default();
-        let balance_str = if let Some(cap) = pattern.captures(&stdout_text) {
-            if cap.len() > 1 {
-                cap.get(1).unwrap().as_str()
-            } else {
-                "0"
-            }
-        } else {
-            let err_text = String::from_utf8(balance_output.stderr).unwrap_or_default();
-            return Err(anyhow!(
-                "no balance logs returned: {} || {}",
-                &err_text,
-                &stdout_text
-            ));
-        };
-        self.ckb_balance = u128::from_str_radix(balance_str, 10).unwrap();
-        Ok(self.ckb_balance)
-    }
-
-    //TODO: fn deposit()
-}
-
-/// account_cli is built from godwoken-examples/packages/tools
-fn account_cli() -> Command {
-    let mut account_cli = if cfg!(target_os = "linux") {
-        Command::new("./account-cli-linux")
-    } else if cfg!(target_os = "macos") {
-        Command::new("./account-cli-macos")
-    } else {
-        panic!("This OS is NOT supported yet.");
-    };
-    let godwoken_rpc: String =
-        env::var("GODWOKEN_RPC").unwrap_or_else(|_| "http://127.0.0.1:8119".to_string());
-    let lumos_config_file_path: String =
-        env::var("LUMOS_CONFIG_FILE").unwrap_or_else(|_| "configs/lumos-config.json".to_string());
-    account_cli
-        .env("LUMOS_CONFIG_FILE", &lumos_config_file_path)
-        .args(&["--godwoken-rpc", &godwoken_rpc]);
-    account_cli
 }
