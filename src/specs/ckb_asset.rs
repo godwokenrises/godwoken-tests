@@ -31,6 +31,8 @@ impl Spec for CkbAsset {
             account_script_hash: None,
             gw_account_id: None,
             sudt_script_args: None,
+            sudt_id: None,
+            l1_sudt_script_hash: None,
         };
         let mut user1 = GodwokenUser {
             private_key: env::var("USER1_PRIVATE_KEY").unwrap_or_else(|_| {
@@ -42,6 +44,8 @@ impl Spec for CkbAsset {
             account_script_hash: None,
             gw_account_id: None,
             sudt_script_args: None,
+            sudt_id: None,
+            l1_sudt_script_hash: None,
         };
 
         // call account-cli to deposit, get the script hash and gw_account_id
@@ -151,14 +155,14 @@ impl Spec for CkbAsset {
         println!("user1_balance_record: {}", user1_balance_record);
         assert_eq!(user1.ckb_balance, user1_balance_record);
 
-        // transfer
-        println!("\nTransfer 10000000001 Shannons from miner to user1");
+        // FIXME: transfer
+        println!("\nTransfer 100000000 Shannons from miner to user1");
         let _transfer_status = account_cli()
             .arg("transfer")
             .args(&["--rpc", &ckb_rpc])
             .args(&["-p", &miner.private_key])
-            .args(&["--amount", "10000000001"])
-            .args(&["--fee", "40000000000"])
+            .args(&["--amount", "100000000"])
+            .args(&["--fee", "0"])
             .args(&["--to-id", &user1.gw_account_id.unwrap().to_string()])
             .args(&["--sudt-id", &CKB_SUDT_ID.to_string()])
             .status()
@@ -179,17 +183,23 @@ impl Spec for CkbAsset {
             .status();
 
         // TODO: query balance after confirm and assert
-        println!("miner_balance_record: {:?}", miner.get_sudt_balance(CKB_SUDT_ID));
-        println!("user1_balance_record: {:?}", user1.get_sudt_balance(CKB_SUDT_ID));
+        println!(
+            "miner_balance_record: {:?}",
+            miner.get_sudt_balance(CKB_SUDT_ID)
+        );
+        println!(
+            "user1_balance_record: {:?}",
+            user1.get_sudt_balance(CKB_SUDT_ID)
+        );
         // FIXME:
         // thread '<unnamed>' panicked at 'assertion failed: `(left == right)`
         // left: `1529999987500`,
         // right: `1519999987499`', tests/src/specs/ckb_asset.rs:206:9
         assert_eq!(
             miner.ckb_balance,
-            miner_balance_record - 10000000001 - 40000000000
+            miner_balance_record - 100000000 - 40000000000
         );
-        // assert_eq!(user1.ckb_balance, user1_balance_record + 10000000001);
+        assert_eq!(user1.ckb_balance, user1_balance_record + 100000000);
 
         println!("\nuser1 withdraw 10000000000 shannons (CKB) from godwoken");
         _withdrawal_status = account_cli()

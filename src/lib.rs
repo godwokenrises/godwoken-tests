@@ -30,10 +30,13 @@ pub struct GodwokenUser {
     ckb_balance: u128,
     account_script_hash: Option<String>, //TODO: sudt_balance[]
     sudt_script_args: Option<String>,
+    sudt_id: Option<u32>,
+    l1_sudt_script_hash: Option<String>,
 }
 
 impl GodwokenUser {
     /// Deprecated
+    #[allow(dead_code)]
     fn get_balance(&mut self) -> Result<u128> {
         if self.gw_account_id.is_none() {
             return Err(anyhow!("Missing gw_account_id: {:?}", self.gw_account_id));
@@ -70,7 +73,7 @@ impl GodwokenUser {
         }
 
         let pattern: Regex = Regex::new(r"[B|b]alance: (\d+)").unwrap();
-        // Desired output: 
+        // Desired output:
         // Your balance: (\d+)
         // Easy to read: 320,000,000,000
         let balance_output = account_cli()
@@ -100,9 +103,22 @@ impl GodwokenUser {
         }
     }
 
-    /// deposit sudt from layer1 to layer2
-    fn deposit(&mut self) -> Result<u128> {
-        // TODO: fn get_envs
+    /// deposit sudt issued by himself from layer1 to layer2
+    ///
+    /// Cli Usage: account-cli deposit-sudt [options]
+    ///
+    /// deposit sUDT to godwoken
+    ///
+    /// Options:
+    /// -p, --private-key <privateKey>               private key to use
+    /// -m --amount <amount>                         sudt amount
+    /// -s --sudt-script-args <l1 sudt script args>  sudt amount
+    /// -r, --rpc <rpc>                              ckb rpc path (default: "http://127.0.0.1:8114")
+    /// -d, --indexer-path <path>                    indexer path (default: "./indexer-data")
+    /// -l, --eth-address <args>                     Eth address (layer2 lock args, using --private-key 																						 value to calculate if not provided)
+    /// -c, --capacity <capacity>                    capacity in shannons (default: "40000000000")
+    /// -h, --help
+    fn deposit_sudt(&mut self, amount: u128) -> bool {
         let ckb_rpc: String =
             std::env::var("CKB_RPC").unwrap_or_else(|_| "http://127.0.0.1:8114".to_string());
 
@@ -112,9 +128,9 @@ impl GodwokenUser {
             .args(&["-p", &self.private_key])
             .args(&[
                 "--sudt-script-args",
-                &self.sudt_script_args.as_ref().unwrap()
+                &self.sudt_script_args.as_ref().unwrap(),
             ]) // -s --sudt-script-args <l1 sudt script args>
-            .args(&["--amount", "80000000000"]) //sudt amount
+            .args(&["--amount", &amount.to_string()]) //sudt amount
             // .args(&["-c", "40000000000"]) // capacity in shannons (default: "40000000000")
             .stdout(Stdio::piped())
             .spawn()
@@ -122,57 +138,60 @@ impl GodwokenUser {
             .stdout
             .unwrap();
 
-        let _last_balance_line = BufReader::new(deposit_stdout)
+        // call account-cli to deposit, get the script hash, gw_account_id and sudt id
+        let script_hash_pattern = Regex::new(r"Layer 2 lock script hash: (0x.{64})").unwrap();
+        let account_id_pattern = Regex::new(r"Your account id: (\d+)").unwrap();
+        let sudt_id_pattern = Regex::new(r"Your sudt id: (\d+)").unwrap();
+        let l1_sudt_script_hash_pattern =
+            Regex::new(r"Layer 1 sudt script hash: (0x.{64})").unwrap();
+        // Layer 2 sudt script hash: 0x48b50a572d660cb7458a30159422ee20bda4918ca274d390a878ffff67e3aba3
+        // TODO(fn): ↑ Using this script hash to get sudt account id ↑
+        // let ckb_balance_pattern = Regex::new(r"ckb balance in godwoken is: (\d+)").unwrap();
+
+        let mut ret = false;
+        BufReader::new(deposit_stdout)
             .lines()
             .filter_map(|line| line.ok())
             .for_each(|line| {
                 println!("{}", &line);
+                // update account_script_hash
+                if self.account_script_hash.is_none() {
+                    if let Some(cap) = script_hash_pattern.captures(&line) {
+                        self.account_script_hash = Some(cap.get(1).unwrap().as_str().to_string());
+                        println!(
+                            "=> update account_script_hash to {:?}",
+                            self.account_script_hash
+                        );
+                    }
+                }
+                // update l1_sudt_script_hash
+                if self.l1_sudt_script_hash.is_none() {
+                    if let Some(cap) = l1_sudt_script_hash_pattern.captures(&line) {
+                        self.l1_sudt_script_hash = Some(cap.get(1).unwrap().as_str().to_string());
+                        println!(
+                            "=> update l1_sudt_script_hash to {:?}",
+                            self.l1_sudt_script_hash
+                        );
+                    }
+                }
+                // update gw_account_id
+                if self.gw_account_id.is_none() {
+                    if let Some(cap) = account_id_pattern.captures(&line) {
+                        self.gw_account_id = cap.get(1).unwrap().as_str().parse::<u32>().ok();
+                        println!("=> update gw_account_id to {:?}", self.gw_account_id);
+                    }
+                }
+                // update sudt_id
+                if self.sudt_id.is_none() {
+                    if let Some(cap) = sudt_id_pattern.captures(&line) {
+                        self.sudt_id = cap.get(1).unwrap().as_str().parse::<u32>().ok();
+                        println!("=> update sudt_id to {:?}", self.sudt_id);
+                    }
+                }
+                if line.contains("deposit success!") {
+                    ret = true;
+                }
             });
-        // .filter(|line| {
-        // 		println!("{}", &line);
-        // 		// filter the balance lines
-        // 		line.starts_with("ckb balance")
-        // })
-        // .last();
-
-        // if let Some(cap) = ckb_balance_pattern.captures(last_ckb_balance_line.unwrap().as_str()) {
-        //     miner.ckb_balance = cap.get(1).unwrap().as_str().parse::<u128>().unwrap();
-        //     // TODO: println
-        // };
-
-        // waiting for layer 2 block producer collect the deposit cell ... 0 seconds
-        // Your account id: 3
-        // Your sudt id: 5
-        // ckb balance in godwoken is: 1180000012000
-        // waiting for layer 2 block producer collect the deposit cell ... 5 seconds
-        // ckb balance in godwoken is: 1180000012000
-        // waiting for layer 2 block producer collect the deposit cell ... 10 seconds
-        // ckb balance in godwoken is: 1180000012000
-        // waiting for layer 2 block producer collect the deposit cell ... 15 seconds
-        // ckb balance in godwoken is: 1180000012000
-        // waiting for layer 2 block producer collect the deposit cell ... 20 seconds
-        // ckb balance in godwoken is: 1180000012000
-        // waiting for layer 2 block producer collect the deposit cell ... 25 seconds
-        // ckb balance in godwoken is: 1220000012000
-        // sudt balance in godwoken is: 480000000000
-        // deposit success!
-
-
-        Ok(0)
-
-
-        // todo!()
-        // Usage: account-cli deposit-sudt [options]
-        // deposit sUDT to godwoken
-        // Options:
-        // 	-p, --private-key <privateKey>               private key to use
-        // 	-m --amount <amount>                         sudt amount
-        // 	-s --sudt-script-args <l1 sudt script args>  sudt amount
-        // 	-r, --rpc <rpc>                              ckb rpc path (default: "http://127.0.0.1:8114")
-        // 	-d, --indexer-path <path>                    indexer path (default: "./indexer-data")
-        // 	-l, --eth-address <args>                     Eth address (layer2 lock args, using --private-key
-        // 																							 value to calculate if not provided)
-        // 	-c, --capacity <capacity>                    capacity in shannons (default: "40000000000")
-        // 	-h, --help
+        return ret;
     }
 }
