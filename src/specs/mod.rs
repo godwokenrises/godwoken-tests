@@ -1,5 +1,7 @@
 mod ckb_asset;
+mod sudt_asset;
 pub use ckb_asset::*;
+pub use sudt_asset::SudtAsset;
 
 // use crate::Node;
 // use ckb_app_config::CKBAppConfig;

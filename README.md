@@ -7,10 +7,13 @@ Before tests can be run locally, a godwoken dev chain should be runing.
 Please update your godwoken configs into `configs/`, including `godwoken-config.toml`, `scripts-deploy-result.json` and `lumos-config.json`.
 
 ```bash
-chmod +x init.sh && ./init.sh
-source <example.env> # use your own env file containing RPC URLs and private keys etc.
+chmod +x init.sh && ./init.sh # build tools for testing
+source <example.env> 					# use your own env file containing RPC URLs and private keys etc.
 cargo run
 ```
+Note: If you boot a new godwoken chain, you should update the config files and run `./init.sh` again.
+
+### Test cases
 
 The test cases are managed in `src/specs/`, such as `scr/specs/ckb_asset.rs`.
 
