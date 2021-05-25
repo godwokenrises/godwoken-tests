@@ -11,8 +11,9 @@ pub fn godwoken_cli() -> Command {
         panic!("This OS is NOT supported yet.");
     };
     let godwoken_rpc: String =
-        env::var("GODWOKEN_RPC").unwrap_or("http://127.0.0.1:8119".to_string());
-    let ckb_rpc: String = env::var("CKB_RPC").unwrap_or("http://127.0.0.1:8114".to_string());
+        env::var("GODWOKEN_RPC").unwrap_or_else(|_| "http://127.0.0.1:8119".to_string());
+    let ckb_rpc: String =
+        env::var("CKB_RPC").unwrap_or_else(|_| "http://127.0.0.1:8114".to_string());
     godwoken_cli
         .args(&["--rpc", &godwoken_rpc])
         .args(&["--ckb-rpc", &ckb_rpc]);

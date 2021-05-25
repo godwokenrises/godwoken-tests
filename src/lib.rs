@@ -63,7 +63,7 @@ impl GodwokenUser {
                 &stdout_text
             ));
         };
-        self.ckb_balance = u128::from_str_radix(balance_str, 10).unwrap();
+        self.ckb_balance = balance_str.parse::<u128>().unwrap();
         Ok(self.ckb_balance)
     }
 
@@ -94,7 +94,7 @@ impl GodwokenUser {
             ));
         };
 
-        let balance = u128::from_str_radix(balance_str, 10).unwrap();
+        let balance = balance_str.parse::<u128>().unwrap();
         if sudt_id == CKB_SUDT_ID {
             self.ckb_balance = balance;
             Ok(self.ckb_balance)
@@ -115,7 +115,7 @@ impl GodwokenUser {
     /// -s --sudt-script-args <l1 sudt script args>  sudt amount
     /// -r, --rpc <rpc>                              ckb rpc path (default: "http://127.0.0.1:8114")
     /// -d, --indexer-path <path>                    indexer path (default: "./indexer-data")
-    /// -l, --eth-address <args>                     Eth address (layer2 lock args, using --private-key 																						 value to calculate if not provided)
+    /// -l, --eth-address <args>                     Eth address (layer2 lock args, using --private-key value to calculate if not provided)
     /// -c, --capacity <capacity>                    capacity in shannons (default: "40000000000")
     /// -h, --help
     fn deposit_sudt(&mut self, amount: u128) -> bool {
@@ -192,6 +192,6 @@ impl GodwokenUser {
                     ret = true;
                 }
             });
-        return ret;
+        ret
     }
 }
