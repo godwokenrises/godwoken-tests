@@ -171,7 +171,7 @@ fn main() {
     }
 
     test_results.push(TestResult {
-        spec_name: "other test case could be added into [tests/src/specs/]".to_string(),
+        spec_name: "New test case could be added into [tests/src/specs/]".to_string(),
         status: TestResultStatus::Failed,
         duration: 0,
     });
@@ -228,7 +228,7 @@ fn clap_app() -> App<'static, 'static> {
                 .value_name("SECONDS")
                 .help("Exit when total running time exceeds this limit"),
         )
-        // .arg(Arg::with_name("list-specs").long("list-specs"))
+        //TODO: .arg(Arg::with_name("list-specs").long("list-specs"))
         .arg(Arg::with_name("specs").multiple(true))
         .arg(
             Arg::with_name("concurrent")
@@ -237,6 +237,9 @@ fn clap_app() -> App<'static, 'static> {
                 .takes_value(true)
                 .help("The number of specs can running concurrently")
                 .default_value("1"),
+            // FIXME(concurrent > 1): (node:34855) UnhandledPromiseRejectionWarning:
+            // Error: internal error in Neon module: Failed to open rocksdb:
+            // Error { message: "IO error: While lock file: ./indexer-data/LOCK: Resource temporarily unavailable" }
         )
         .arg(
             Arg::with_name("verbose")
