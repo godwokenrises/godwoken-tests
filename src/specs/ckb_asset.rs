@@ -143,11 +143,11 @@ impl Spec for CkbAsset {
         // assert_eq!(last_balance - first_balance, 60000000000);
         // miner.ckb_balance = last_balance;
 
-        let miner_balance_record = miner.get_balance().unwrap();
+        let miner_balance_record = miner.get_sudt_balance(CKB_SUDT_ID).unwrap();
         println!("miner_balance_record: {}", miner_balance_record);
         assert_eq!(miner.ckb_balance, miner_balance_record);
 
-        let user1_balance_record = user1.get_balance().unwrap();
+        let user1_balance_record = user1.get_sudt_balance(CKB_SUDT_ID).unwrap();
         println!("user1_balance_record: {}", user1_balance_record);
         assert_eq!(user1.ckb_balance, user1_balance_record);
 
@@ -179,8 +179,8 @@ impl Spec for CkbAsset {
             .status();
 
         // TODO: query balance after confirm and assert
-        println!("miner_balance_record: {:?}", miner.get_balance());
-        println!("user1_balance_record: {:?}", user1.get_balance());
+        println!("miner_balance_record: {:?}", miner.get_sudt_balance(CKB_SUDT_ID));
+        println!("user1_balance_record: {:?}", user1.get_sudt_balance(CKB_SUDT_ID));
         // FIXME:
         // thread '<unnamed>' panicked at 'assertion failed: `(left == right)`
         // left: `1529999987500`,

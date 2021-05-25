@@ -20,12 +20,3 @@ mv godwoken-cli-* ../
 
 ###
 cd .. && rm -rf examples
-
-# deposit using account-cli-macos executalbe
-# start_seconds=`date +%s`
-# LUMOS_CONFIG_FILE=configs/lumos-config.json \
-# 	./account-cli-macos \
-# 		--godwoken-rpc http://192.168.5.102:8119 \
-# 		get-balance 2 
-# end_seconds=`date +%s`
-# echo Total elapsed time: $((end_seconds-start_seconds)) seconds.

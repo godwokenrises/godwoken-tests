@@ -1,12 +1,13 @@
 use crate::{GodwokenUser, Spec};
 use std::env;
 
+/// Simple User-Defined Token
 pub struct SudtAsset;
 impl Spec for SudtAsset {
     fn run(&self) {
-        println!("sUDT test case:");
+        println!("sUDT test cases:");
 
-        let miner = GodwokenUser {
+        let mut miner = GodwokenUser {
             private_key: env::var("MINER_PRIVATE_KEY").unwrap_or_else(|_| {
                 "0xdd50cac37ec6dd12539a968c1a2cbedda75bd8724f7bcad486548eaabb87fc8b".to_string()
             }),
@@ -28,9 +29,20 @@ impl Spec for SudtAsset {
             account_script_hash: None,
             gw_account_id: None,
             sudt_script_args: env::var("SUDT5_SCRIPT_ARGS").ok(),
+            //TODO: get "sudt-script-args" by private-key
         };
 
         // deposit sudt from layer1 to layer2
-        user1.deposit();
+        miner.deposit();
+
+        //TODO get_sudt_balance
+        println!("miner's sudt4 balance: {:?}", miner.get_sudt_balance(4));
+        // user1.get_sudt_balance(5);
+
+        // withdraw
+
+        // transfer
+
+        // issueToken
     }
 }

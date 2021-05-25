@@ -1,5 +1,4 @@
 use anyhow::{anyhow, Result};
-use log::log;
 use regex::Regex;
 use std::{
     io::{BufRead, BufReader},
@@ -27,18 +26,19 @@ pub const X_SUDT_ID: u32 = 2;
 pub struct GodwokenUser {
     private_key: String,
     pub_ckb_addr: String,
-    gw_account_id: Option<u32>,
+    gw_account_id: Option<u32>, //TODO: get gw_account_id by privateKey
     ckb_balance: u128,
     account_script_hash: Option<String>, //TODO: sudt_balance[]
     sudt_script_args: Option<String>,
 }
 
 impl GodwokenUser {
+    /// Deprecated
     fn get_balance(&mut self) -> Result<u128> {
         if self.gw_account_id.is_none() {
             return Err(anyhow!("Missing gw_account_id: {:?}", self.gw_account_id));
         }
-        // FIXME: get gw_account_id
+
         let pattern: Regex = Regex::new(r"[B|b]alance: (\d+)").unwrap();
         let balance_output = account_cli()
             .arg("get-balance")
@@ -64,8 +64,44 @@ impl GodwokenUser {
         Ok(self.ckb_balance)
     }
 
+    fn get_sudt_balance(&mut self, sudt_id: u32) -> Result<u128> {
+        if self.gw_account_id.is_none() {
+            return Err(anyhow!("Missing gw_account_id: {:?}", self.gw_account_id));
+        }
+
+        let pattern: Regex = Regex::new(r"[B|b]alance: (\d+)").unwrap();
+        // Desired output: 
+        // Your balance: (\d+)
+        // Easy to read: 320,000,000,000
+        let balance_output = account_cli()
+            .arg("get-balance")
+            .args(&["--account-id", &self.gw_account_id.unwrap().to_string()])
+            .args(&["--sudt-id", &sudt_id.to_string()])
+            .output()
+            .expect("failed to get_sudt_balance");
+        let stdout_text = String::from_utf8(balance_output.stdout).unwrap_or_default();
+        let balance_str = if let Some(cap) = pattern.captures(&stdout_text) {
+            cap.get(1).unwrap().as_str()
+        } else {
+            let err_text = String::from_utf8(balance_output.stderr).unwrap_or_default();
+            return Err(anyhow!(
+                "no balance logs returned: {} || {}",
+                &err_text,
+                &stdout_text
+            ));
+        };
+
+        let balance = u128::from_str_radix(balance_str, 10).unwrap();
+        if sudt_id == CKB_SUDT_ID {
+            self.ckb_balance = balance;
+            Ok(self.ckb_balance)
+        } else {
+            Ok(balance)
+        }
+    }
+
     /// deposit sudt from layer1 to layer2
-    fn deposit(self) -> Result<u128> {
+    fn deposit(&mut self) -> Result<u128> {
         // TODO: fn get_envs
         let ckb_rpc: String =
             std::env::var("CKB_RPC").unwrap_or_else(|_| "http://127.0.0.1:8114".to_string());
@@ -76,7 +112,7 @@ impl GodwokenUser {
             .args(&["-p", &self.private_key])
             .args(&[
                 "--sudt-script-args",
-                &self.sudt_script_args.unwrap_or_default(),
+                &self.sudt_script_args.as_ref().unwrap()
             ]) // -s --sudt-script-args <l1 sudt script args>
             .args(&["--amount", "80000000000"]) //sudt amount
             // .args(&["-c", "40000000000"]) // capacity in shannons (default: "40000000000")
@@ -86,7 +122,7 @@ impl GodwokenUser {
             .stdout
             .unwrap();
 
-        let mut last_ckb_balance_line = BufReader::new(deposit_stdout)
+        let _last_balance_line = BufReader::new(deposit_stdout)
             .lines()
             .filter_map(|line| line.ok())
             .for_each(|line| {
@@ -104,7 +140,27 @@ impl GodwokenUser {
         //     // TODO: println
         // };
 
+        // waiting for layer 2 block producer collect the deposit cell ... 0 seconds
+        // Your account id: 3
+        // Your sudt id: 5
+        // ckb balance in godwoken is: 1180000012000
+        // waiting for layer 2 block producer collect the deposit cell ... 5 seconds
+        // ckb balance in godwoken is: 1180000012000
+        // waiting for layer 2 block producer collect the deposit cell ... 10 seconds
+        // ckb balance in godwoken is: 1180000012000
+        // waiting for layer 2 block producer collect the deposit cell ... 15 seconds
+        // ckb balance in godwoken is: 1180000012000
+        // waiting for layer 2 block producer collect the deposit cell ... 20 seconds
+        // ckb balance in godwoken is: 1180000012000
+        // waiting for layer 2 block producer collect the deposit cell ... 25 seconds
+        // ckb balance in godwoken is: 1220000012000
+        // sudt balance in godwoken is: 480000000000
+        // deposit success!
+
+
         Ok(0)
+
+
         // todo!()
         // Usage: account-cli deposit-sudt [options]
         // deposit sUDT to godwoken
