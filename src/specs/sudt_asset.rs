@@ -43,10 +43,10 @@ impl Spec for SudtAsset {
 
         // deposit sudt from layer1 to layer2 and get gw_account_id
         if !miner.deposit_sudt(1000000000) {
-            panic!("minner's deposition failed.");
+            panic!("minner's deposit failed.");
         }
         if !user1.deposit_sudt(1000000000) {
-            panic!("user1's deposition failed.")
+            panic!("user1's deposit failed.")
         }
 
         // get_sudt_balance

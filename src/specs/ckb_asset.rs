@@ -49,7 +49,7 @@ impl Spec for CkbAsset {
         };
 
         // call account-cli to deposit, get the script hash and gw_account_id
-        // when the deposition finished.
+        // when the deposit finished.
         let script_hash_pattern = Regex::new(r"script hash: (0x.{64})").unwrap();
         let ckb_balance_pattern = Regex::new(r"ckb balance in godwoken is: (\d+)").unwrap();
         let account_id_pattern = Regex::new(r"Your account id: (\d+)").unwrap();
