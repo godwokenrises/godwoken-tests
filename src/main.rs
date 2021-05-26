@@ -184,6 +184,7 @@ fn all_specs() -> Vec<Box<dyn Spec>> {
     vec![
         Box::new(CkbAsset),
         Box::new(SudtAsset),
+        Box::new(Polyjuice),
         // add new specs here
     ]
     //TODO: shuffle

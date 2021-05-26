@@ -14,7 +14,7 @@ yarn copy-configs
 yarn convert-config-format # convert `godwoken-config.toml` to `godwoken-config.json`
 yarn build-all
 npx pkg -t node14-macos,node14-linux packages/tools/lib/account-cli.js
-npx pkg -t node14-macos,node14-linux packages/tools/lib/godwoken-cli.js 
+npx pkg -t node14-macos,node14-linux packages/tools/lib/polyjuice-cli.js 
 mv account-cli-* ../
 mv godwoken-cli-* ../
 

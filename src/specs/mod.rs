@@ -1,6 +1,9 @@
 mod ckb_asset;
+mod polyjuice;
 mod sudt_asset;
+
 pub use ckb_asset::*;
+pub use polyjuice::Polyjuice;
 pub use sudt_asset::SudtAsset;
 
 // use crate::Node;
