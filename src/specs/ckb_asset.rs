@@ -185,10 +185,7 @@ impl Spec for CkbAsset {
             "user1_balance_record: {:?}",
             user1.get_sudt_balance(CKB_SUDT_ID)
         );
-        assert_eq!(
-            miner.ckb_balance,
-            miner_balance_record - 40000000000
-        );
+        assert_eq!(miner.ckb_balance, miner_balance_record - 40000000000);
         assert_eq!(user1.ckb_balance, user1_balance_record - 10000000000);
     }
 }

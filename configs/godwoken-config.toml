@@ -1,47 +1,47 @@
 [[backends]]
 validator_path = 'godwoken-scripts/c/build/meta-contract-validator'
 generator_path = 'godwoken-scripts/c/build/meta-contract-generator'
-validator_script_type_hash = '0xdcca15153ee053d995db6693b93212187da5c9f1ad7ee16935126646daf47f5d'
+validator_script_type_hash = '0x619519cff96dd0bb0e3ae44d11775385075025a78a8a4e86ffb60b0df15cee02'
 
 [[backends]]
 validator_path = 'godwoken-scripts/c/build/sudt-validator'
 generator_path = 'godwoken-scripts/c/build/sudt-generator'
-validator_script_type_hash = '0x88cc50d05e58e216390f03439288e5f6a04adec9cbcfcfb59d7cf32e0c09a27d'
+validator_script_type_hash = '0x5d4921806cea321ae5e316280099d99e0d5ed34d82abb8709e13d57a26744287'
 
 [[backends]]
 validator_path = 'deploy/polyjuice-validator'
 generator_path = 'deploy/polyjuice-generator'
-validator_script_type_hash = '0x7ce179cfba9595c6d5d44b740daa8c4c62be41af95b6c7237427901cf37cf033'
+validator_script_type_hash = '0xae0b7014d6850be7e371a4ab858e5bb5d9b9ad188e98cd6ca8043916af464255'
 
 [store]
 path = './store.db'
 
 [genesis]
-timestamp = 1621321795812
-rollup_type_hash = '0xf70aa98a96fba847185be1b58c1d1e3cae7ad91f971eecc5749799d5e72939f0'
-meta_contract_validator_type_hash = '0xdcca15153ee053d995db6693b93212187da5c9f1ad7ee16935126646daf47f5d'
+timestamp = 1622015407072
+rollup_type_hash = '0x305688fe25918229f505b66886eae5e317e5ac2a7eb2e43714e7d08b1bc8f6c2'
+meta_contract_validator_type_hash = '0x619519cff96dd0bb0e3ae44d11775385075025a78a8a4e86ffb60b0df15cee02'
 
 [genesis.rollup_config]
 l1_sudt_script_type_hash = '0xc1d16846e515a60e28d19197b87097631f40fbc8a33c0408ee65202803795939'
-custodian_script_type_hash = '0xb3e68333f9fc5430f7cc57062072d81cd331a97116f64e3d1e33d820b53f0a51'
-deposition_script_type_hash = '0x0902c13b8904fb4865c8601fa618eafeaa88583a61090d02bab258123aaeeccd'
-withdrawal_script_type_hash = '0x8c1b844148738c343ca073aa29ea3fab520af427eb0f36d715a57e73698b5293'
-challenge_script_type_hash = '0x6505b58b420bd2f0bdda47aa7bd44e4713e59a267b70f99bb75a7fc3b4fe1169'
-stake_script_type_hash = '0xe70a7c0e8f5e18bbd6b6e5785df7e0dd5c41cc9d3c328ccb6f24bfddc96f970d'
-l2_sudt_validator_script_type_hash = '0x88cc50d05e58e216390f03439288e5f6a04adec9cbcfcfb59d7cf32e0c09a27d'
+custodian_script_type_hash = '0x7ce179cfba9595c6d5d44b740daa8c4c62be41af95b6c7237427901cf37cf033'
+deposition_script_type_hash = '0xbac49534a21667c9d09d76bb5729523f0550f32a952c6c4f9915b673dee44725'
+withdrawal_script_type_hash = '0x3bcd5dd6af0c2c1d865f787e648044f90177382288072c61c57bc989a2375f16'
+challenge_script_type_hash = '0xeb02124558d12708887dec032f234602050cb3fa2e05168f6da535762d8d71e9'
+stake_script_type_hash = '0xf70aa98a96fba847185be1b58c1d1e3cae7ad91f971eecc5749799d5e72939f0'
+l2_sudt_validator_script_type_hash = '0x5d4921806cea321ae5e316280099d99e0d5ed34d82abb8709e13d57a26744287'
 burn_lock_hash = '0x0000000000000000000000000000000000000000000000000000000000000000'
 required_staking_capacity = '0x2540be400'
 challenge_maturity_blocks = '0x5'
 finality_blocks = '0x14'
 reward_burn_rate = '0x32'
 allowed_eoa_type_hashes = [
-    '0xdf6a74cbcdb125297c107aa79b5f21f2add4f46be30e3b67f0c2b62716b131a3',
+    '0x925ac32d287704bc880133b0c71d37d12b6c6314cada6d87d95b8c74f0188873',
     '0xf0e03a329803bd033eae42e80c8cd6c6dc81b48afe9f4a630f27e78be54db14c',
 ]
 allowed_contract_type_hashes = [
-    '0xdcca15153ee053d995db6693b93212187da5c9f1ad7ee16935126646daf47f5d',
-    '0x88cc50d05e58e216390f03439288e5f6a04adec9cbcfcfb59d7cf32e0c09a27d',
-    '0x7ce179cfba9595c6d5d44b740daa8c4c62be41af95b6c7237427901cf37cf033',
+    '0x619519cff96dd0bb0e3ae44d11775385075025a78a8a4e86ffb60b0df15cee02',
+    '0x5d4921806cea321ae5e316280099d99e0d5ed34d82abb8709e13d57a26744287',
+    '0xae0b7014d6850be7e371a4ab858e5bb5d9b9ad188e98cd6ca8043916af464255',
 ]
 
 [genesis.secp_data_dep]
@@ -51,14 +51,14 @@ dep_type = 'code'
 tx_hash = '0x6dd0b20f37a03939f40f26a6a41a9ad3baa9abdc37086e74879c52dd35c8664c'
 index = '0x3'
 [chain.genesis_committed_info]
-number = '0x46'
-block_hash = '0x3dca17bf3c5a5d4316e83aa9092ddbada09400f6694e5bd2148303a8327ec481'
-transaction_hash = '0x97c86750fce8ad30d90fe865ee65bd9ca5c33377515187c26862ac8c52d60276'
+number = '0xbe'
+block_hash = '0x8619ae9c9a5dd3605eb4794ee573de4239e5778eb009b818fe36206ae851b2ce'
+transaction_hash = '0x0dbcb0097b90798953f8db50c04a2d9b9ddbafc70ea15012b155da19b49cca33'
 
 [chain.rollup_type_script]
 code_hash = '0x00000000000000000000000000000000000000000000000000545950455f4944'
 hash_type = 'type'
-args = '0x722f0daa7bc5469e93e9590d47113c23e981c497ed655f919ab32fd44df6e1af'
+args = '0x54204645f4acff619ab109dc3c63a23ce29e2762aaf4a635156a27f9f5515483'
 
 [rpc_client]
 indexer_url = 'http://127.0.0.1:8116'
@@ -74,35 +74,35 @@ account_id = 0
 dep_type = 'code'
 
 [block_producer.rollup_cell_type_dep.out_point]
-tx_hash = '0xf0404b894845782664c0bd15f63f87e4eb33cc134f26eeafab8f51164350fa73'
+tx_hash = '0xf0d66a9eacb6a5995422caa56ddddc405d5703702f4f97ff44ec62bcaf5c25d7'
 index = '0x0'
 
 [block_producer.deposit_cell_lock_dep]
 dep_type = 'code'
 
 [block_producer.deposit_cell_lock_dep.out_point]
-tx_hash = '0xfa584667da92fdcf839d12ae9a1197235f5f73e403d0fd671787d768ac561d8d'
+tx_hash = '0x594f067f71cfc1feca32f660729ca0db72bb774c29af96771f95ff5aef4d8b2e'
 index = '0x0'
 
 [block_producer.stake_cell_lock_dep]
 dep_type = 'code'
 
 [block_producer.stake_cell_lock_dep.out_point]
-tx_hash = '0xe29e1370b02ca3bcb03150b72b22258e1618012e42c6110037d9c669202d80d8'
+tx_hash = '0x137fbe25a63dd193c4457bff1b883fa393528342f70d690dd4bc99a2f30bc4e6'
 index = '0x0'
 
 [block_producer.poa_lock_dep]
 dep_type = 'code'
 
 [block_producer.poa_lock_dep.out_point]
-tx_hash = '0xb6df7fd544889b3170d63b10286f52730fdbda44a2e844de6a465983cca1c359'
+tx_hash = '0x451e9b44b43ab9003d10c4cb1b76db7554928712546289fa9ae4c02a81e2c2f7'
 index = '0x0'
 
 [block_producer.poa_state_dep]
 dep_type = 'code'
 
 [block_producer.poa_state_dep.out_point]
-tx_hash = '0x9856d466c7c08c24b03e36645a77b1b911a1e27af0a842b1b37de8e09b3bc4c0'
+tx_hash = '0xbe84c2c3241e0d37f88ce130a502f8a764993d1452ee7ae3224f6818b31082ac'
 index = '0x0'
 
 [block_producer.wallet_config]
@@ -115,5 +115,5 @@ code_hash = '0x9bd7e06f3ecf4be0f2fcd2188b23f1b9fcc88e5d4b65a8637b17723bbda3cce8'
 
 [web3_indexer]
 database_url = 'postgres://user:password@postgres:5432/lumos'
-polyjuice_script_type_hash = '0x7ce179cfba9595c6d5d44b740daa8c4c62be41af95b6c7237427901cf37cf033'
-eth_account_lock_hash = '0xdf6a74cbcdb125297c107aa79b5f21f2add4f46be30e3b67f0c2b62716b131a3'
+polyjuice_script_type_hash = '0xae0b7014d6850be7e371a4ab858e5bb5d9b9ad188e98cd6ca8043916af464255'
+eth_account_lock_hash = '0x925ac32d287704bc880133b0c71d37d12b6c6314cada6d87d95b8c74f0188873'

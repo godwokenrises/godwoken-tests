@@ -1,12 +1,11 @@
-use crate::{CKB_SUDT_ID, Spec, polyjuice_cli,
-    util::get_signers};
+use crate::{polyjuice_cli, util::get_signers, Spec, CKB_SUDT_ID};
 
 pub struct Polyjuice;
 
 impl Spec for Polyjuice {
     fn run(&self) {
         println!("Polyjuice test cases:");
-        let (miner, user1) = get_signers();
+        let (miner, _user1) = get_signers();
 
         let mut _status;
         // create-creator-account
@@ -24,7 +23,7 @@ impl Spec for Polyjuice {
                 .args(&["--sudt-id", &CKB_SUDT_ID.to_string()])
                 .status();
         }
-        
+
         // miner from id: 4
         // miner creator account id: 3
 
@@ -42,10 +41,13 @@ impl Spec for Polyjuice {
         _status = polyjuice_cli()
             .arg("deploy")
             .args(&["--private-key", &miner.private_key])
-            .args(&["--creator-account-id", &creator_account_id.unwrap().to_string()])
+            .args(&[
+                "--creator-account-id",
+                &creator_account_id.unwrap().to_string(),
+            ])
             .args(&["--sudt-id", &CKB_SUDT_ID.to_string()])
             .args(&["--gas-limit", "30000"]) //TODO gas limit?
-            .args(&["--gas-price", "1"])                 //TODO gas price?
+            .args(&["--gas-price", "1"]) //TODO gas price?
             .args(&["--data", ""])
             .args(&["--value", "1"])
             .status();
@@ -53,7 +55,6 @@ impl Spec for Polyjuice {
         // new account id: 5
         // contract address: 0x1fff3b2d3c96cb0003b202e76df1c2a805000000
 
-        
         // using eth_sendRawTransaction to send transaction on Godwoken
         // Usage: polyjuice-cli send-transaction [options]
         // Send a transaction to godwoken by `eth_sendRawTransaction`
@@ -66,7 +67,6 @@ impl Spec for Polyjuice {
         // -c, --creator-account-id <creator account id>  creator account id, default to `3` if ENABLE_TESTNET_MODE=true
         // -v, --value <value>                            value (default: "0")
         // -h, --help                                     display help for command
-        
 
         // using eth_call to call EVM contract in Polyjuice
         // Usage: polyjuice-cli call [options]
