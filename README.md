@@ -22,7 +22,7 @@ Remember to add new specs into `all_specs()` function in `src/main.rs`.
 You can run specified specs:
 
 ```bash
-cargo run -- [CkbAsset] [SudtAsset] [OtherSpecSturctName]
+cargo run -- [CkbAsset] [SudtAsset] [OtherSpecStructName]
 ```
 
 See all available options:
