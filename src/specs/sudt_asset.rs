@@ -3,6 +3,7 @@ use std::env;
 
 /// Simple User-Defined Token
 pub struct SudtAsset;
+
 impl Spec for SudtAsset {
     fn run(&self) {
         println!("sUDT test cases:");
@@ -23,7 +24,7 @@ impl Spec for SudtAsset {
             gw_account_id: None,
             sudt_id: None,
             l1_sudt_script_hash: None,
-            sudt_script_args: env::var("SUDT4_SCRIPT_ARGS").ok(),
+            sudt_script_args: env::var("MINER_SUDT_SCRIPT_ARGS").ok(),
         };
 
         let mut user1 = GodwokenUser {
@@ -37,16 +38,18 @@ impl Spec for SudtAsset {
             gw_account_id: None,
             sudt_id: None,
             l1_sudt_script_hash: None,
-            sudt_script_args: env::var("SUDT5_SCRIPT_ARGS").ok(),
+            sudt_script_args: env::var("USER1_SUDT_SCRIPT_ARGS").ok(),
             //TODO: get "sudt-script-args" by private-key
         };
 
-        // deposit sudt from layer1 to layer2 and get gw_account_id
+        // deposit sudt from layer1 to layer2 and get gw_account_id, sudt_id and etc.
         if !miner.deposit_sudt(1000000000) {
-            panic!("minner's deposit failed.");
+            println!("\n[Note] Miner should issue a SUDT token first.\n");
+            panic!("Miner's deposit failed.");
         }
         if !user1.deposit_sudt(1000000000) {
-            panic!("user1's deposit failed.")
+            println!("\n[Note] User1 should issue a SUDT token first.\n");
+            panic!("User1's deposit failed.")
         }
 
         // get_sudt_balance

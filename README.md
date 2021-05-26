@@ -11,7 +11,7 @@ chmod +x init.sh && ./init.sh # build tools for testing
 source <example.env>          # use your own env file containing RPC URLs and private keys etc.
 cargo run                     # run all test cases
 ```
-Note: If you boot a new godwoken chain, you should update the config files and run `./init.sh` again.
+Note: If you boot a new godwoken chain, you should update the config files in `configs/` and run `./init.sh` again.
 
 ### Test cases
 
