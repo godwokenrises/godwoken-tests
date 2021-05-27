@@ -1,3 +1,4 @@
+use regex::Regex;
 use crate::{polyjuice_cli, util::get_signers, Spec, CKB_SUDT_ID};
 
 pub struct Polyjuice;
@@ -5,27 +6,38 @@ pub struct Polyjuice;
 impl Spec for Polyjuice {
     fn run(&self) {
         println!("Polyjuice test cases:");
-        let (miner, _user1) = get_signers();
 
-        let mut _status;
-        // create-creator-account
+        let (miner, user1) = get_signers();
+
+        let pattern = Regex::new(r"Your creator account id: (\d+)").unwrap();
+        
+        // create-creator-account and get creator_account_id
         // Usage: polyjuice-cli create-creator-account [options]
         // Create account id for create polyjuice contract account (the `creator_account_id` config)
         // Options:
         // -p, --private-key <private key>  your private key to create creator account id
         // -s, --sudt-id <sudt id>          sudt id, default to CKB id (1) (default: "1")
         // -h, --help                       display help for command
-        let creator_account_id = Some(3); //TODO: get creator_account_id by privateKey?
-        if creator_account_id.is_none() {
-            _status = polyjuice_cli()
-                .arg("create-creator-account")
-                .args(&["--private-key", &miner.private_key])
-                .args(&["--sudt-id", &CKB_SUDT_ID.to_string()])
-                .status();
-        }
-
+        let output = polyjuice_cli()
+            .arg("create-creator-account")
+            .args(&["--private-key", &user1.private_key])
+            .args(&["--sudt-id", &CKB_SUDT_ID.to_string()])
+            .output().expect("create-creator-account failed.");
+        let stdout_text = String::from_utf8(output.stdout).unwrap_or_default();
+        // println!("{}", &stdout_text);
+        let creator_account_id = if let Some(cap) = pattern.captures(&stdout_text) {
+            cap.get(1).unwrap().as_str()
+        } else {
+            panic!("no creator_account_id logs returned.\n{}\n{}",
+            &String::from_utf8(output.stderr).unwrap_or_default(),
+            &stdout_text);
+        };
+        println!("Polyjuice creator account id: {}", creator_account_id);
+ 
         // miner from id: 4
-        // miner creator account id: 3
+        // TODO: getAccountIdByScriptHash
+
+        // let mut _status;
 
         // deploy a EVM contract
         // Usage: polyjuice-cli deploy
@@ -38,19 +50,21 @@ impl Spec for Polyjuice {
         // -s, --sudt-id <sudt id>                        sudt id, default to CKB id (1) (default: "1")
         // -v, --value <value>                            value (default: "0")
         // -h, --help                                     display help for command
-        _status = polyjuice_cli()
-            .arg("deploy")
-            .args(&["--private-key", &miner.private_key])
-            .args(&[
-                "--creator-account-id",
-                &creator_account_id.unwrap().to_string(),
-            ])
-            .args(&["--sudt-id", &CKB_SUDT_ID.to_string()])
-            .args(&["--gas-limit", "30000"]) //TODO gas limit?
-            .args(&["--gas-price", "1"]) //TODO gas price?
-            .args(&["--data", ""])
-            .args(&["--value", "1"])
-            .status();
+        
+        // _status = polyjuice_cli()
+        //     .arg("deploy")
+        //     .args(&["--private-key", &miner.private_key])
+        //     .args(&[
+        //         "--creator-account-id",
+        //         &creator_account_id.unwrap().to_string(),
+        //     ])
+        //     .args(&["--sudt-id", &CKB_SUDT_ID.to_string()])
+        //     .args(&["--gas-limit", "30000"]) //TODO gas limit?
+        //     .args(&["--gas-price", "1"]) //TODO gas price?
+        //     .args(&["--data", ""])
+        //     .args(&["--value", "1"])
+        //     .status();
+             
         // new script hash: 0x1fff3b2d3c96cb0003b202e76df1c2a8e0ee63c46d8c65a413a26814db7344dc
         // new account id: 5
         // contract address: 0x1fff3b2d3c96cb0003b202e76df1c2a805000000

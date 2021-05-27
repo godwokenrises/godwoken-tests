@@ -3,6 +3,7 @@ use std::env;
 
 pub mod cli;
 
+/// get miner, user1, ...
 pub fn get_signers() -> (GodwokenUser, GodwokenUser) {
     let miner = GodwokenUser {
         private_key: env::var("MINER_PRIVATE_KEY").unwrap_or_else(|_| {
@@ -12,6 +13,7 @@ pub fn get_signers() -> (GodwokenUser, GodwokenUser) {
             .unwrap_or_else(|_| "ckt1qyqy84gfm9ljvqr69p0njfqullx5zy2hr9kq0pd3n5".to_string()),
         ckb_balance: 0,
         account_script_hash: None,
+        // TODO: privateKeyToAccountId
         gw_account_id: None,
         sudt_id: None,
         l1_sudt_script_hash: None,
