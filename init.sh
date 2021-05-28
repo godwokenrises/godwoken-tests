@@ -5,7 +5,7 @@ export GODWOKEN_CONFIG_PATH=${PWD}/configs/godwoken-config.toml
 # If you switched to a new CKB chain,
 # you should switch to a new indexer path `--indexer-path <your new path>`,
 # or just delete `indexer-data` dir.
-rm -r indexer-data
+[[ -n "$KEEP_INDEXER" ]] || rm -r indexer-data
 
 # use godwoken-examples submodule as tools
 git submodule update --init

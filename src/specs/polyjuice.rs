@@ -1,4 +1,5 @@
-use crate::{polyjuice_cli, util::get_signers, Spec, CKB_SUDT_ID};
+use crate::util::cli::{node_godwoken_cli, polyjuice_cli};
+use crate::{util::get_signers, Spec, CKB_SUDT_ID};
 use regex::Regex;
 
 pub struct Polyjuice;
@@ -7,7 +8,7 @@ impl Spec for Polyjuice {
     fn run(&self) {
         println!("====================\nPolyjuice test cases\n====================");
 
-        let (miner, user1) = get_signers();
+        let (_miner, user1) = get_signers();
 
         println!("* create-creator-account and get creator_account_id");
         // Usage: polyjuice-cli create-creator-account [options]
@@ -35,30 +36,27 @@ impl Spec for Polyjuice {
         };
         println!("Polyjuice creator account id: {}", creator_account_id);
 
-        // miner from id: 4 //TODO: get from id
-        // TODO: getAccountIdByScriptHash
-
-        println!("* deploy a EVM contract - SimpleStorage");
+        println!("* deploy an EVM contract - SimpleStorage");
         // Usage: polyjuice-cli deploy
         // Options:
         // -a, --creator-account-id <creator account id>  creator account id, default to `3` if ENABLE_TESTNET_MODE=true
         // -l, --gas-limit <gas limit>                    gas limit
         // -p, --gas-price <gas price>                    gas price
-        // -d, --data <contract data>                     data
+        // -d, --data <contract data>                     contract bin data, should be HexString
         // -p, --private-key <private key>                private key
         // -s, --sudt-id <sudt id>                        sudt id, default to CKB id (1) (default: "1")
         // -v, --value <value>                            value (default: "0")
         // -h, --help                                     display help for command
         let output = polyjuice_cli()
             .arg("deploy")
-            .args(&["--private-key", &miner.private_key])
+            .args(&["--private-key", &_miner.private_key])
             .args(&["--creator-account-id", creator_account_id])
             .args(&["--sudt-id", &CKB_SUDT_ID.to_string()])
-            .args(&["--gas-limit", "30000"]) //TODO gas limit?
-            .args(&["--gas-price", "0"]) //TODO gas price?
+            .args(&["--gas-limit", "30000"])
+            .args(&["--gas-price", "0"])
             // sample-contracts.SimpleStorage
             .args(&["--data", "0x60806040525b607b60006000508190909055505b610018565b60db806100266000396000f3fe60806040526004361060295760003560e01c806360fe47b114602f5780636d4ce63c14605b576029565b60006000fd5b60596004803603602081101560445760006000fd5b81019080803590602001909291905050506084565b005b34801560675760006000fd5b50606e6094565b6040518082815260200191505060405180910390f35b8060006000508190909055505b50565b6000600060005054905060a2565b9056fea2646970667358221220044daf4e34adffc61c3bb9e8f40061731972d32db5b8c2bc975123da9e988c3e64736f6c63430006060033"])
-            .args(&["--value", "0"])
+            // .args(&["--value", "0"]) // QUANTITY - (optional) Integer of the value sent with this transaction
             .output().expect("faild to deploy EVM contract.");
         let stdout_text = String::from_utf8(output.stdout).unwrap_or_default();
         let pattern = Regex::new(r"contract address: (0x[0-9a-fA-F]*)[\n\t\s]").unwrap();
@@ -71,11 +69,30 @@ impl Spec for Polyjuice {
                 &stdout_text
             );
         };
-        println!("contract address: {}", contract_address)
+        println!("contract address: {}", contract_address);
         // new script hash: 0x1fff3b2d3c96cb0003b202e76df1c2a8e0ee63c46d8c65a413a26814db7344dc
         // new account id: [i32]
 
-        //TODO using eth_call to call EVM contract in Polyjuice
+        // get from_id, aka account id
+        let output = node_godwoken_cli()
+            .args(&["getAccountId", &user1.private_key])
+            .output()
+            .expect("failed to get account ID.");
+        let stdout_text = String::from_utf8(output.stdout).unwrap_or_default();
+        let pattern = Regex::new(r"Account id: (\d+)").unwrap();
+        let from_id = if let Some(cap) = pattern.captures(&stdout_text) {
+            cap.get(1).unwrap().as_str()
+        } else {
+            panic!(
+                "no account id returned.\n{}\n{}",
+                &String::from_utf8(output.stderr).unwrap_or_default(),
+                &stdout_text
+            );
+        };
+        // println!("from id of user1: {}", from_id);
+
+        //TODO
+        println!("* call EVM contract in Polyjuice using eth_call");
         // Usage: polyjuice-cli call [options]
         // Static Call a EVM contract by `eth_call`
         // Options:
@@ -83,9 +100,41 @@ impl Spec for Polyjuice {
         // -t, --to-address <contract address>  contract address (default: "0x")
         // -l, --gas-limit <gas limit>          gas limit (default: "16777216")
         // -p, --gas-price <gas price>          gas price (default: "1")
-        // -d, --data <data>                    data (default: "0x")
-        // -v, --value <value>                  value (default: "0")
+        // -d, --data <data>                    data (default: "0x") - Hash of the method signature and encoded parameters. For details see Ethereum Contract ABI
+        // -v, --value <value>                  (optional, default: "0") Integer of the value sent with this
         // -h, --help                           display help for command
+        println!("SimpleStorage.get() ->");
+        let _output = polyjuice_cli()
+            .arg("call")
+            .args(&["--from-id", from_id])
+            .args(&["--to-address", contract_address])
+            .args(&["--data", "0x6d4ce63c"])
+            .status()
+            .expect("faild to call EVM contract");
+        println!("SimpleStorage.set(0x0d10) ->");
+        let _output = polyjuice_cli()
+            .arg("call")
+            .args(&["--from-id", from_id])
+            .args(&["--to-address", contract_address])
+            .args(&[
+                "--data",
+                "0x60fe47b10000000000000000000000000000000000000000000000000000000000000d10",
+            ])
+            .status()
+            .expect("faild to call EVM contract");
+        println!("SimpleStorage.get() ->");
+        let _output = polyjuice_cli()
+            .arg("call")
+            .args(&["--from-id", from_id])
+            .args(&["--to-address", contract_address])
+            .args(&["--data", "0x6d4ce63c"])
+            .status()
+            .expect("faild to call EVM contract");
+
+        // simple_storage_get
+        // https://github.com/nervosnetwork/godwoken-polyjuice/blob/main/polyjuice-tests/src/helper.rs#L537
+
+        // TODO send-transaction
 
         // using eth_sendRawTransaction to send transaction on Godwoken
         // Usage: polyjuice-cli send-transaction [options]
