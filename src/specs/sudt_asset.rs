@@ -6,8 +6,7 @@ pub struct SudtAsset;
 
 impl Spec for SudtAsset {
     fn run(&self) {
-        println!("sUDT test cases:");
-
+        println!("===============\nsUDT test cases\n===============");
         // TODO: issueToken: issue new SUDT on CKB for test
 
         let ckb_rpc: String =
