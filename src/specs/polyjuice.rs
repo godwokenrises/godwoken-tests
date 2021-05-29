@@ -69,11 +69,7 @@ impl Spec for Polyjuice {
                 &stdout_text
             );
         };
-        //FIXME:
-        // let contract_address = "0xd36a99e9b03fc214a2008a7040a570b912000000";
         println!("contract address: {}", contract_address);
-        // new script hash: 0x1fff3b2d3c96cb0003b202e76df1c2a8e0ee63c46d8c65a413a26814db7344dc
-        // new account id: [i32]
 
         // get from_id, aka account id
         let output = node_godwoken_cli()
@@ -112,20 +108,14 @@ impl Spec for Polyjuice {
             .args(&["--data", "0x6d4ce63c"])
             .output()
             .expect("faild to call EVM contract");
-        let stdout_text = String::from_utf8(output.stdout).unwrap_or_default();
-        let pattern = Regex::new(r"return data (0x[0-9a-fA-F]*)[\n\t\s]").unwrap();
-        let stored_data = if let Some(cap) = pattern.captures(&stdout_text) {
-            cap.get(1).unwrap().as_str()
-        } else {
-            panic!(
-                "no returned data\n{}\n{}",
-                &String::from_utf8(output.stderr).unwrap_or_default(),
-                &stdout_text
-            );
-        };
-        println!("storedData = {}", stored_data);
+        let mut stored_data = read_data_from_stdout(
+            output,
+            r"return data (0x[0-9a-fA-F]*)[\n\t\s]",
+            "no returned data",
+        );
+        println!("storedData = {}", &stored_data);
 
-        println!("* SimpleStorage.set(0x010) ->");
+        println!("* SimpleStorage.set(0x011) ->");
         // using eth_sendRawTransaction to send transaction on Godwoken
         // Usage: polyjuice-cli send-transaction [options]
         // Send a transaction to godwoken by `eth_sendRawTransaction`
@@ -147,23 +137,40 @@ impl Spec for Polyjuice {
             .args(&["--gas-price", "1"])
             .args(&[
                 "--data",
-                "0x60fe47b10000000000000000000000000000000000000000000000000000000000000010",
+                "0x60fe47b10000000000000000000000000000000000000000000000000000000000000011",
             ])
             .status()
-            .expect("faild to call EVM contract"); //FIXME failed to set
+            .expect("faild to call EVM contract");
 
         println!("* SimpleStorage.get() ->");
-        let _output = polyjuice_cli()
+        let output = polyjuice_cli()
             .arg("call")
             .args(&["--from-id", from_id])
             .args(&["--to-address", contract_address])
             .args(&["--data", "0x6d4ce63c"])
-            .status()
+            .output()
             .expect("faild to call EVM contract");
+        stored_data = read_data_from_stdout(
+            output,
+            r"return data (0x[0-9a-fA-F]*)[\n\t\s]",
+            "no returned data",
+        );
+        println!("storedData = {}", &stored_data);
     }
 }
 
-//TODO:
-// fn read_data_from_stdout(stdout: Vec, err_msg: str) -> T {
-
-// }
+fn read_data_from_stdout(output: std::process::Output, regex: &str, err_msg: &str) -> String {
+    let stdout_text = String::from_utf8(output.stdout).unwrap_or_default();
+    let pattern = Regex::new(regex).unwrap();
+    let data = if let Some(cap) = pattern.captures(&stdout_text) {
+        cap.get(1).unwrap().as_str().to_owned()
+    } else {
+        panic!(
+            "{}\n{}\n{}",
+            err_msg,
+            &String::from_utf8(output.stderr).unwrap_or_default(),
+            &stdout_text
+        );
+    };
+    data
+}
