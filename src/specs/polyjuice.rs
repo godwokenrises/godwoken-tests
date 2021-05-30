@@ -87,7 +87,6 @@ impl Spec for Polyjuice {
                 &stdout_text
             );
         };
-        // println!("from id of user1: {}", from_id);
 
         //TODO
         println!("* call EVM contract in Polyjuice using eth_call: SimpleStorage.get() ->");
@@ -114,6 +113,10 @@ impl Spec for Polyjuice {
             "no returned data",
         );
         println!("storedData = {}", &stored_data);
+        assert_eq!(
+            stored_data,
+            "0x000000000000000000000000000000000000000000000000000000000000007b"
+        );
 
         println!("* SimpleStorage.set(0x011) ->");
         // using eth_sendRawTransaction to send transaction on Godwoken
@@ -156,6 +159,10 @@ impl Spec for Polyjuice {
             "no returned data",
         );
         println!("storedData = {}", &stored_data);
+        assert_eq!(
+            stored_data,
+            "0x0000000000000000000000000000000000000000000000000000000000000011"
+        );
     }
 }
 
