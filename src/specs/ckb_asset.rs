@@ -16,7 +16,7 @@ impl Spec for CkbAsset {
     ///   2. godwoken transfer from MINER to USER1
     ///   3. withdraw CKB from layer2 to layer1
     fn run(&self) {
-        println!("\nCkbAsset Test Case: invoke account-cli to deposit -> transfer -> withdraw");
+        println!("==================\nCkbAsset Test Case\n==================\n* invoke account-cli to deposit -> transfer -> withdraw");
 
         let ckb_rpc: String =
             env::var("CKB_RPC").unwrap_or_else(|_| "http://127.0.0.1:8114".to_string());

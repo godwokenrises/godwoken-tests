@@ -13,7 +13,6 @@ pub mod worker;
 pub use specs::Spec;
 pub use types::CKB_SUDT_ID;
 pub use util::cli::account_cli;
-pub use util::cli::polyjuice_cli;
 
 pub struct GodwokenUser {
     private_key: String,
