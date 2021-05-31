@@ -15,6 +15,29 @@ pub fn node_godwoken_cli() -> Command {
     node_godwoken_cli
 }
 
+// Usage: issue-token [options]
+// Options:
+//   -V, --version                   output the version number
+//   -p, --private-key <privateKey>  private key to use
+//   -m --amount <amount>            sudt amount
+//   -r, --rpc <rpc>                 rpc path (default: "http://127.0.0.1:8114")
+//   -d, --indexer-path <path>       indexer path (default: "./indexer-data")
+//   -c, --capacity <capacity>       capacity in issued cell
+//   -h, --help                      display help for command
+/// issue a new sudt token
+pub fn issue_token_cli() -> Command {
+    let lumos_config_file_path: String =
+        env::var("LUMOS_CONFIG_FILE").unwrap_or_else(|_| "configs/lumos-config.json".to_string());
+    let ckb_rpc: String =
+        env::var("CKB_RPC").unwrap_or_else(|_| "http://127.0.0.1:8114".to_string());
+    let mut cli = Command::new("node");
+    cli.env("LUMOS_CONFIG_FILE", &lumos_config_file_path)
+        .arg("tools/packages/tools/lib/issue-token.js")
+        .args(&["--rpc", &ckb_rpc])
+        .args(&["--indexer-path", "issue-token-indexer-data"]);
+    cli
+}
+
 /// account_cli is built from godwoken-examples/packages/tools
 pub fn account_cli() -> Command {
     let mut account_cli = if cfg!(target_os = "linux") {

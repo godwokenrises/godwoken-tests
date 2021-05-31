@@ -1,5 +1,8 @@
 use crate::util::cli::{node_godwoken_cli, polyjuice_cli};
-use crate::{util::get_signers, Spec, CKB_SUDT_ID};
+use crate::{
+    util::{get_signers, read_data_from_stdout},
+    Spec, CKB_SUDT_ID,
+};
 use regex::Regex;
 
 pub struct Polyjuice;
@@ -126,7 +129,7 @@ impl Spec for Polyjuice {
         // -t, --to-address <eth address>                 to address
         // -l, --gas-limit <gas limit>                    gas limit
         // -p, --gas-price <gas price>                    gas price
-        // -d, --data <data>                              data
+        // -d, --data <data>                              The compiled code of a contract OR the hash of the invoked method signature and encoded parameters. For details see Ethereum Contract ABI.
         // -p, --private-key <private key>                private key
         // -c, --creator-account-id <creator account id>  creator account id, default to `3` if ENABLE_TESTNET_MODE=true
         // -v, --value <value>                            value (default: "0")
@@ -164,20 +167,4 @@ impl Spec for Polyjuice {
             "0x0000000000000000000000000000000000000000000000000000000000000011"
         );
     }
-}
-
-fn read_data_from_stdout(output: std::process::Output, regex: &str, err_msg: &str) -> String {
-    let stdout_text = String::from_utf8(output.stdout).unwrap_or_default();
-    let pattern = Regex::new(regex).unwrap();
-    let data = if let Some(cap) = pattern.captures(&stdout_text) {
-        cap.get(1).unwrap().as_str().to_owned()
-    } else {
-        panic!(
-            "{}\n{}\n{}",
-            err_msg,
-            &String::from_utf8(output.stderr).unwrap_or_default(),
-            &stdout_text
-        );
-    };
-    data
 }

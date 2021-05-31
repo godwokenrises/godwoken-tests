@@ -1,4 +1,5 @@
-use crate::{account_cli, Spec, CKB_SUDT_ID};
+use crate::util::cli::account_cli;
+use crate::{Spec, CKB_SUDT_ID};
 // TODO: use crate::util::envs;
 use regex::Regex;
 use std::env;
