@@ -1,4 +1,4 @@
-use crate::util::cli::{node_godwoken_cli, polyjuice_cli};
+use crate::util::cli::{godwoken_cli, polyjuice_cli};
 use crate::{
     util::{get_signers, read_data_from_stdout},
     Spec, CKB_SUDT_ID,
@@ -75,7 +75,7 @@ impl Spec for Polyjuice {
         println!("contract address: {}", contract_address);
 
         // get from_id, aka account id
-        let output = node_godwoken_cli()
+        let output = godwoken_cli()
             .args(&["getAccountId", &user1.private_key])
             .output()
             .expect("failed to get account ID.");

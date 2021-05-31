@@ -16,6 +16,3 @@ yarn && yarn build-all
 yarn copy-configs           # copy and convert config format
 yarn convert-config-format  # convert `godwoken-config.toml` to `godwoken-config.json`
 yarn build-all
-yarn pkg
-
-mv *-cli-* ../ && cd ..
