@@ -1,4 +1,4 @@
-use crate::util::cli::{godwoken_cli, polyjuice_cli};
+use crate::util::cli::polyjuice_cli;
 use crate::{
     util::{get_signers, read_data_from_stdout},
     Spec, CKB_SUDT_ID,
@@ -11,7 +11,7 @@ impl Spec for Polyjuice {
     fn run(&self) {
         println!("====================\nPolyjuice test cases\n====================");
 
-        let (_miner, user1) = get_signers();
+        let (_miner, mut user1) = get_signers();
 
         println!("* create-creator-account and get creator_account_id");
         // Usage: polyjuice-cli create-creator-account [options]
@@ -75,21 +75,7 @@ impl Spec for Polyjuice {
         println!("contract address: {}", contract_address);
 
         // get from_id, aka account id
-        let output = godwoken_cli()
-            .args(&["getAccountId", &user1.private_key])
-            .output()
-            .expect("failed to get account ID.");
-        let stdout_text = String::from_utf8(output.stdout).unwrap_or_default();
-        let pattern = Regex::new(r"Account id: (\d+)").unwrap();
-        let from_id = if let Some(cap) = pattern.captures(&stdout_text) {
-            cap.get(1).unwrap().as_str()
-        } else {
-            panic!(
-                "no account id returned.\n{}\n{}",
-                &String::from_utf8(output.stderr).unwrap_or_default(),
-                &stdout_text
-            );
-        };
+        let from_id = user1.get_account_id().unwrap().to_string();
 
         //TODO
         println!("* call EVM contract in Polyjuice using eth_call: SimpleStorage.get() ->");
@@ -105,7 +91,7 @@ impl Spec for Polyjuice {
         // -h, --help                           display help for command
         let output = polyjuice_cli()
             .arg("call")
-            .args(&["--from-id", from_id])
+            .args(&["--from-id", &from_id])
             .args(&["--to-address", contract_address])
             .args(&["--data", "0x6d4ce63c"])
             .output()
@@ -151,7 +137,7 @@ impl Spec for Polyjuice {
         println!("* SimpleStorage.get() ->");
         let output = polyjuice_cli()
             .arg("call")
-            .args(&["--from-id", from_id])
+            .args(&["--from-id", &from_id])
             .args(&["--to-address", contract_address])
             .args(&["--data", "0x6d4ce63c"])
             .output()

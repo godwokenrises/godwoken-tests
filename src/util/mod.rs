@@ -2,6 +2,7 @@ use crate::GodwokenUser;
 use std::env;
 
 pub mod cli;
+pub mod godwoken_ctl;
 
 /// get miner, user1, ...
 pub fn get_signers() -> (GodwokenUser, GodwokenUser) {

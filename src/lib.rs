@@ -14,10 +14,13 @@ pub use specs::Spec;
 pub use types::CKB_SUDT_ID;
 pub use util::cli::account_cli;
 
+use util::cli::godwoken_cli;
+use util::read_data_from_stdout;
+
 pub struct GodwokenUser {
     private_key: String,
     pub_ckb_addr: String,
-    gw_account_id: Option<u32>, //TODO: get gw_account_id by privateKey
+    gw_account_id: Option<u32>,
     ckb_balance: u128,
     account_script_hash: Option<String>, //TODO: sudt_balance[]
     sudt_script_args: Option<String>,
@@ -26,13 +29,26 @@ pub struct GodwokenUser {
 }
 
 impl GodwokenUser {
-    #[allow(dead_code)]
+    /// get gw_account_id by privateKey
+    fn get_account_id(&mut self) -> Option<u32> {
+        if self.gw_account_id.is_some() {
+            return self.gw_account_id;
+        }
+        let output = godwoken_cli()
+            .args(&["getAccountId", &self.private_key])
+            .output()
+            .expect("failed to get account ID.");
+        let id_str = read_data_from_stdout(output, r"Account id: (\d+)", "no account id returned.");
+        self.gw_account_id = id_str.parse::<u32>().ok();
+        self.gw_account_id
+    }
+
     fn get_balance(&mut self) -> Result<u128> {
         self.get_sudt_balance(CKB_SUDT_ID)
     }
 
     fn get_sudt_balance(&mut self, sudt_id: u32) -> Result<u128> {
-        if self.gw_account_id.is_none() {
+        if self.gw_account_id.is_none() && self.get_account_id().is_none() {
             return Err(anyhow!("Missing gw_account_id: {:?}", self.gw_account_id));
         }
 
