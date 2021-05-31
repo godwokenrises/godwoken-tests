@@ -111,8 +111,6 @@ impl Spec for CkbAsset {
             user1.ckb_balance = cap.get(1).unwrap().as_str().parse::<u128>().unwrap();
         };
 
-        //TODO: if !exit_status.status.success()
-
         // let first_balance  = if let Some(cap) = balance_lines.next() {
         // 	u128::from_str_radix(cap.get(1).unwrap().as_str(), 10).unwrap()
         // } else { panic!("get first_balance error") };
@@ -123,11 +121,11 @@ impl Spec for CkbAsset {
         // assert_eq!(last_balance - first_balance, 60000000000);
         // miner.ckb_balance = last_balance;
 
-        let miner_balance_record = miner.get_sudt_balance(CKB_SUDT_ID).unwrap();
+        let miner_balance_record = miner.get_balance().unwrap();
         println!("miner_balance_record: {}", miner_balance_record);
         assert_eq!(miner.ckb_balance, miner_balance_record);
 
-        let user1_balance_record = user1.get_sudt_balance(CKB_SUDT_ID).unwrap();
+        let user1_balance_record = user1.get_balance().unwrap();
         println!("user1_balance_record: {}", user1_balance_record);
         assert_eq!(user1.ckb_balance, user1_balance_record);
 
@@ -178,14 +176,8 @@ impl Spec for CkbAsset {
             .args(&["--capacity", "10000000000"])
             .status();
 
-        println!(
-            "miner_balance_record: {:?}",
-            miner.get_sudt_balance(CKB_SUDT_ID)
-        );
-        println!(
-            "user1_balance_record: {:?}",
-            user1.get_sudt_balance(CKB_SUDT_ID)
-        );
+        println!("miner_balance_record: {:?}", miner.get_balance());
+        println!("user1_balance_record: {:?}", user1.get_balance());
         assert_eq!(miner.ckb_balance, miner_balance_record - 40000000000);
         assert_eq!(user1.ckb_balance, user1_balance_record - 10000000000);
     }

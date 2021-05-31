@@ -26,36 +26,9 @@ pub struct GodwokenUser {
 }
 
 impl GodwokenUser {
-    /// Deprecated
     #[allow(dead_code)]
     fn get_balance(&mut self) -> Result<u128> {
-        if self.gw_account_id.is_none() {
-            return Err(anyhow!("Missing gw_account_id: {:?}", self.gw_account_id));
-        }
-
-        let pattern: Regex = Regex::new(r"[B|b]alance: (\d+)").unwrap();
-        let balance_output = account_cli()
-            .arg("get-balance")
-            .args(&["--account-id", &self.gw_account_id.unwrap().to_string()])
-            .output()
-            .expect("failed to get-balance");
-        let stdout_text = String::from_utf8(balance_output.stdout).unwrap_or_default();
-        let balance_str = if let Some(cap) = pattern.captures(&stdout_text) {
-            if cap.len() > 1 {
-                cap.get(1).unwrap().as_str()
-            } else {
-                "0"
-            }
-        } else {
-            let err_text = String::from_utf8(balance_output.stderr).unwrap_or_default();
-            return Err(anyhow!(
-                "no balance logs returned: {} || {}",
-                &err_text,
-                &stdout_text
-            ));
-        };
-        self.ckb_balance = balance_str.parse::<u128>().unwrap();
-        Ok(self.ckb_balance)
+        self.get_sudt_balance(CKB_SUDT_ID)
     }
 
     fn get_sudt_balance(&mut self, sudt_id: u32) -> Result<u128> {
@@ -63,7 +36,6 @@ impl GodwokenUser {
             return Err(anyhow!("Missing gw_account_id: {:?}", self.gw_account_id));
         }
 
-        let pattern: Regex = Regex::new(r"[B|b]alance: (\d+)").unwrap();
         // Desired output:
         // Your balance: (\d+)
         // Easy to read: 320,000,000,000
@@ -73,19 +45,13 @@ impl GodwokenUser {
             .args(&["--sudt-id", &sudt_id.to_string()])
             .output()
             .expect("failed to get_sudt_balance");
-        let stdout_text = String::from_utf8(balance_output.stdout).unwrap_or_default();
-        let balance_str = if let Some(cap) = pattern.captures(&stdout_text) {
-            cap.get(1).unwrap().as_str()
-        } else {
-            let err_text = String::from_utf8(balance_output.stderr).unwrap_or_default();
-            return Err(anyhow!(
-                "no balance logs returned: {} || {}",
-                &err_text,
-                &stdout_text
-            ));
-        };
-
+        let balance_str = util::read_data_from_stdout(
+            balance_output,
+            r"[B|b]alance: (\d+)",
+            "no balance logs returned",
+        );
         let balance = balance_str.parse::<u128>().unwrap();
+
         if sudt_id == CKB_SUDT_ID {
             self.ckb_balance = balance;
             Ok(self.ckb_balance)
