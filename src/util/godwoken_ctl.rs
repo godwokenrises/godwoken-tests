@@ -16,7 +16,7 @@ impl GodwokenCtl {
         GodwokenCtl {}
     }
 
-    pub fn get_transaction_receipt(l2_tx_hash: &str) -> String {
+    pub fn get_transaction_receipt(self, l2_tx_hash: &str) -> String {
         let output = godwoken_cli()
             .args(&["getTransactionReceipt", l2_tx_hash])
             .output()

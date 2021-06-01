@@ -9,7 +9,7 @@ Please update your godwoken configs into `configs/`, including `godwoken-config.
 ```bash
 chmod +x init.sh && ./init.sh # build tools for testing
 source <example.env>          # use your own env file containing RPC URLs and private keys etc.
-cargo run                     # run all test cases
+RUST_LOG=info cargo run       # run all test cases
 ```
 Note: If you boot a new godwoken chain, you should update the config files in `configs/` and run `./init.sh` again.
 
@@ -22,7 +22,7 @@ Remember to add new specs into `all_specs()` function in `src/main.rs`.
 You can run specified specs:
 
 ```bash
-cargo run -- [CkbAsset] [SudtAsset] [OtherSpecStructName]
+RUST_LOG=godwoken_tests=debug cargo run -- [CkbAsset] [SudtAsset] [Polyjuice] [OtherSpecStructName]
 ```
 
 See all available options:
