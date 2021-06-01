@@ -14,7 +14,6 @@ pub fn get_signers() -> (GodwokenUser, GodwokenUser) {
             .unwrap_or_else(|_| "ckt1qyqy84gfm9ljvqr69p0njfqullx5zy2hr9kq0pd3n5".to_string()),
         ckb_balance: 0,
         account_script_hash: None,
-        // TODO: privateKeyToAccountId
         gw_account_id: None,
         sudt_id: None,
         l1_sudt_script_hash: None,
@@ -32,7 +31,6 @@ pub fn get_signers() -> (GodwokenUser, GodwokenUser) {
         sudt_id: None,
         l1_sudt_script_hash: None,
         sudt_script_args: env::var("USER1_SUDT_SCRIPT_ARGS").ok(),
-        //TODO: get "sudt-script-args" by private-key
     };
     (miner, user1)
 }
