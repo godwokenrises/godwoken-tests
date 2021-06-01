@@ -66,7 +66,10 @@ impl Spec for SudtAsset {
             "no l2_tx_hash returned.",
         );
         log::debug!("layer2 transaction hash: {}", &l2_tx_hash);
-        print!("{}", GodwokenCtl::get_transaction_receipt(&l2_tx_hash));
+        println!(
+            "{}",
+            GodwokenCtl::new().get_transaction_receipt(&l2_tx_hash)
+        );
         assert_eq!(
             miner_sudt_balance_record - 654321,
             miner.get_sudt_balance(miner.sudt_id.unwrap()).unwrap()

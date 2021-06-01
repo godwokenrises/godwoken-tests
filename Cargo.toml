@@ -11,8 +11,12 @@ clap = { version = "2" }
 crossbeam-channel = "0.5"
 parking_lot = "0.11"
 log = "0.4.14"
+env_logger = "0.8.3"
 # an excellent crate for displaying useful and pretty errors
 anyhow = "1.0"
+
+# lazy_static = "1.4.0"
+
 
 # # home directories vary depending on the user's operating system
 # home = "0.5"
@@ -23,9 +27,3 @@ anyhow = "1.0"
 # [dependencies.serde]
 # version = "1.0"
 # features = ["derive"] # we only need the derive feature.
-
-# [dependencies.chrono] # Chrono: Date and Time for Rust
-# version = "0.4" 			# chrono is a good crate to use if you need to handle date and time data in Rust. It provides an easy API for representing a moment in time.
-# features = ["serde"]	# We need the serde feature for the chrono crate, so we can serialize the DateTime field.
-
-# lazy_static = "1.4.0"

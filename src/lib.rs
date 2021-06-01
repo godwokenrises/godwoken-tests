@@ -15,6 +15,7 @@ pub use types::CKB_SUDT_ID;
 pub use util::cli::account_cli;
 
 use util::cli::{godwoken_cli, issue_token_cli};
+use util::godwoken_ctl::GodwokenCtl;
 use util::read_data_from_stdout;
 
 pub struct GodwokenUser {
@@ -201,26 +202,25 @@ impl GodwokenUser {
         ret
     }
 
-    //TODO:
-    // fn transfer(self, sudt_id: u32, amount: u128, to_id: u32) {
-    //     let ckb_rpc: String =
-    //         std::env::var("CKB_RPC").unwrap_or_else(|_| "http://127.0.0.1:8114".to_string());
-    //     let output = account_cli()
-    //         .arg("transfer")
-    //         .args(&["--rpc", &ckb_rpc])
-    //         .args(&["-p", &self.private_key])
-    //         .args(&["--amount", "654321"])
-    //         .args(&["--fee", "0"])
-    //         .args(&["--to-id", &user1.gw_account_id.unwrap().to_string()])
-    //         .args(&["--sudt-id", &miner.sudt_id.unwrap().to_string()])
-    //         .output()
-    //         .expect("failed to transfer");
-    //     let l2_tx_hash = read_data_from_stdout(
-    //         output,
-    //         r"l2 tx hash: (0x[0-9a-fA-F]*)[\n\t\s]",
-    //         "no l2_tx_hash returned.",
-    //     );
-    //     log::debug!("layer2 transaction hash: {}", &l2_tx_hash);
-    //     print!("{}", GodwokenCtl::get_transaction_receipt(&l2_tx_hash));
-    // }
+    fn transfer(&self, sudt_id: u32, amount: u128, to_id: u32) {
+        let ckb_rpc: String =
+            std::env::var("CKB_RPC").unwrap_or_else(|_| "http://127.0.0.1:8114".to_string());
+        let output = account_cli()
+            .arg("transfer")
+            .args(&["--rpc", &ckb_rpc])
+            .args(&["-p", &self.private_key])
+            .args(&["--amount", &amount.to_string()])
+            .args(&["--fee", "0"]) // TODO: calc fee
+            .args(&["--to-id", &to_id.to_string()])
+            .args(&["--sudt-id", &sudt_id.to_string()])
+            .output()
+            .expect("failed to transfer");
+        let l2_tx_hash = read_data_from_stdout(
+            output,
+            r"l2 tx hash: (0x[0-9a-fA-F]*)[\n\t\s]",
+            "no l2_tx_hash returned.",
+        );
+        let receipt = GodwokenCtl::new().get_transaction_receipt(&l2_tx_hash);
+        log::debug!("layer2 transaction hash: {}", &receipt);
+    }
 }

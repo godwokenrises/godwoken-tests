@@ -1,3 +1,6 @@
+#[macro_use]
+extern crate log;
+
 use clap::{value_t, App, Arg};
 use godwoken_tests::specs::*;
 use godwoken_tests::worker::{Notify, Workers};
@@ -25,6 +28,12 @@ struct TestResult {
 // #[allow(clippy::cognitive_complexity)]
 fn main() {
     env::set_var("RUST_BACKTRACE", "full");
+
+    //TODO: Redirect both stdout and stderr of child process to the same file
+    // let mut builder = env_logger::Builder::from_default_env();
+    // builder.target(env_logger::Target::Stdout);
+    // builder.init();
+    env_logger::init();
 
     let clap_app = clap_app();
     let matches = clap_app.get_matches();
