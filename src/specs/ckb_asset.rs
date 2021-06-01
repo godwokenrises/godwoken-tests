@@ -1,12 +1,14 @@
 use crate::util::cli::account_cli;
+use crate::util::godwoken_ctl::GodwokenCtl;
+use crate::util::read_data_from_stdout;
 use crate::{Spec, CKB_SUDT_ID};
-// TODO: use crate::util::envs;
 use regex::Regex;
 use std::env;
 use std::{
     io::{BufRead, BufReader},
     process::Stdio,
 };
+
 //TODO: https://docs.rs/env_logger/0.8.3/env_logger/
 //TODO: Redirect both stdout and stderr of child process to the same file
 
@@ -23,7 +25,6 @@ impl Spec for CkbAsset {
             env::var("CKB_RPC").unwrap_or_else(|_| "http://127.0.0.1:8114".to_string());
 
         let (mut miner, mut user1) = crate::util::get_signers();
-
         // call account-cli to deposit, get the script hash and gw_account_id
         // when the deposit finished.
         let script_hash_pattern = Regex::new(r"script hash: (0x.{64})").unwrap();
@@ -68,7 +69,6 @@ impl Spec for CkbAsset {
             .last();
         if let Some(cap) = ckb_balance_pattern.captures(last_ckb_balance_line.unwrap().as_str()) {
             miner.ckb_balance = cap.get(1).unwrap().as_str().parse::<u128>().unwrap();
-            // TODO: println
         };
 
         let user1_deposit_stdout = account_cli()
@@ -111,65 +111,49 @@ impl Spec for CkbAsset {
             user1.ckb_balance = cap.get(1).unwrap().as_str().parse::<u128>().unwrap();
         };
 
-        //TODO: if !exit_status.status.success()
-
-        // let first_balance  = if let Some(cap) = balance_lines.next() {
-        // 	u128::from_str_radix(cap.get(1).unwrap().as_str(), 10).unwrap()
-        // } else { panic!("get first_balance error") };
-
-        // let last_balance = if let Some(cap) = balance_lines.last() {
-        // 	u128::from_str_radix(cap.get(1).unwrap().as_str(), 10).unwrap()
-        // } else { panic!("get last_balance error") };
-        // assert_eq!(last_balance - first_balance, 60000000000);
-        // miner.ckb_balance = last_balance;
-
-        let miner_balance_record = miner.get_sudt_balance(CKB_SUDT_ID).unwrap();
+        let miner_balance_record = miner.get_balance().unwrap();
         println!("miner_balance_record: {}", miner_balance_record);
         assert_eq!(miner.ckb_balance, miner_balance_record);
-
-        let user1_balance_record = user1.get_sudt_balance(CKB_SUDT_ID).unwrap();
+        let user1_balance_record = user1.get_balance().unwrap();
         println!("user1_balance_record: {}", user1_balance_record);
         assert_eq!(user1.ckb_balance, user1_balance_record);
 
-        // FIXME: transfer
-        println!("\nTransfer 100000000 Shannons from miner to user1");
-        let _transfer_status = account_cli()
+        println!("* Transfer 111 Shannons (CKB) from miner to user1");
+        let output = account_cli()
             .arg("transfer")
             .args(&["--rpc", &ckb_rpc])
             .args(&["-p", &miner.private_key])
-            .args(&["--amount", "100000000"])
+            .args(&["--amount", "111"])
             .args(&["--fee", "0"])
             .args(&["--to-id", &user1.gw_account_id.unwrap().to_string()])
             .args(&["--sudt-id", &CKB_SUDT_ID.to_string()])
-            .status()
+            .output()
             .expect("failed to transfer");
-        // Note: balance is not updated now, waiting for confirmation.
+        let l2_tx_hash = read_data_from_stdout(
+            output,
+            r"l2 tx hash: (0x[0-9a-fA-F]*)[\n\t\s]",
+            "no l2_tx_hash returned.",
+        );
+        println!("layer2 transaction hash: {}", &l2_tx_hash);
+        GodwokenCtl::get_transaction_receipt(&l2_tx_hash);
+
+        println!("miner_balance_record: {:?}", miner.get_balance());
+        println!("user1_balance_record: {:?}", user1.get_balance());
+        assert_eq!(miner.ckb_balance, miner_balance_record - 111);
+        assert_eq!(user1.ckb_balance, user1_balance_record + 111);
 
         // withdraw
-        println!("\nminer withdraw 40000000000 shannons (CKB) from godwoken");
+        let miner_balance_record = miner.ckb_balance;
+        let user1_balance_record = user1.ckb_balance;
+        println!("* miner withdraw 40000000000 shannons (CKB) from godwoken");
         let mut _withdrawal_status = account_cli()
             .arg("withdraw")
             .args(&["--rpc", &ckb_rpc])
             .args(&["-p", &miner.private_key])
-            .args(&[
-                "--owner-ckb-address",
-                "ckt1qyqy84gfm9ljvqr69p0njfqullx5zy2hr9kq0pd3n5",
-            ]) // ckt1qyqy84gfm9ljvqr69p0njfqullx5zy2hr9kq0pd3n5
+            .args(&["--owner-ckb-address", &miner.pub_ckb_addr])
             .args(&["--capacity", "40000000000"]) // 40,000,000,000 Shannons = 400 CKBytes
             .status();
-
-        // TODO: query balance after confirm and assert
-        // FIXME: check the transfer tx
-        // thread '<unnamed>' panicked at 'assertion failed: `(left == right)`
-        // left: `1529999987500`,
-        // right: `1519999987499`', tests/src/specs/ckb_asset.rs:206:9
-        // assert_eq!(
-        //     miner.ckb_balance,
-        //     miner_balance_record - 100000000 - 40000000000
-        // );
-        // assert_eq!(user1.ckb_balance, user1_balance_record + 100000000);
-
-        println!("\nuser1 withdraw 10000000000 shannons (CKB) from godwoken");
+        println!("* user1 withdraw 10000000000 shannons (CKB) from godwoken");
         _withdrawal_status = account_cli()
             .arg("withdraw")
             .args(&["--rpc", &ckb_rpc])
@@ -178,14 +162,8 @@ impl Spec for CkbAsset {
             .args(&["--capacity", "10000000000"])
             .status();
 
-        println!(
-            "miner_balance_record: {:?}",
-            miner.get_sudt_balance(CKB_SUDT_ID)
-        );
-        println!(
-            "user1_balance_record: {:?}",
-            user1.get_sudt_balance(CKB_SUDT_ID)
-        );
+        println!("miner_balance_record: {:?}", miner.get_balance());
+        println!("user1_balance_record: {:?}", user1.get_balance());
         assert_eq!(miner.ckb_balance, miner_balance_record - 40000000000);
         assert_eq!(user1.ckb_balance, user1_balance_record - 10000000000);
     }
