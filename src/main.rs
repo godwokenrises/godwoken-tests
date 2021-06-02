@@ -1,6 +1,3 @@
-#[macro_use]
-extern crate log;
-
 use clap::{value_t, App, Arg};
 use godwoken_tests::specs::*;
 use godwoken_tests::worker::{Notify, Workers};

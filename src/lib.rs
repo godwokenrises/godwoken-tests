@@ -11,9 +11,9 @@ pub mod util;
 pub mod worker;
 
 pub use specs::Spec;
-pub use types::CKB_SUDT_ID;
 pub use util::cli::account_cli;
 
+use types::{CKB_SUDT_ID, CKB_SUDT_SCRIPT_HASH};
 use util::cli::{godwoken_cli, issue_token_cli};
 use util::godwoken_ctl::GodwokenCtl;
 use util::read_data_from_stdout;
@@ -108,6 +108,22 @@ impl GodwokenUser {
         // TODO: check the txHash of issuing token: 0x40439edc7be40aadc504504dbb3ce1ed6c7626699dbb701f03dbc35a7b8b61c3
     }
 
+    /// call account-cli to deposit CKB from layer1 to layer2
+    fn deposit_ckb(&self, capacity: u128) -> bool {
+        let ckb_rpc: String =
+            std::env::var("CKB_RPC").unwrap_or_else(|_| "http://127.0.0.1:8114".to_string());
+        let output = account_cli()
+            .arg("deposit")
+            .args(&["--rpc", &ckb_rpc])
+            .args(&["-p", &self.private_key])
+            .args(&["-c", &capacity.to_string()]) // 600 CKBytes = 60,000,000,000 Shannons
+            .output()
+            .expect("faild to deposit CKB");
+        let stdo = String::from_utf8(output.stdout).unwrap_or_default();
+        log::debug!("{}", &stdo);
+        stdo.contains("deposit success!")
+    }
+
     /// deposit sudt issued by himself from layer1 to layer2
     ///
     /// Cli Usage: account-cli deposit-sudt [options]
@@ -125,7 +141,7 @@ impl GodwokenUser {
     /// -h, --help
     fn deposit_sudt(&mut self, amount: u128) -> bool {
         if self.get_sudt_script_args().is_none() {
-            println!("Missing sudt_script_args: {:?}", self.sudt_script_args);
+            log::warn!("Missing sudt_script_args: {:?}", self.sudt_script_args);
             return false;
         }
 
@@ -165,7 +181,7 @@ impl GodwokenUser {
                 if self.account_script_hash.is_none() {
                     if let Some(cap) = script_hash_pattern.captures(&line) {
                         self.account_script_hash = Some(cap.get(1).unwrap().as_str().to_string());
-                        println!(
+                        log::debug!(
                             "=> update account_script_hash to {:?}",
                             self.account_script_hash
                         );
@@ -175,7 +191,7 @@ impl GodwokenUser {
                 if self.l1_sudt_script_hash.is_none() {
                     if let Some(cap) = l1_sudt_script_hash_pattern.captures(&line) {
                         self.l1_sudt_script_hash = Some(cap.get(1).unwrap().as_str().to_string());
-                        println!(
+                        log::debug!(
                             "=> update l1_sudt_script_hash to {:?}",
                             self.l1_sudt_script_hash
                         );
@@ -185,14 +201,14 @@ impl GodwokenUser {
                 if self.gw_account_id.is_none() {
                     if let Some(cap) = account_id_pattern.captures(&line) {
                         self.gw_account_id = cap.get(1).unwrap().as_str().parse::<u32>().ok();
-                        println!("=> update gw_account_id to {:?}", self.gw_account_id);
+                        log::debug!("=> update gw_account_id to {:?}", self.gw_account_id);
                     }
                 }
                 // update sudt_id
                 if self.sudt_id.is_none() {
                     if let Some(cap) = sudt_id_pattern.captures(&line) {
                         self.sudt_id = cap.get(1).unwrap().as_str().parse::<u32>().ok();
-                        println!("=> update sudt_id to {:?}", self.sudt_id);
+                        log::debug!("=> update sudt_id to {:?}", self.sudt_id);
                     }
                 }
                 if line.contains("deposit success!") {
@@ -220,7 +236,42 @@ impl GodwokenUser {
             r"l2 tx hash: (0x[0-9a-fA-F]*)[\n\t\s]",
             "no l2_tx_hash returned.",
         );
+        log::info!("layer2 transaction hash: {}", &l2_tx_hash);
         let receipt = GodwokenCtl::new().get_transaction_receipt(&l2_tx_hash);
-        log::debug!("layer2 transaction hash: {}", &receipt);
+        log::debug!("transaction receipt: {}", &receipt);
+    }
+
+    // withdraw Usage: account-cli withdraw [options]
+    // withdraw CKB / sUDT from godwoken
+    // Options:
+    // -p, --private-key <privateKey>              private key to use
+    // -c, --capacity <capacity>                   capacity in shannons
+    // -o --owner-ckb-address <owner ckb address>  owner ckb address (to)
+    // -s --sudt-script-hash <sudt script hash>    l1 sudt script hash, default for withdrawal CKB (default: "0x0000000000000000000000000000000000000000000000000000000000000000")
+    // -m --amount <amount>                        amount of sudt (default: "0")
+    // -r, --rpc <rpc>                             ckb rpc path (default: "http://127.0.0.1:8114")
+    // -d, --indexer-path <path>                   indexer path (default: "./indexer-data")
+    // -h, --help                                  display help for command
+    fn withdraw(&self, l1_sudt_script_hash: &str, mut amount: u128, to_ckb_addr: &str) -> bool {
+        let mut ckb_shannons_capacity = 10000000000;
+        if l1_sudt_script_hash == CKB_SUDT_SCRIPT_HASH {
+            ckb_shannons_capacity = amount;
+            amount = 0;
+        }
+        let ckb_rpc: String =
+            std::env::var("CKB_RPC").unwrap_or_else(|_| "http://127.0.0.1:8114".to_string());
+        let output = account_cli()
+            .arg("withdraw")
+            .args(&["--rpc", &ckb_rpc])
+            .args(&["-p", &self.private_key])
+            .args(&["--amount", &amount.to_string()]) // -m --amount <amount> amount of sudt (default: "0")
+            .args(&["--sudt-script-hash", &l1_sudt_script_hash]) // l1 sudt script hash
+            .args(&["--owner-ckb-address", &to_ckb_addr]) // ckt1qyqy84gfm9ljvqr69p0njfqullx5zy2hr9kq0pd3n5
+            .args(&["--capacity", &ckb_shannons_capacity.to_string()])
+            .output()
+            .expect("failed to withdraw");
+        let stdo = String::from_utf8(output.stdout).unwrap_or_default();
+        log::debug!("{}", &stdo);
+        stdo.contains("withdrawal success!")
     }
 }
