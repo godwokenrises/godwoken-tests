@@ -7,5 +7,11 @@
 pub struct H256([u8; 32]);
 // pub struct H256(pub [u8; 32]);
 
+#[allow(dead_code)]
+type Address = [u8; 20];
+// TODO: △ user these types
+
 pub const CKB_SUDT_ID: u32 = 1;
+pub const CKB_SUDT_SCRIPT_HASH: &str =
+    "0x0000000000000000000000000000000000000000000000000000000000000000";
 pub const X_SUDT_ID: u32 = 2;
