@@ -7,7 +7,7 @@ pub struct SudtAsset;
 
 impl Spec for SudtAsset {
     fn run(&self) {
-        println!("===============\nSUDT test cases\n===============");
+        println!("===============\nSUDT Test Cases\n===============");
 
         let (mut miner, mut user1) = get_signers();
 
