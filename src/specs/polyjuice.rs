@@ -6,7 +6,7 @@ pub struct Polyjuice;
 
 impl Spec for Polyjuice {
     fn run(&self) {
-        println!("====================\nPolyjuice test cases\n====================");
+        println!("====================\nPolyjuice Test Cases\n====================");
 
         let (miner, mut user1) = get_signers();
         let godwoken_ctl = GodwokenCtl::new();

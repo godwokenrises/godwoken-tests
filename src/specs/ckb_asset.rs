@@ -8,7 +8,7 @@ impl Spec for CkbAsset {
     ///   2. godwoken transfer from MINER to USER1
     ///   3. withdraw CKB from layer2 to layer1
     fn run(&self) {
-        println!("==================\nCkbAsset Test Case\n==================");
+        println!("===================\nCkbAsset Test Cases\n===================");
 
         let (mut miner, mut user1) = crate::util::get_signers();
 
