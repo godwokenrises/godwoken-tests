@@ -12,7 +12,7 @@ git submodule update --init
 cd tools && git pull
 
 # please use node@14
-yarn && yarn build-all
+yarn
+yarn build-tools
 yarn copy-configs           # copy and convert config format
-yarn convert-config-format  # convert `godwoken-config.toml` to `godwoken-config.json`
 yarn build-all

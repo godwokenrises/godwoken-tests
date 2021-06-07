@@ -37,6 +37,7 @@ pub fn get_signers() -> (GodwokenUser, GodwokenUser) {
 
 pub fn read_data_from_stdout(output: std::process::Output, regex: &str, err_msg: &str) -> String {
     let stdout_text = String::from_utf8(output.stdout).unwrap_or_default();
+    log::debug!("{}", &stdout_text);
     let pattern = regex::Regex::new(regex).unwrap();
     let data = if let Some(cap) = pattern.captures(&stdout_text) {
         cap.get(1).unwrap().as_str().to_owned()
