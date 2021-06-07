@@ -1,0 +1,36 @@
+name: Test
+
+on:
+  push:
+    branches:
+    # - main
+    - CI/**
+    # - dependabot/**
+  pull_request:
+    branches:
+    - develop
+
+jobs:
+  docker:
+    timeout-minutes: 10
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v1
+
+    - name: Start containers
+      run: docker-compose --version
+      # run: docker-compose -f "docker-compose.yml" up -d --build
+
+    # - name: Install node
+    #   uses: actions/setup-node@v1
+    #   with:
+    #     node-version: 14.x
+
+    # - name: Run tests
+    #   run: 
+
+    # - name: Stop containers
+    #   if: always()
+    #   run: docker-compose -f "docker-compose.yml" down
