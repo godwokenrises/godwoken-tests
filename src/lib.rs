@@ -80,32 +80,27 @@ impl GodwokenUser {
             return self.sudt_script_args.as_ref();
         }
         let output = account_cli()
-            .arg("get-sudt-script-args")
-            .args(&["--private-key", &self.private_key])
+            .args(&["get-sudt-script-args", &self.private_key])
             .output()
             .expect("failed to get sudt script args");
         self.sudt_script_args = Some(read_data_from_stdout(
             output,
-            r"sudt script args: ([0-9a-fA-F]*)[\n\t\s]",
+            r"sudt script args: (0x[0-9a-fA-F]*)[\n\t\s]",
             "no sudt script args returned",
         ));
         self.sudt_script_args.as_ref()
     }
 
-    fn issue_sudt(&self, amount: u128) {
-        let _output = issue_token_cli()
+    fn issue_sudt(&self, amount: u128) -> bool {
+        let output = issue_token_cli()
             .args(&["--private-key", &self.private_key])
             .args(&["--amount", &amount.to_string()])
             // .args(&["--capacity", &capcity.to_string()])
             .output()
             .expect("failed to issue token.");
-
-        // TODO: let _l1_tx_hash = read_data_from_stdout(
-        //     output,
-        //     r"txHash: (0x[0-9a-fA-F]*)[\n\t\s]",
-        //     "layer1 tx hash not found",
-        // );
-        // TODO: check the txHash of issuing token: 0x40439edc7be40aadc504504dbb3ce1ed6c7626699dbb701f03dbc35a7b8b61c3
+        let stdo = String::from_utf8(output.stdout).unwrap_or_default();
+        log::debug!("{}", &stdo);
+        stdo.contains("SUDT issued successfully!")
     }
 
     /// call account-cli to deposit CKB from layer1 to layer2
@@ -253,7 +248,7 @@ impl GodwokenUser {
     // -d, --indexer-path <path>                   indexer path (default: "./indexer-data")
     // -h, --help                                  display help for command
     fn withdraw(&self, l1_sudt_script_hash: &str, mut amount: u128, to_ckb_addr: &str) -> bool {
-        let mut ckb_shannons_capacity = 10000000000;
+        let mut ckb_shannons_capacity = 38600000000;
         if l1_sudt_script_hash == CKB_SUDT_SCRIPT_HASH {
             ckb_shannons_capacity = amount;
             amount = 0;

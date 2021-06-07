@@ -12,8 +12,8 @@ impl Spec for CkbAsset {
 
         let (mut miner, mut user1) = crate::util::get_signers();
         log::info!("* deposit CKB");
-        miner.deposit_ckb(60000000000);
-        user1.deposit_ckb(30000000000);
+        miner.deposit_ckb(100000000000);
+        user1.deposit_ckb(222211110000);
 
         let miner_balance_record = miner.get_balance().unwrap();
         log::info!("miner_balance_record: {}", miner_balance_record);
