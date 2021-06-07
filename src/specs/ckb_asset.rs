@@ -11,7 +11,6 @@ impl Spec for CkbAsset {
         println!("===================\nCkbAsset Test Cases\n===================");
 
         let (mut miner, mut user1) = crate::util::get_signers();
-
         log::info!("* deposit CKB");
         miner.deposit_ckb(60000000000);
         user1.deposit_ckb(30000000000);
@@ -37,12 +36,12 @@ impl Spec for CkbAsset {
         log::info!("* miner withdraw 40000000000 shannons (CKB) from godwoken");
         miner.withdraw(CKB_SUDT_SCRIPT_HASH, 40000000000, &miner.pub_ckb_addr);
 
-        log::info!("* user1 withdraw 10000000000 shannons (CKB) from godwoken");
-        user1.withdraw(CKB_SUDT_SCRIPT_HASH, 10000000000, &user1.pub_ckb_addr);
+        log::info!("* user1 withdraw 28500000000 shannons (CKB) from godwoken");
+        user1.withdraw(CKB_SUDT_SCRIPT_HASH, 28500000000, &user1.pub_ckb_addr);
 
         log::info!("miner_balance_record: {:?}", miner.get_balance());
         log::info!("user1_balance_record: {:?}", user1.get_balance());
         assert_eq!(miner.ckb_balance, miner_balance_record - 40000000000);
-        assert_eq!(user1.ckb_balance, user1_balance_record - 10000000000);
+        assert_eq!(user1.ckb_balance, user1_balance_record - 28500000000);
     }
 }
