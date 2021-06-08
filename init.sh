@@ -9,10 +9,9 @@ export GODWOKEN_CONFIG_PATH=${PWD}/configs/godwoken-config.toml
 
 # use godwoken-examples submodule as tools
 git submodule update --init
-cd tools && git pull
 
-# please use node@14
-yarn
+cd tools
+yarn                # please use node@14
 yarn build-tools
-yarn copy-configs           # copy and convert config format
+yarn copy-configs   # copy and convert config format
 yarn build-all

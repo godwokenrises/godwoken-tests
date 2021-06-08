@@ -80,6 +80,7 @@ impl Spec for SudtAsset {
             user1.get_sudt_balance(user1.sudt_id.unwrap()).unwrap()
         );
 
+        // withdraw
         log::info!(
             "* user1 withdraw 48600000000 SUDT_{} from godwoken",
             user1.sudt_id.unwrap()
