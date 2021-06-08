@@ -1,0 +1,65 @@
+{
+  // Use IntelliSense to learn about possible attributes.
+  // Hover to view descriptions of existing attributes.
+  // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "type": "lldb",
+      "request": "launch",
+      "name": "Debug executable 'godwoken-test'",
+      "program": "${workspaceRoot}/target/debug/godwoken-tests",
+      "args": [
+        "--",
+        "SudtAsset"
+      ],
+      "env": {
+        "RUST_LOG": "godwoken_tests=debug",
+        "CKB_RPC": "http://localhost:8114",
+        "GODWOKEN_RPC": "http://localhost:8119",
+        "MINER_PRIVATE_KEY": "0xdd50cac37ec6dd12539a968c1a2cbedda75bd8724f7bcad486548eaabb87fc8b",
+        "MINER_CKB_ADDR": "ckt1qyqy84gfm9ljvqr69p0njfqullx5zy2hr9kq0pd3n5",
+        "USER1_PRIVATE_KEY": "0x6cd5e7be2f6504aa5ae7c0c04178d8f47b7cfc63b71d95d9e6282f5b090431bf",
+        "USER1_CKB_ADDR": "ckt1qyqf22qfzaer95xm5d2m5km0f6k288x9warqnhsf4m"
+      },
+      "cwd": "${workspaceFolder}"
+    },
+    {
+      "type": "lldb",
+      "request": "launch",
+      "name": "Debug executable 'godwoken'",
+      "cargo": {
+        "args": [
+          "build",
+          "--bin=godwoken",
+          "--package=gw-block-producer"
+        ],
+        "filter": {
+          "name": "godwoken",
+          "kind": "bin"
+        }
+      },
+      "args": [],
+      "cwd": "${workspaceFolder}"
+    },
+    {
+      "type": "lldb",
+      "request": "launch",
+      "name": "Debug unit tests in executable 'godwoken'",
+      "cargo": {
+        "args": [
+          "test",
+          "--no-run",
+          "--bin=godwoken",
+          "--package=gw-block-producer"
+        ],
+        "filter": {
+          "name": "godwoken",
+          "kind": "bin"
+        }
+      },
+      "args": [],
+      "cwd": "${workspaceFolder}"
+    }
+  ]
+}
