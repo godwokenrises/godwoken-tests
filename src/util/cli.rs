@@ -32,8 +32,7 @@ pub fn issue_token_cli() -> Command {
     let mut _cli = Command::new("node");
     _cli.env("LUMOS_CONFIG_FILE", &lumos_config_file_path)
         .arg("tools/packages/tools/lib/issue-token.js")
-        .args(&["--rpc", &ckb_rpc])
-        .args(&["--indexer-path", "issue-token-indexer-data"]);
+        .args(&["--rpc", &ckb_rpc]);
     _cli
 }
 
