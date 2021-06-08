@@ -17,7 +17,7 @@ validator_script_type_hash = '0xf70aa98a96fba847185be1b58c1d1e3cae7ad91f971eecc5
 path = ''
 
 [genesis]
-timestamp = 1623038946446
+timestamp = 1623141411391
 rollup_type_hash = '0x6b7ff8226faa5fe940288a018b22e1b5a8cfeae8d6b475c00440dae2659d2934'
 meta_contract_validator_type_hash = '0xbac49534a21667c9d09d76bb5729523f0550f32a952c6c4f9915b673dee44725'
 
@@ -52,9 +52,9 @@ dep_type = 'code'
 tx_hash = '0x6dd0b20f37a03939f40f26a6a41a9ad3baa9abdc37086e74879c52dd35c8664c'
 index = '0x3'
 [chain.genesis_committed_info]
-number = '0x59'
-block_hash = '0x2a212240a0a69808238853321edb2698ef763f88b402bad46ccb558a0b7d8665'
-transaction_hash = '0xa8489d21fce78d3fe3e781c6d5d616f3d100133c2a3349ced20e8399bd1e31f3'
+number = '0x58'
+block_hash = '0x073c5dd275c978c5e7e349c4085b7438958c729b403bbac5b09b3d57457c4a26'
+transaction_hash = '0xc071db79ba2952f53b78fcd62707fcc9e473e25ec1a7c2115879f43947ae8d49'
 
 [chain.rollup_type_script]
 code_hash = '0x22034c8ad0710a83ba28bd41cd1cb1a0786e0fd984cbd20d81ba3219d52a1932'
@@ -131,8 +131,8 @@ index = '0x0'
 dep_type = 'code'
 
 [block_producer.l1_sudt_type_dep.out_point]
-tx_hash = '0x0000000000000000000000000000000000000000000000000000000000000000'
-index = '0x0'
+tx_hash = '0x50ca87722da8b67deea5517cca73da7d65408d6e2e87539e40b4267341830e50'
+index = '0x1'
 
 [block_producer.wallet_config]
 privkey_path = 'deploy/private_key'
