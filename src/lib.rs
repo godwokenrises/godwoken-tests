@@ -148,7 +148,7 @@ impl GodwokenUser {
             .args(&["-p", &self.private_key])
             .args(&[
                 "--sudt-script-args",
-                &self.sudt_script_args.as_ref().unwrap(),
+                self.sudt_script_args.as_ref().unwrap(),
             ]) // -s --sudt-script-args <l1 sudt script args>
             .args(&["--amount", &amount.to_string()]) //sudt amount
             // .args(&["-c", "40000000000"]) // capacity in shannons (default: "40000000000")
@@ -260,8 +260,8 @@ impl GodwokenUser {
             .args(&["--rpc", &ckb_rpc])
             .args(&["-p", &self.private_key])
             .args(&["--amount", &amount.to_string()]) // -m --amount <amount> amount of sudt (default: "0")
-            .args(&["--sudt-script-hash", &l1_sudt_script_hash]) // l1 sudt script hash
-            .args(&["--owner-ckb-address", &to_ckb_addr]) // ckt1qyqy84gfm9ljvqr69p0njfqullx5zy2hr9kq0pd3n5
+            .args(&["--sudt-script-hash", l1_sudt_script_hash]) // l1 sudt script hash
+            .args(&["--owner-ckb-address", to_ckb_addr]) // ckt1qyqy84gfm9ljvqr69p0njfqullx5zy2hr9kq0pd3n5
             .args(&["--capacity", &ckb_shannons_capacity.to_string()])
             .output()
             .expect("failed to withdraw");
