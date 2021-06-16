@@ -1,5 +1,7 @@
 target/
 build/
 
+.env
+
 /*indexer-data/
 /*-cli*
