@@ -1,4 +1,5 @@
 [submodule "godwoken-examples"]
 	path = tools
 	url = https://github.com/Flouse/godwoken-examples
-	branch = pkg
+	branch = for-godwoken-integration-tests
+
