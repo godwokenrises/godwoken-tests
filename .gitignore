@@ -2,6 +2,9 @@ target/
 build/
 
 .env
+/configs/godwoken-config.toml
+/configs/scripts-deploy-result.json
+/configs/lumos-config.json 
 
-/*indexer-data/
+/*indexer-data*/
 /*-cli*
