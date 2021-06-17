@@ -1,4 +1,5 @@
 use crate::types::{CKB_SUDT_ID, CKB_SUDT_SCRIPT_HASH};
+use crate::util::{get_finality_blocks, get_signers};
 use crate::Spec;
 
 pub struct CkbAsset;
@@ -10,7 +11,7 @@ impl Spec for CkbAsset {
     fn run(&self) {
         println!("===================\nCkbAsset Test Cases\n===================");
 
-        let (mut miner, mut user1) = crate::util::get_signers();
+        let (mut miner, mut user1) = get_signers();
         log::info!("* deposit CKB");
         miner.deposit_ckb(100000000000);
         user1.deposit_ckb(222211110000);
@@ -34,7 +35,7 @@ impl Spec for CkbAsset {
 
         // withdraw
         log::info!("wait for asset finalized...");
-        std::thread::sleep(std::time::Duration::from_secs(60));
+        std::thread::sleep(std::time::Duration::from_secs(get_finality_blocks() * 3));
         log::info!("* miner withdraw 40000000000 shannons (CKB) from godwoken");
         miner.withdraw(CKB_SUDT_SCRIPT_HASH, 40000000000, &miner.pub_ckb_addr);
 

@@ -1,4 +1,4 @@
-use crate::util::get_signers;
+use crate::util::{get_finality_blocks, get_signers};
 use crate::Spec;
 
 /// ## Simple User-Defined Token, aka Simple UDT
@@ -82,7 +82,7 @@ impl Spec for SudtAsset {
 
         // withdraw
         log::info!("wait for asset finalized...");
-        std::thread::sleep(std::time::Duration::from_secs(60));
+        std::thread::sleep(std::time::Duration::from_secs(get_finality_blocks() * 3));
         log::info!(
             "* user1 withdraw 48600000000 SUDT_{} from godwoken",
             user1.sudt_id.unwrap()

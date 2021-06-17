@@ -1,5 +1,7 @@
+use crate::types::Config;
 use crate::GodwokenUser;
-use std::env;
+use anyhow::{Context, Result};
+use std::{env, fs, path::Path};
 
 pub mod cli;
 pub mod godwoken_ctl;
@@ -50,4 +52,27 @@ pub fn read_data_from_stdout(output: std::process::Output, regex: &str, err_msg:
         );
     };
     data
+}
+
+fn read_config<P: AsRef<Path>>(path: P) -> Result<Config> {
+    let content = fs::read(&path)
+        .with_context(|| format!("read config file from {}", path.as_ref().to_string_lossy()))?;
+    let config = toml::from_slice(&content).with_context(|| "parse config file")?;
+    Ok(config)
+}
+
+fn read_godwoken_config() -> Result<Config> {
+    let path = "./configs/godwoken-config.toml";
+    read_config(&path)
+}
+
+/// get finality blocks from godwoken config.
+/// default: 6
+pub fn get_finality_blocks() -> u64 {
+    if let Ok(config) = read_godwoken_config() {
+        let finality_blocks = config.genesis.rollup_config.finality_blocks;
+        u64::from_str_radix(finality_blocks.trim_start_matches("0x"), 16).unwrap_or(6)
+    } else {
+        6
+    }
 }

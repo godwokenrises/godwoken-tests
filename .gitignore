@@ -1,5 +1,6 @@
 target/
 build/
+error.log
 
 .env
 /configs/godwoken-config.toml
@@ -8,3 +9,8 @@ build/
 
 /*indexer-data*/
 /*-cli*
+
+.vscode/configurationCache.log
+.vscode/dryrun.log
+.vscode/targets.log
+.vscode/settings.json
