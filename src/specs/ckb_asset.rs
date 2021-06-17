@@ -29,10 +29,12 @@ impl Spec for CkbAsset {
         assert_eq!(miner.ckb_balance, miner_balance_record - 111);
         assert_eq!(user1.ckb_balance, user1_balance_record + 111);
 
-        // withdraw
         let miner_balance_record = miner.ckb_balance;
         let user1_balance_record = user1.ckb_balance;
 
+        // withdraw
+        log::info!("wait for asset finalized...");
+        std::thread::sleep(std::time::Duration::from_secs(60));
         log::info!("* miner withdraw 40000000000 shannons (CKB) from godwoken");
         miner.withdraw(CKB_SUDT_SCRIPT_HASH, 40000000000, &miner.pub_ckb_addr);
 
