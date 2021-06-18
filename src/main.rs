@@ -188,6 +188,7 @@ fn main() {
 /// all test cases
 fn all_specs() -> Vec<Box<dyn Spec>> {
     vec![
+        Box::new(MultiSignWallet),
         Box::new(Polyjuice),
         Box::new(SudtAsset),
         Box::new(CkbAsset),
@@ -244,7 +245,8 @@ fn clap_app() -> App<'static, 'static> {
                 .takes_value(true)
                 .help("The number of specs can running concurrently")
                 .default_value("1"),
-            // FIXME(concurrent > 1): (node:34855) UnhandledPromiseRejectionWarning:
+            // TODO: wait for lumos ready(unlock) between worker switching
+            // TODO: use diff lumos <= (concurrent > 1): (node:34855) UnhandledPromiseRejectionWarning:
             // Error: internal error in Neon module: Failed to open rocksdb:
             // Error { message: "IO error: While lock file: ./indexer-data/LOCK: Resource temporarily unavailable" }
         )
