@@ -1,5 +1,6 @@
 target/
 build/
+/cache/*.json
 error.log
 
 .env
