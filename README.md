@@ -2,21 +2,23 @@
 
 This repository contains integration tests that test [Godwoken](https://github.com/nervosnetwork/godwoken).
 
+## Prerequisites
+
+* [Rust](https://rustup.rs), [`Node.js` v14+](https://nodejs.org) and [`Yarn`](https://yarnpkg.com) are required.
+* Before tests can be run locally, a godwoken dev chain should be runing.
+[Godwoken-Kicker](https://github.com/RetricSu/godwoken-kicker) would be a good choice to start godwoken-polyjuice chain with one line command.
 ## Running tests locally
 
-1. Before tests can be run locally, a godwoken dev chain should be runing.
-[Godwoken-Kicker](https://github.com/RetricSu/godwoken-kicker) would be a good choice to start godwoken-polyjuice chain with one line command.
+1. Update your godwoken configs into `configs/`, including `godwoken-config.toml`, `scripts-deploy-result.json` and `lumos-config.json`.
 
-2. Update your godwoken configs into `configs/`, including `godwoken-config.toml`, `scripts-deploy-result.json` and `lumos-config.json`.
-
-3. Build tools
+2. Build tools
 ```bash
 chmod +x init.sh && ./init.sh # build tools for testing
 ```
 
-4. `cp example.env .env` and then update environment variables in `.env` such as `CKB_RPC`, `GODWOKEN_RPC`, `MINER_PRIVATE_KEY`, `MINER_CKB_ADDR`, `USER1_PRIVATE_KEY` and `USER1_CKB_ADDR`.
+3. `cp example.env .env` and then update environment variables in `.env` such as `CKB_RPC`, `GODWOKEN_RPC`, `GODWOKEN_API`, `WEB3_RPC`, USER`x`_PRIVATE_KEY, etc.
 
-5. Run tests with your own environment variables.
+4. Run tests with your own environment variables.
 ```bash
 source .env                   # use your own env file
 RUST_LOG=info cargo run       # run all test cases
