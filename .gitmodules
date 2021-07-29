@@ -2,3 +2,7 @@
 	path = tools
 	url = https://github.com/Flouse/godwoken-examples
 	branch = contracts
+[submodule "godwoken-kicker"]
+	path = kicker
+	url = https://github.com/RetricSu/godwoken-kicker
+	branch = develop
