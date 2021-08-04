@@ -12,7 +12,7 @@ on:
 
 jobs:
   devnet:
-    timeout-minutes: 30
+    # timeout-minutes: 60
     runs-on: ubuntu-latest
 
     steps:
@@ -43,6 +43,7 @@ jobs:
   
     - name: Setup tmate session
       uses: mxschmitt/action-tmate@v3
+      timeout-minutes: 15
 
     # - name: Install node
     #   uses: actions/setup-node@v1
