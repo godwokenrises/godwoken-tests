@@ -69,6 +69,7 @@ jobs:
     # TODO: update configs of godwoken
 
     - name: Setup tmate session
+      if: ${{ failure() }}
       uses: mxschmitt/action-tmate@v3
       timeout-minutes: 30
 
