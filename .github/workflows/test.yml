@@ -33,6 +33,12 @@ jobs:
       run: |
         test "$(moleculec --version)" = "Moleculec 0.6.1" \
         || CARGO_TARGET_DIR=target/ cargo install moleculec --version 0.6.1
+    - name: Install Capsule
+      run: |
+        test "$(capsule -V)" = "Capsule 0.4.6 36d59e0" \
+        || cargo install ckb-capsule \
+        --git https://github.com/nervosnetwork/capsule.git \
+        --tag v0.4.6
 
     - name: Godwoken Kicker services
       run: |
