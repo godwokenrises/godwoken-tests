@@ -1,4 +1,4 @@
-name: Test
+name: Integration Test
 
 on:
   push:
@@ -56,6 +56,9 @@ jobs:
           ${{ runner.os }}-yarn-
     - run: yarn install
       working-directory: tools
+    
+    - run: ENV_PATH=devnet.env yarn test:multi-sign-wallet
+      working-directory: tools/packages/polyjuice
 
     # TODO: update configs of godwoken
 
