@@ -25,10 +25,10 @@ jobs:
           ~/.cargo/bin/
           ~/.cargo/registry
           ~/.cargo/git
-          kicker/cache/build
-          kicker/packages/
           target
-        # kicker/packages/godwoken/target
+          kicker/cache/build
+          kicker/packages/godwoken/target
+        # kicker/packages
         key: ${{ runner.os }}-cargo-${{ hashFiles('Cargo.lock') }}
     - name: Install moleculec
       run: |
@@ -47,6 +47,8 @@ jobs:
         cd kicker
         make init
         make start
+        sudo chown -R `whoami` cache/build
+        sudo chown -R `whoami` packages/godwoken/target
 
     - uses: actions/setup-node@v2
       with:
@@ -66,8 +68,6 @@ jobs:
     
     - run: ENV_PATH=devnet.env yarn test:multi-sign-wallet
       working-directory: tools/packages/polyjuice
-
-    # TODO: update configs of godwoken
 
     - name: Setup tmate session
       if: ${{ failure() }}
