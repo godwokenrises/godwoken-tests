@@ -22,13 +22,19 @@ jobs:
     # make the Docker cache exportable and thus properly cacheable
     - name: Set up Docker Buildx
       uses: docker/setup-buildx-action@v1
-    - name: Cache Docker layers
-      uses: actions/cache@v2
-      with:
-        path: /tmp/.buildx-cache
-        key: ${{ runner.os }}-buildx-${{ github.sha }}
-        restore-keys: |
-          ${{ runner.os }}-buildx-
+    # In this step, this action saves a list of existing images,
+    # the cache is created without them in the post run.
+    # It also restores the cache if it exists.
+    - uses: satackey/action-docker-layer-caching@v0.0.11
+      continue-on-error: true # Ignore the failure of a step and avoid terminating the job.
+
+    # - name: Cache Docker layers
+    #   uses: actions/cache@v2
+    #   with:
+    #     path: /tmp/.buildx-cache
+    #     key: ${{ runner.os }}-buildx-${{ github.sha }}
+    #     restore-keys: |
+    #       ${{ runner.os }}-buildx-
     
     - name: Cache Rust - Cargo
       uses: actions/cache@v2
@@ -55,6 +61,7 @@ jobs:
 
     - name: Godwoken Kicker services
       run: |
+        docker system df -v
         docker-compose --version
         cd kicker
         make init
@@ -62,21 +69,21 @@ jobs:
         sudo chown -R `whoami` cache/build
       # sudo chown -R `whoami` packages/godwoken/target
 
-    # - uses: actions/setup-node@v2
-    #   with:
-    #     node-version: '14'
-    # - name: Get yarn cache directory path
-    #   id: yarn-cache-dir-path
-    #   run: echo "::set-output name=dir::$(yarn cache dir)"
-    # - uses: actions/cache@v2
-    #   id: yarn-cache # use this to check for `cache-hit` (`steps.yarn-cache.outputs.cache-hit != 'true'`)
-    #   with:
-    #     path: ${{ steps.yarn-cache-dir-path.outputs.dir }}
-    #     key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
-    #     restore-keys: |
-    #       ${{ runner.os }}-yarn-
-    # - run: yarn install
-    #   working-directory: tools
+    - uses: actions/setup-node@v2
+      with:
+        node-version: '14'
+    - name: Get yarn cache directory path
+      id: yarn-cache-dir-path
+      run: echo "::set-output name=dir::$(yarn cache dir)"
+    - uses: actions/cache@v2
+      id: yarn-cache # use this to check for `cache-hit` (`steps.yarn-cache.outputs.cache-hit != 'true'`)
+      with:
+        path: ${{ steps.yarn-cache-dir-path.outputs.dir }}
+        key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
+        restore-keys: |
+          ${{ runner.os }}-yarn-
+    - run: yarn install
+      working-directory: tools
     
     # - run: ENV_PATH=devnet.env yarn test:multi-sign-wallet
     #   working-directory: tools/packages/polyjuice
