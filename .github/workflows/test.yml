@@ -84,6 +84,16 @@ jobs:
           ${{ runner.os }}-yarn-
     - run: yarn install
       working-directory: tools
+    - run: yarn install && yarn compile
+      working-directory: testcases/godwoken-polyjuice-compatibility-examples
+
+    - name: Generate devnet envfile from godwoken-config.toml
+      run: yarn generate-envfile
+      working-directory: tools/packages/tools
+
+    # - name: [testcase] multi-sign-wallet
+    # - run: ENV_PATH=devnet.env yarn test:multi-sign-wallet
+    #   working-directory: testcases/godwoken-polyjuice-compatibility-examples
     
     # - run: ENV_PATH=devnet.env yarn test:multi-sign-wallet
     #   working-directory: tools/packages/polyjuice
