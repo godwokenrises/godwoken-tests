@@ -66,7 +66,9 @@ jobs:
         cd kicker
         make init
         make start
+        make start
         sudo chown -R `whoami` cache/build
+      # TODO: check servics
       # sudo chown -R `whoami` packages/godwoken/target
 
     - uses: actions/setup-node@v2
@@ -84,17 +86,21 @@ jobs:
           ${{ runner.os }}-yarn-
     - run: yarn install
       working-directory: tools
-    - run: yarn install && yarn compile
-      working-directory: testcases/godwoken-polyjuice-compatibility-examples
 
     - name: Generate devnet envfile from godwoken-config.toml
       run: yarn generate-envfile
       working-directory: tools/packages/tools
 
-    # - name: [testcase] multi-sign-wallet
-    # - run: ENV_PATH=devnet.env yarn test:multi-sign-wallet
-    #   working-directory: testcases/godwoken-polyjuice-compatibility-examples
-    
+    - name: Godwoken Polyjuice Compatibility Examples
+      working-directory: testcases/godwoken-polyjuice-compatibility-examples
+      run: |
+        yarn install && yarn compile
+        ENV_PATH=../../tools/packages/tools/configs/devnet.env yarn ts-node ./scripts/box-proxy.ts
+        ENV_PATH=../../tools/packages/tools/configs/devnet.env yarn ts-node ./scripts/multi-sign-wallet.ts
+        ENV_PATH=../../tools/packages/tools/configs/devnet.env yarn ts-node ./scripts/multicall.ts
+        ENV_PATH=../../tools/packages/tools/configs/devnet.env yarn ts-node ./scripts/create2.ts
+        ENV_PATH=../../tools/packages/tools/configs/devnet.env yarn ts-node ./scripts/stable-swap-3-pool.ts
+
     # - run: ENV_PATH=devnet.env yarn test:multi-sign-wallet
     #   working-directory: tools/packages/polyjuice
 
