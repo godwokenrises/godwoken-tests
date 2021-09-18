@@ -45,7 +45,7 @@ jobs:
           ~/.cargo/git
           target
           kicker/cache/build
-          kicker/packages/godwoken/target
+        # kicker/packages/godwoken/target
         # kicker/packages
         key: ${{ runner.os }}-cargo-${{ hashFiles('Cargo.lock') }}
     - name: Install moleculec
@@ -55,7 +55,7 @@ jobs:
     - name: Install Capsule
       run: |
         test "$(capsule -V)" = "Capsule 0.4.6 36d59e0" \
-        || cargo install ckb-capsule \
+        || CARGO_TARGET_DIR=target/ cargo install ckb-capsule \
         --git https://github.com/nervosnetwork/capsule.git \
         --tag v0.4.6
 
@@ -103,6 +103,18 @@ jobs:
 
     # - run: ENV_PATH=devnet.env yarn test:multi-sign-wallet
     #   working-directory: tools/packages/polyjuice
+
+    - name: Save logs
+      if: always()
+      working-directory: kicker/docker
+      run: docker-compose logs --tail 60000 > /tmp/kicker.log
+    - name: Archive logs
+      if: always()
+      uses: actions/upload-artifact@v2
+      with:
+        name: kicker-logs
+        path: |
+          /tmp/kicker.log
 
     - name: Setup tmate session
       if: ${{ failure() }}
