@@ -18,7 +18,7 @@ jobs:
         IMAGE_TAG: v0.6.4-rc5
       run: |
         cd configs
-        docker run --rm -i -w /deploy \
+        docker run -i -w /deploy \
           -v `pwd`/gw-testnet-config.toml:/deploy/gw-testnet-config.toml \
           -v `pwd`/pk:/deploy/pk \
           nervos/godwoken-prebuilds:${{ env.IMAGE_TAG }} bash -c "RUST_LOG=gw=debug godwoken run -c gw-testnet-config.toml"
