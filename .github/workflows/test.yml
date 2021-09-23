@@ -9,6 +9,25 @@ on:
     - develop
 
 jobs:
+  readonly-testnet-node-sync-to-tip:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - name: readonly-testnet-node-sync-to-tip
+      env:
+        IMAGE_TAG: v0.6.4-rc5
+      run: |
+        cd configs
+        docker run --rm -i -w /deploy \
+          -v `pwd`/gw-testnet-config.toml:/deploy/gw-testnet-config.toml \
+          -v `pwd`/pk:/deploy/pk \
+          nervos/godwoken-prebuilds:${{ env.IMAGE_TAG }} bash -c "RUST_LOG=gw=debug godwoken run -c gw-testnet-config.toml"
+
+    - name: Setup tmate session for debugging if something failed
+      if: ${{ failure() }}
+      uses: mxschmitt/action-tmate@v3
+      timeout-minutes: 30
+
   devnet:
     timeout-minutes: 60
     runs-on: ubuntu-latest
