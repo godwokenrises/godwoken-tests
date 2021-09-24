@@ -4,21 +4,42 @@ on:
   push:
     branches:
     - CI
+    - readonly-testnet-node-sync-to-tip
   pull_request:
     branches:
     - develop
 
 jobs:
   readonly-testnet-node-sync-to-tip:
+    env:
+      IMAGE_TAG: v0.6.4-rc5
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
+
+    - name: Download ckb-indexer-data
+      run: |
+        docker run --rm \
+          -v /ckb-indexer-data:/ckb-indexer-data \
+          ghcr.io/flouse/testnet-polyjuice-api:latest bash -c \
+          "cp /godwoken-polyman/packages/runner/db/ckb-indexer-testnet/* /ckb-indexer-data/"
+        sudo chown -R `whoami` /ckb-indexer-data
+
+    - name: Setup tmate session for debugging if something failed
+      uses: mxschmitt/action-tmate@v3
+      timeout-minutes: 30
+
+    - name: Start ckb-indexer
+      run: |
+        docker run -p 8116:8116 -i \
+          -v /ckb-indexer-data:/ckb-indexer-data \
+          nervos/godwoken-prebuilds:${{ env.IMAGE_TAG }} \
+          sh -c "RUST_LOG=info ckb-indexer -c http://3.235.223.161:18114 -s /ckb-indexer-data"
+
     - name: readonly-testnet-node-sync-to-tip
-      env:
-        IMAGE_TAG: v0.6.4-rc5
       run: |
         cd configs
-        docker run -i -w /deploy \
+        docker run -i -w /deploy --network host \
           -v `pwd`/gw-testnet-config.toml:/deploy/gw-testnet-config.toml \
           -v `pwd`/pk:/deploy/pk \
           nervos/godwoken-prebuilds:${{ env.IMAGE_TAG }} bash -c "RUST_LOG=gw=debug godwoken run -c gw-testnet-config.toml"
@@ -27,6 +48,7 @@ jobs:
       if: ${{ failure() }}
       uses: mxschmitt/action-tmate@v3
       timeout-minutes: 30
+
 
   devnet:
     timeout-minutes: 60
