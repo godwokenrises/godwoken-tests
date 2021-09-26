@@ -1,36 +1,160 @@
-name: Test
+name: Integration Test
 
 on:
   push:
     branches:
-    # - main
     - CI
-    # - dependabot/**
   pull_request:
     branches:
     - develop
 
 jobs:
-  docker:
-    timeout-minutes: 10
+  readonly-testnet-node-sync-to-tip:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - name: readonly-testnet-node-sync-to-tip
+      env:
+        IMAGE_TAG: v0.6.4-rc5
+      run: |
+        cd configs
+        docker run --rm -i -w /deploy \
+          -v `pwd`/gw-testnet-config.toml:/deploy/gw-testnet-config.toml \
+          -v `pwd`/pk:/deploy/pk \
+          nervos/godwoken-prebuilds:${{ env.IMAGE_TAG }} bash -c "RUST_LOG=gw=debug godwoken run -c gw-testnet-config.toml"
+
+    - name: Setup tmate session for debugging if something failed
+      if: ${{ failure() }}
+      uses: mxschmitt/action-tmate@v3
+      timeout-minutes: 30
+
+  devnet:
+    timeout-minutes: 60
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout
-      uses: actions/checkout@v1
+    - uses: actions/checkout@v2
+      with:
+        submodules: 'recursive'
+    
+    # set up buildx/BuildKit runner in the context,
+    # make the Docker cache exportable and thus properly cacheable
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v1
+    # In this step, this action saves a list of existing images,
+    # the cache is created without them in the post run.
+    # It also restores the cache if it exists.
+    - uses: satackey/action-docker-layer-caching@v0.0.11
+      continue-on-error: true # Ignore the failure of a step and avoid terminating the job.
 
-    - name: Start containers
-      run: docker-compose --version
-      # run: docker-compose -f "docker-compose.yml" up -d --build
-
-    # - name: Install node
-    #   uses: actions/setup-node@v1
+    # - name: Cache Docker layers
+    #   uses: actions/cache@v2
     #   with:
-    #     node-version: 14.x
+    #     path: /tmp/.buildx-cache
+    #     key: ${{ runner.os }}-buildx-${{ github.sha }}
+    #     restore-keys: |
+    #       ${{ runner.os }}-buildx-
+    
+    - name: Rust Cache
+      uses: actions/cache@v2
+      with:
+        path: |
+          ~/.cargo/bin/
+          ~/.cargo/registry
+          ~/.cargo/git
+          target
+          kicker/cache/build
+        # kicker/packages/godwoken/target
+        # kicker/packages
+        key: ${{ runner.os }}-cargo-${{ hashFiles('Cargo.lock') }}
+    - name: Install moleculec
+      run: |
+        test "$(moleculec --version)" = "Moleculec 0.6.1" \
+        || CARGO_TARGET_DIR=target/ cargo install moleculec --version 0.6.1
+    - name: Install Capsule
+      run: |
+        test "$(capsule -V)" = "Capsule 0.4.6 36d59e0" \
+        || CARGO_TARGET_DIR=target/ cargo install ckb-capsule \
+        --git https://github.com/nervosnetwork/capsule.git \
+        --tag v0.4.6
 
-    # - name: Run tests
-    #   run: 
+    - name: Start Godwoken-Kicker services
+      working-directory: kicker
+      run: |
+        docker system df -v
+        docker-compose --version
+        make init
+        make start
+        docker-compose --file docker/docker-compose.yml logs --tail 6
 
-    # - name: Stop containers
-    #   if: always()
-    #   run: docker-compose -f "docker-compose.yml" down
+    # FIXME: Godwoken service is not running - https://github.com/Flouse/godwoken/runs/3639382192?check_suite_focus=true#step:8:667
+    - name: Make sure the services of Kicker are OK
+      working-directory: kicker
+      run: |
+        make start
+        docker-compose --file docker/docker-compose.yml logs --tail 6
+        sudo chown -R `whoami` cache/build
+      # sudo chown -R `whoami` packages/godwoken/target
+      # TODO: check servics 
+
+    - uses: actions/setup-node@v2
+      with:
+        node-version: '14'
+    - name: Get yarn cache directory path
+      id: yarn-cache-dir-path
+      run: echo "::set-output name=dir::$(yarn cache dir)"
+    - name: Node Cache
+      uses: actions/cache@v2
+      id: yarn-cache # use this to check for `cache-hit` (`steps.yarn-cache.outputs.cache-hit != 'true'`)
+      with:
+        path: ${{ steps.yarn-cache-dir-path.outputs.dir }}
+        key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
+        restore-keys: |
+          ${{ runner.os }}-yarn-
+
+    - name: Generate devnet envfile from godwoken-config.toml
+      working-directory: tools
+      run: |
+        yarn install
+        cd packages/tools
+        yarn generate-envfile
+
+    - name: Testcase - Godwoken Polyjuice Compatibility Examples
+      working-directory: testcases/godwoken-polyjuice-compatibility-examples
+      run: |
+        yarn install && yarn compile
+        ENV_PATH=../../tools/packages/tools/configs/devnet.env yarn ts-node ./scripts/box-proxy.ts
+        ENV_PATH=../../tools/packages/tools/configs/devnet.env yarn ts-node ./scripts/multi-sign-wallet.ts
+        ENV_PATH=../../tools/packages/tools/configs/devnet.env yarn ts-node ./scripts/multicall.ts
+        ENV_PATH=../../tools/packages/tools/configs/devnet.env yarn ts-node ./scripts/create2.ts
+        ENV_PATH=../../tools/packages/tools/configs/devnet.env yarn ts-node ./scripts/stable-swap-3-pool.ts
+      timeout-minutes: 10
+
+    - name: Testcase - Pancakeswap
+      working-directory: testcases/pancakeswap-contracts-godwoken
+      run: |
+        yarn && yarn compile
+        ENV_PATH=../../tools/packages/tools/configs/devnet.env yarn ts-node ./scripts/deploy.ts
+      timeout-minutes: 2
+
+    - name: Save logs
+      if: always()
+      working-directory: kicker/docker
+      run: docker-compose logs --tail 60000 > /tmp/kicker.log
+    - name: Archive logs
+      if: always()
+      uses: actions/upload-artifact@v2
+      with:
+        name: kicker-logs
+        path: |
+          /tmp/kicker.log
+
+    - name: Stop containers of Kicker
+      if: always()
+      working-directory: kicker
+      run: make stop
+
+    - name: Setup tmate session for debugging if something failed
+      if: ${{ failure() }}
+      uses: mxschmitt/action-tmate@v3
+      timeout-minutes: 30

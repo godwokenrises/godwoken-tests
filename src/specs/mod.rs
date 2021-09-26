@@ -1,8 +1,10 @@
 mod ckb_asset;
+mod multi_sign_wallet;
 mod polyjuice;
 mod sudt_asset;
 
 pub use ckb_asset::*;
+pub use multi_sign_wallet::MultiSignWallet;
 pub use polyjuice::Polyjuice;
 pub use sudt_asset::SudtAsset;
 

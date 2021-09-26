@@ -1,5 +1,6 @@
 target/
 build/
+/cache/*.json
 error.log
 
 .env
@@ -13,3 +14,5 @@ error.log
 .vscode/dryrun.log
 .vscode/targets.log
 .vscode/settings.json
+
+contracts/node_modules/

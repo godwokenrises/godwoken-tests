@@ -2,61 +2,55 @@
 
 This repository contains integration tests that test [Godwoken](https://github.com/nervosnetwork/godwoken).
 
-## Running tests locally
+## Prerequisites
 
-1. Before tests can be run locally, a godwoken dev chain should be runing.
+* [Docker](https://docs.docker.com/get-docker/), [docker-compose](https://docs.docker.com/compose/install/), [`Node.js` v14+](https://nodejs.org) and [`Yarn`](https://yarnpkg.com) are required.
+* Before tests can be run locally, a godwoken dev chain should be runing.
 [Godwoken-Kicker](https://github.com/RetricSu/godwoken-kicker) would be a good choice to start godwoken-polyjuice chain with one line command.
 
-2. Update your godwoken configs into `configs/`, including `godwoken-config.toml`, `scripts-deploy-result.json` and `lumos-config.json`.
+## Running tests locally
 
-3. Build tools
-```bash
-chmod +x init.sh && ./init.sh # build tools for testing
+1. Fetch the source code:
+```sh
+git clone --recursive https://github.com/nervosnetwork/godwoken-tests.git
+cd godwoken-tests
 ```
 
-4. `cp example.env .env` and then update environment variables in `.env` such as `CKB_RPC`, `GODWOKEN_RPC`, `MINER_PRIVATE_KEY`, `MINER_CKB_ADDR`, `USER1_PRIVATE_KEY` and `USER1_CKB_ADDR`.
-
-5. Run tests with your own environment variables.
-```bash
-source .env                   # use your own env file
-RUST_LOG=info cargo run       # run all test cases
+2. Update [`nervos/godwoken-prebuilds`](https://hub.docker.com/r/nervos/godwoken-prebuilds/tags?page=1&ordering=last_updated) docker image to the version you expected.
+```sh
+# edit this line in `kicker/docker/.build.mode.env`
+DOCKER_PREBUILD_IMAGE_TAG=<the tag you expected>
 ```
 
-**Note**: If you boot a new godwoken chain, you should update the config files in `configs/` and run `./init.sh` again.
-
-## Test cases
-
-The test cases are managed in `src/specs/`, such as `scr/specs/ckb_asset.rs`.
-
-Remember to add new specs into `all_specs()` function in `src/main.rs`.
-
-You can run specified specs:
-
-```bash
-RUST_LOG=godwoken_tests=debug cargo run -- [CkbAsset] [SudtAsset] [Polyjuice] [OtherSpecStructName]
+3. Start Godwoken-Kicker
+```sh
+cd kicker
+make init && make start
 ```
 
-See all available options:
-
-```bash
-cargo run -- --help
-# 
-# godwoken-tests 0.1.0
-#
-# USAGE:
-#     godwoken-tests [FLAGS] [OPTIONS] [specs]...
-#
-# FLAGS:
-#     -h, --help         Prints help information
-#         --no-report    [TODO]Do not show integration test report
-#     -V, --version      Prints version information
-#         --verbose      [TODO]Show verbose log
-#
-# OPTIONS:
-#     -c, --concurrent <concurrent>    The number of specs can running concurrently [default: 1]
-#         --log-file <log-file>        [TODO]Write log outputs into file.
-#         --max-time <SECONDS>         Exit when total running time exceeds this limit
-
-# ARGS:
-#     <specs>... 
+4. Generate a devnet envfile from [godwoken-config.toml](kicker/workspace/config.toml)
+```sh
+cd tools
+yarn install
+cd packages/tools
+yarn generate-envfile
 ```
+
+5. Run test cases using `devnet.env`
+```sh
+cd testcases/godwoken-polyjuice-compatibility-examples
+yarn install && yarn compile
+ENV_PATH=../../tools/packages/tools/configs/devnet.env yarn ts-node ./scripts/box-proxy.ts
+ENV_PATH=../../tools/packages/tools/configs/devnet.env yarn ts-node ./scripts/multi-sign-wallet.ts
+ENV_PATH=../../tools/packages/tools/configs/devnet.env yarn ts-node ./scripts/multicall.ts
+ENV_PATH=../../tools/packages/tools/configs/devnet.env yarn ts-node ./scripts/create2.ts
+ENV_PATH=../../tools/packages/tools/configs/devnet.env yarn ts-node ./scripts/stable-swap-3-pool.ts
+
+cd testcases/pancakeswap-contracts-godwoken
+yarn && yarn compile
+ENV_PATH=../../tools/packages/tools/configs/devnet.env yarn ts-node ./scripts/deploy.ts
+```
+
+New test cases could be added into `testcases` directory
+
+**Note**: If you boot a new godwoken chain, you should `generate-envfile` again.

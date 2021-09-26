@@ -115,7 +115,7 @@ impl GodwokenUser {
             .output()
             .expect("faild to deposit CKB");
         let stdo = String::from_utf8(output.stdout).unwrap_or_default();
-        log::debug!("{}", &stdo);
+        log::debug!("deposit result: {}", &stdo);
         stdo.contains("deposit success!")
     }
 

@@ -69,3 +69,9 @@ pub fn polyjuice_cli() -> Command {
         .args(&["--godwoken-rpc", &godwoken_rpc]);
     _cli
 }
+
+pub fn get_ontract_script(script_path: &str) -> Command {
+    let mut _cli = Command::new("node");
+    _cli.arg(script_path);
+    _cli
+}
