@@ -1,10 +1,29 @@
 name: Integration Test
 
 on:
+  workflow_dispatch:
+    inputs:
+      prebuild-image:
+        description: 'https://github.com/nervosnetwork/godwoken-docker-prebuilds'
+        required: false
+        default: 'ghcr.io/flouse/godwoken-prebuilds:latest'
+      # godwoken:
+      #   description: 'godwoken version'
+      #   required: false
+      #   default: 'The version in prebuild-image'
+      # godwoken-scripts:
+      #   description: 'godwoken-scripts version'
+      #   required: false
+      #   default: 'The version in prebuild-image'
+      # polyjuice:
+      #   description: 'polyjuice version'
+      #   required: false
+      #   default: 'The version in prebuild-image'
   push:
     branches:
     - CI
     - readonly-testnet-node-sync-to-tip
+    - manual-trigger
   pull_request:
     branches:
     - develop
