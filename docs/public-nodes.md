@@ -19,10 +19,12 @@
 ## CKB Testnet Aggron
 
 ### Node RPC
+- CKB2021: https://testnet.ckbapp.dev/rpc
 - https://testnet.ckb.dev/
 - https://testnet.ckb.dev/rpc
 
 ### Indexer RPC
+- CKB2021: https://testnet.ckbapp.dev/indexer
 - https://testnet.ckb.dev/indexer
 
 ## Limit
