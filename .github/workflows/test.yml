@@ -4,32 +4,63 @@ on:
   push:
     branches:
     - CI
+    - readonly-testnet-node-sync-to-tip
   pull_request:
     branches:
     - develop
 
 jobs:
-  readonly-testnet-node-sync-to-tip:
-    runs-on: ubuntu-latest
-    steps:
-    - uses: actions/checkout@v2
-    - name: readonly-testnet-node-sync-to-tip
-      env:
-        IMAGE_TAG: v0.6.4-rc5
-      run: |
-        cd configs
-        docker run --rm -i -w /deploy \
-          -v `pwd`/gw-testnet-config.toml:/deploy/gw-testnet-config.toml \
-          -v `pwd`/pk:/deploy/pk \
-          nervos/godwoken-prebuilds:${{ env.IMAGE_TAG }} bash -c "RUST_LOG=gw=debug godwoken run -c gw-testnet-config.toml"
+  # readonly-testnet-node-sync-to-tip:
+  #   env:
+  #     IMAGE_TAG: v0.6.5-rc2.1
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #   - uses: actions/checkout@v2
 
-    - name: Setup tmate session for debugging if something failed
-      if: ${{ failure() }}
-      uses: mxschmitt/action-tmate@v3
-      timeout-minutes: 30
+    # - name: Download ckb-indexer-data
+    #   run: |
+        # docker run --rm \
+        #   -v /ckb-indexer-data:/ckb-indexer-data \
+        #   ghcr.io/flouse/testnet-polyjuice-api:latest bash -c \
+        #   "cp /godwoken-polyman/packages/runner/db/ckb-indexer-testnet/* /ckb-indexer-data/"
+        # sudo chown -R `whoami` /ckb-indexer-data
+
+    # - name: Setup tmate session for debugging if something failed
+    #   uses: mxschmitt/action-tmate@v3
+    #   timeout-minutes: 30
+
+    # - name: Start ckb-indexer
+    #   run: |
+    #     docker run -p 8116:8116 -i \
+    #       -v /ckb-indexer-data:/ckb-indexer-data \
+    #       nervos/ckb-indexer:0.2.2 \
+    #       sh -c "RUST_LOG=info ckb-indexer -c http://3.235.223.161:18114 -s /ckb-indexer-data"
+
+    # - name: Store Cache of Godwoken Testnet
+    #   uses: actions/cache@v2
+    #   with:
+    #     path: |
+    #       configs/store.db
+    #     key: ${{ runner.os }}-cache-${{ hashFiles('**/store.db') }}
+    #     ore-keys: |
+    #       ${{ runner.os }}-cache-
+    # - name: readonly-testnet-node-sync-to-tip
+    #   run: |
+    #     cd configs
+    #     docker run -i -w /deploy --network host \
+    #       -v `pwd`/gw-testnet-config.toml:/deploy/gw-testnet-config.toml \
+    #       -v `pwd`/pk:/deploy/pk \
+    #       -v `pwd`/store.db:/deploy/store.db \
+    #       nervos/godwoken-prebuilds:${{ env.IMAGE_TAG }} bash -c "RUST_LOG=gw=debug godwoken run -c gw-testnet-config.toml"
+    #   timeout-minutes: 120
+
+    # - name: Setup tmate session for debugging if something failed
+    #   if: ${{ failure() }}
+    #   uses: mxschmitt/action-tmate@v3
+    #   timeout-minutes: 30
+
 
   devnet:
-    timeout-minutes: 60
     runs-on: ubuntu-latest
 
     steps:
@@ -128,14 +159,14 @@ jobs:
         ENV_PATH=../../tools/packages/tools/configs/devnet.env yarn ts-node ./scripts/multicall.ts
         ENV_PATH=../../tools/packages/tools/configs/devnet.env yarn ts-node ./scripts/create2.ts
         ENV_PATH=../../tools/packages/tools/configs/devnet.env yarn ts-node ./scripts/stable-swap-3-pool.ts
-      timeout-minutes: 10
+      timeout-minutes: 30
 
     - name: Testcase - Pancakeswap
       working-directory: testcases/pancakeswap-contracts-godwoken
       run: |
         yarn && yarn compile
         ENV_PATH=../../tools/packages/tools/configs/devnet.env yarn ts-node ./scripts/deploy.ts
-      timeout-minutes: 2
+      timeout-minutes: 60
 
     - name: Save logs
       if: always()
