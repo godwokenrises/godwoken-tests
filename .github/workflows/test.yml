@@ -193,6 +193,7 @@ jobs:
           sed \
             -e "s|MANUAL_BUILD_GODWOKEN=false|MANUAL_BUILD_GODWOKEN=true|g" \
             -e "s|GODWOKEN_GIT_CHECKOUT=.*|GODWOKEN_GIT_CHECKOUT=${{ github.event.inputs.godwoken }}|g" \
+            -e "s|BUILD_GODWOKEN_ON_LOCAL_OVER_DOCKER=false|BUILD_GODWOKEN_ON_LOCAL_OVER_DOCKER=true|g" \
             .build.mode.env.bak > .build.mode.env
         fi
         if [ -n "${{ github.event.inputs.godwoken-scripts }}" ]; then
