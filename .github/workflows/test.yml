@@ -3,22 +3,34 @@ name: Integration Test
 on:
   workflow_dispatch:
     inputs:
-      prebuild-image:
-        description: 'https://github.com/nervosnetwork/godwoken-docker-prebuilds'
+      gw_prebuild_image_name:
+        description: 'The prebuild image name'
+        required: true
+        default: 'ghcr.io/flouse/godwoken-prebuilds'
+      gw_prebuild_image_tag:
+        description: 'The prebuild image tag'
+        required: true
+        default: 'latest'
+      godwoken:
+        description: 'Godwoken version'
         required: false
-        default: 'ghcr.io/flouse/godwoken-prebuilds:latest'
-      # godwoken:
-      #   description: 'godwoken version'
+        # default: 'The version in prebuild-image'
+      godwoken-scripts:
+        description: 'Godwoken-scripts version'
+        required: false
+        # default: 'The version in prebuild-image'
+      polyjuice:
+        description: 'Polyjuice version'
+        required: false
+        # default: 'The version in prebuild-image'
+      testnet-sync:
+        description: 'Whether to run a godwoken readonly node and sync to testnet tip'
+        required: false
+        default: 'false'
+      # logLevel:
+      #   description: 'Log level'   
       #   required: false
-      #   default: 'The version in prebuild-image'
-      # godwoken-scripts:
-      #   description: 'godwoken-scripts version'
-      #   required: false
-      #   default: 'The version in prebuild-image'
-      # polyjuice:
-      #   description: 'polyjuice version'
-      #   required: false
-      #   default: 'The version in prebuild-image'
+      #   default: 'INFO'
   push:
     branches:
     - CI
@@ -28,11 +40,46 @@ on:
     branches:
     - develop
 
+env:
+  GW_PREBUILDS_IMAGE_NAME: ghcr.io/flouse/godwoken-prebuilds
+  GW_PREBUILD_IMAGE_TAG: latest
+  GODWOKEN_GIT_URL: https://github.com/nervosnetwork/godwoken.git
+  GODWOKEN_REF: master
+  GW_SCRIPTS_GIT_URL: https://github.com/nervosnetwork/godwoken-scripts.git
+  GW_SCRIPTS_REF: master
+  POLYJUICE_GIT_URL: https://github.com/nervosnetwork/godwoken-polyjuice.git
+  POLYJUICE_REF: main
+
 jobs:
-  readonly-testnet-node-sync-to-tip:
-    env:
-      GODWOKEN_PREBUILDS_IMAGE: nervos/godwoken-prebuilds:v0.6.5-rc3
+  prepare-image:
     runs-on: ubuntu-latest
+    outputs: # Map a step output to a job output
+      GW_PREBUILDS_IMAGE_NAME: ${{ steps.env-switcher.outputs.GW_PREBUILDS_IMAGE_NAME }}
+      GW_PREBUILD_IMAGE_TAG: ${{ steps.env-switcher.outputs.GW_PREBUILD_IMAGE_TAG }}
+    steps:
+    - name: Setup envs
+      id: env-switcher
+      run: |
+        echo "inputs: ${{ toJSON(github.event.inputs) }}"
+        if [ -n "${{ github.event.inputs.gw_prebuild_image_name }}" ]; then 
+          echo "GW_PREBUILDS_IMAGE=${{ github.event.inputs.gw_prebuild_image_name }}:${{ github.event.inputs.gw_prebuild_image_tag }}" >> $GITHUB_ENV
+          echo "::set-output name=GW_PREBUILDS_IMAGE_NAME::${{ github.event.inputs.gw_prebuild_image_name }}"
+          echo "::set-output name=GW_PREBUILD_IMAGE_TAG::${{ github.event.inputs.gw_prebuild_image_tag }}"
+        else
+          echo "GW_PREBUILDS_IMAGE=${{ env.GW_PREBUILDS_IMAGE_NAME }}:${{ env.GW_PREBUILD_IMAGE_TAG }}" >> $GITHUB_ENV
+          echo "::set-output name=GW_PREBUILDS_IMAGE_NAME::${{ env.GW_PREBUILDS_IMAGE_NAME }}"
+          echo "::set-output name=GW_PREBUILD_IMAGE_TAG::${{ env.GW_PREBUILD_IMAGE_TAG }}"
+        fi
+    - run: |
+        echo "env.GW_PREBUILDS_IMAGE: ${{ env.GW_PREBUILDS_IMAGE }}"
+        echo "TODO: build image from https://github.com/Flouse/godwoken-docker-prebuilds"
+    
+    # TODO: build image if the tag is not exist
+
+  readonly-testnet-node-sync-to-tip:
+    needs: prepare-image
+    runs-on: ubuntu-latest
+    if: ${{ false }} # testnet-sync: false
     steps:
     - uses: actions/checkout@v2
 
@@ -48,7 +95,7 @@ jobs:
       run: |
         docker create --name ckb-indexer-0.3 -p 8116:8116 \
           -v /ckb-indexer-data:/ckb-indexer-data \
-          ${{ env.GODWOKEN_PREBUILDS_IMAGE }} \
+          ${{ env.GW_PREBUILDS_IMAGE_NAME }}:${{ env.GW_PREBUILD_IMAGE_TAG }} \
           sh -c "RUST_LOG=info ckb-indexer -c https://testnet.ckbapp.dev/rpc -s /ckb-indexer-data -l 0.0.0.0:8116"
         docker start ckb-indexer-0.3
         echo "sleep 1 minute..." && sleep 60
@@ -73,19 +120,21 @@ jobs:
           -v `pwd`/gw-testnet-config.toml:/deploy/gw-testnet-config.toml \
           -v `pwd`/pk:/deploy/pk \
           -v `pwd`/store.db:/deploy/store.db \
-          ${{ env.GODWOKEN_PREBUILDS_IMAGE }} bash -c "RUST_LOG=debug godwoken run -c gw-testnet-config.toml"
+          ${{ env.GW_PREBUILDS_IMAGE_NAME }}:${{ env.GW_PREBUILD_IMAGE_TAG }} \
+          bash -c "godwoken run -c gw-testnet-config.toml"
         docker logs readonly-testnet-node-sync-to-tip -f
       timeout-minutes: 120
 
     - name: Setup tmate session for debugging if something failed
-      # if: ${{ failure() }}
+      if: ${{ failure() }} # TODO: or cancelled() 
       uses: mxschmitt/action-tmate@v3
       timeout-minutes: 30
 
-  # Run integration-tests base on Godowoken-Kicker services
+  # Run integration-tests on devnet deployed by Godowoken-Kicker
   devnet:
+    needs: prepare-image
     runs-on: ubuntu-latest
-
+    if: ${{ true }}
     steps:
     - uses: actions/checkout@v2
       with:
@@ -95,11 +144,12 @@ jobs:
     # make the Docker cache exportable and thus properly cacheable
     - name: Set up Docker Buildx
       uses: docker/setup-buildx-action@v1
-    # In this step, this action saves a list of existing images,
-    # the cache is created without them in the post run.
-    # It also restores the cache if it exists.
-    - uses: satackey/action-docker-layer-caching@v0.0.11
-      continue-on-error: true # Ignore the failure of a step and avoid terminating the job.
+
+    # # In this step, this action saves a list of existing images,
+    # # the cache is created without them in the post run.
+    # # It also restores the cache if it exists.
+    # - uses: satackey/action-docker-layer-caching@v0.0.11
+    #   continue-on-error: true # Ignore the failure of a step and avoid terminating the job.
 
     # - name: Cache Docker layers
     #   uses: actions/cache@v2
@@ -118,19 +168,48 @@ jobs:
           ~/.cargo/git
           target
           kicker/cache/build
-        # kicker/packages/godwoken/target
-        # kicker/packages
         key: ${{ runner.os }}-cargo-${{ hashFiles('Cargo.lock') }}
     - name: Install moleculec
       run: |
-        test "$(moleculec --version)" = "Moleculec 0.6.1" \
-        || CARGO_TARGET_DIR=target/ cargo install moleculec --version 0.6.1
+        test "$(moleculec --version)" = "Moleculec 0.7.2" \
+        || CARGO_TARGET_DIR=target/ cargo install moleculec --version 0.7.2 --force
     - name: Install Capsule
       run: |
         test "$(capsule -V)" = "Capsule 0.4.6 36d59e0" \
         || CARGO_TARGET_DIR=target/ cargo install ckb-capsule \
         --git https://github.com/nervosnetwork/capsule.git \
         --tag v0.4.6
+
+    - name: Replace the envs in kicker/docker/.build.mode.env
+      working-directory: kicker/docker/
+      run: |
+        mv .build.mode.env .build.mode.env.bak
+        sed \
+          -e "s|DOCKER_PREBUILD_IMAGE_NAME=.*|DOCKER_PREBUILD_IMAGE_NAME=${{ needs.prepare-image.outputs.GW_PREBUILDS_IMAGE_NAME }}|g" \
+          -e "s|DOCKER_PREBUILD_IMAGE_TAG=.*|DOCKER_PREBUILD_IMAGE_TAG=${{ needs.prepare-image.outputs.GW_PREBUILD_IMAGE_TAG }}|g" \
+          .build.mode.env.bak > .build.mode.env
+        if [ -n "${{ github.event.inputs.godwoken }}" ]; then
+          mv .build.mode.env .build.mode.env.bak
+          sed \
+            -e "s|MANUAL_BUILD_GODWOKEN=false|MANUAL_BUILD_GODWOKEN=true|g" \
+            -e "s|GODWOKEN_GIT_CHECKOUT=.*|GODWOKEN_GIT_CHECKOUT=${{ github.event.inputs.godwoken }}|g" \
+            .build.mode.env.bak > .build.mode.env
+        fi
+        if [ -n "${{ github.event.inputs.godwoken-scripts }}" ]; then
+          mv .build.mode.env .build.mode.env.bak
+          sed \
+            -e "s|MANUAL_BUILD_SCRIPTS=false|MANUAL_BUILD_SCRIPTS=true|g" \
+            -e "s|SCRIPTS_GIT_CHECKOUT=.*|SCRIPTS_GIT_CHECKOUT=${{ github.event.inputs.godwoken-scripts }}|g" \
+            .build.mode.env.bak > .build.mode.env
+        fi
+        if [ -n "${{ github.event.inputs.polyjuice }}" ]; then
+          mv .build.mode.env .build.mode.env.bak
+          sed \
+            -e "s|MANUAL_BUILD_POLYJUICE=false|MANUAL_BUILD_POLYJUICE=true|g" \
+            -e "s|POLYJUICE_GIT_CHECKOUT=.*|POLYJUICE_GIT_CHECKOUT=${{ github.event.inputs.polyjuice }}|g" \
+            .build.mode.env.bak > .build.mode.env
+        fi
+        cat .build.mode.env
 
     - name: Start Godwoken-Kicker services
       working-directory: kicker
@@ -148,7 +227,6 @@ jobs:
         make start
         docker-compose --file docker/docker-compose.yml logs --tail 6
         sudo chown -R `whoami` cache/build
-      # sudo chown -R `whoami` packages/godwoken/target
       # TODO: check servics 
 
     - uses: actions/setup-node@v2
