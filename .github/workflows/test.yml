@@ -131,7 +131,7 @@ jobs:
       timeout-minutes: 30
 
   # Run integration-tests on devnet deployed by Godowoken-Kicker
-  devnet:
+  test-on-devnet:
     needs: prepare-image
     runs-on: ubuntu-latest
     if: ${{ true }}
