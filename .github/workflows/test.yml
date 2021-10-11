@@ -248,9 +248,35 @@ jobs:
     - name: Generate devnet envfile from godwoken-config.toml
       working-directory: tools
       run: |
-        yarn install
+        yarn install && yarn build-all
+        export SCRIPT_DEPLOY_RESULT_PATH=../kicker/workspace/deploy/scripts-deploy-result.json
+        export GODWOKEN_CONFIG_PATH=../kicker/workspace/config.toml
+        yarn run copy-configs && yarn run convert-config-format
         cd packages/tools
         yarn generate-envfile
+
+    - name: Deposit from layer1 to layer2
+      working-directory: tools
+      run: |
+        LUMOS_CONFIG_FILE=../configs/lumos-config.json \
+          node ./packages/tools/lib/account-cli.js deposit \
+            --private-key 0x6cd5e7be2f6504aa5ae7c0c04178d8f47b7cfc63b71d95d9e6282f5b090431bf \
+            --capacity 333322221111 \
+        | tee result
+        if grep -q "deposit success" result; then
+          echo "The deposited asset can be withdrawn only after finalize_blocks(default to 20) layer2 blocks."          
+        else
+          exit 1
+        fi
+    
+    - name: Get current layer2 block number
+      id: deposit-block-num
+      uses: actions/github-script@v5
+      with:
+        script: |
+          const getTipBlockNumber = require("./scripts/fetch-tip-block-number");
+          return await getTipBlockNumber();
+        result-encoding: string
 
     - name: Testcase - Godwoken Polyjuice Compatibility Examples
       working-directory: testcases/godwoken-polyjuice-compatibility-examples
@@ -269,6 +295,37 @@ jobs:
         yarn && yarn compile
         ENV_PATH=../../tools/packages/tools/configs/devnet.env yarn ts-node ./scripts/deploy.ts
       timeout-minutes: 60
+    
+    # Note:
+    # The deposited asset can be withdrawn only after `finalize_blocks`(default to 20) layer2 blocks.
+    - name: Wait until [finalize_blocks(default to 20)] layer2 blocks passed
+      uses: actions/github-script@v5
+      with:
+        script: |
+          const getTipBlockNumber = require("./scripts/fetch-tip-block-number");
+          const depositBlockNum = ${{ steps.deposit-block-num.outputs.result }};
+          const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
+          (async (waitBlocks = 20) => {
+            while (await getTipBlockNumber() - depositBlockNum < waitBlocks) {
+              console.log(`Wait until ${waitBlocks} layer2 blocks passed`);
+              await sleep(45000);
+            }
+          })();
+          
+    - name: Request withdrawal from layer2 back to layer1
+      working-directory: tools
+      run: |
+        LUMOS_CONFIG_FILE=../configs/lumos-config.json \
+          node ./packages/tools/lib/account-cli.js withdraw \
+            --private-key 0x6cd5e7be2f6504aa5ae7c0c04178d8f47b7cfc63b71d95d9e6282f5b090431bf \
+            --capacity 33322221111 \
+            --owner-ckb-address ckt1qyqf22qfzaer95xm5d2m5km0f6k288x9warqnhsf4m \
+        | tee result
+        if grep -q "withdrawal success" result; then
+          echo "Success! Withdrawal request sent. Please Wait for challenge period duration to unlock the funds."
+        else
+          exit 1
+        fi
 
     - name: Save logs
       if: always()
@@ -282,12 +339,29 @@ jobs:
         path: |
           /tmp/kicker.log
 
-    - name: Stop containers of Kicker
-      if: always()
-      working-directory: kicker
-      run: make stop
+    # - name: Stop containers of Kicker
+    #   if: always()
+    #   working-directory: kicker
+    #   run: make stop
 
     - name: Setup tmate session for debugging if something failed
       if: ${{ failure() }}
       uses: mxschmitt/action-tmate@v3
       timeout-minutes: 30
+
+
+  test-on-testnet:
+    runs-on: ubuntu-latest
+    if: ${{ false }}
+
+    steps:
+    - uses: actions/checkout@v2
+      with:
+        submodules: 'recursive'
+    
+    # - name: Generate the configs of testnet
+    # - name: Get balance on testnet
+    # - name: Deposit on testnet
+    # - name: Withdraw on testnet
+    # - name: Unlock the withdrawn funds to complete the withdrawal process
+    
