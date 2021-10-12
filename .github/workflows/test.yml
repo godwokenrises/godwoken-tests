@@ -263,7 +263,7 @@ jobs:
             --private-key 0x6cd5e7be2f6504aa5ae7c0c04178d8f47b7cfc63b71d95d9e6282f5b090431bf \
             --capacity 333322221111 \
         | tee result
-        if grep -q "deposit success" result; then
+        if grep -q "Deposit success" result; then
           echo "The deposited asset can be withdrawn only after finalize_blocks(default to 20) layer2 blocks."          
         else
           exit 1
