@@ -352,16 +352,78 @@ jobs:
 
   test-on-testnet:
     runs-on: ubuntu-latest
-    if: ${{ false }}
+    if: ${{ true }}
 
     steps:
     - uses: actions/checkout@v2
       with:
         submodules: 'recursive'
+
+    - uses: actions/setup-node@v2
+      with:
+        node-version: '14'
+    - name: Get yarn cache directory path
+      id: yarn-cache-dir-path
+      run: echo "::set-output name=dir::$(yarn cache dir)"
+    - name: Node Cache
+      uses: actions/cache@v2
+      id: yarn-cache # use this to check for `cache-hit` (`steps.yarn-cache.outputs.cache-hit != 'true'`)
+      with:
+        path: ${{ steps.yarn-cache-dir-path.outputs.dir }}
+        key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
+        restore-keys: |
+          ${{ runner.os }}-yarn-
     
-    # - name: Generate the configs of testnet
-    # - name: Get balance on testnet
-    # - name: Deposit on testnet
-    # - name: Withdraw on testnet
+    - name: Generate the configs of testnet
+      working-directory: tools
+      run: yarn && yarn generate-testnet-configs && yarn build-all
+    
+    # Using test account:
+    #   Erivate-key: 0x6cd5e7be2f6504aa5ae7c0c04178d8f47b7cfc63b71d95d9e6282f5b090431bf
+    #   ETH address: 0x6daf63d8411d6e23552658e3cfb48416a6a2ca78
+    #   godwoken short address: 0xc700b4f327f908240eea61c717606e34fae7d28f
+    #   CKB address: ckt1qyqf22qfzaer95xm5d2m5km0f6k288x9warqnhsf4m
+    #   Explorer: https://explorer.nervos.org/aggron/address/ckt1qyqf22qfzaer95xm5d2m5km0f6k288x9warqnhsf4m
+    - name: Get the balance of test account on testnet
+      working-directory: tools
+      run: |
+        node ./packages/tools/lib/account-cli.js get-balance \
+          --account 0xc700b4f327f908240eea61c717606e34fae7d28f
+    
+    - name: Deposit from layer1 to layer2 on testnet
+      working-directory: tools
+      run: |
+        node ./packages/tools/lib/account-cli.js deposit \
+          --rpc https://testnet.ckbapp.dev/rpc \
+          --indexer https://testnet.ckbapp.dev/indexer \
+          --private-key 0x6cd5e7be2f6504aa5ae7c0c04178d8f47b7cfc63b71d95d9e6282f5b090431bf \
+          --capacity 50012340000 \
+        | tee result
+        if grep -q "Deposit success" result; then
+          echo "The deposited asset can be withdrawn only after finalize_blocks(default to 20) layer2 blocks."          
+        else
+          exit 1
+        fi
+
+    - name: Request withdrawal from layer2 back to layer1 on testnet
+      working-directory: tools
+      run: |
+        node ./packages/tools/lib/account-cli.js withdraw \
+          --rpc https://testnet.ckbapp.dev/rpc \
+          --private-key 0x6cd5e7be2f6504aa5ae7c0c04178d8f47b7cfc63b71d95d9e6282f5b090431bf \
+          --capacity 33322221111 \
+          --owner-ckb-address ckt1qyqf22qfzaer95xm5d2m5km0f6k288x9warqnhsf4m \
+        | tee result
+        if grep -q "withdrawal success" result; then
+          echo "Success! Withdrawal request sent. Please Wait for challenge period duration to unlock the funds."
+        else
+          exit 1
+        fi
+    # TODO:
     # - name: Unlock the withdrawn funds to complete the withdrawal process
+
+    - name: Setup tmate session for debugging if something failed
+      if: ${{ failure() }} # TODO: or cancelled() 
+      uses: mxschmitt/action-tmate@v3
+      timeout-minutes: 30
     
