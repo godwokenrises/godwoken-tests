@@ -112,8 +112,7 @@ jobs:
     - name: readonly-testnet-node-sync-to-tip
       run: |
         cd configs
-        mv gw-testnet-config.toml gw-testnet-config.toml.bak
-        sed "s+indexer_url =.*+indexer_url = 'http://localhost:8116'+g" gw-testnet-config.toml.bak > gw-testnet-config.toml
+        sed -i "s+indexer_url =.*+indexer_url = 'http://localhost:8116'+g" gw-testnet-config.toml
         docker run -w /deploy --network host \
           --name readonly-testnet-node-sync-to-tip \
           -d --restart unless-stopped	\
@@ -183,52 +182,65 @@ jobs:
     - name: Replace the envs in kicker/docker/.build.mode.env
       working-directory: kicker/docker/
       run: |
-        mv .build.mode.env .build.mode.env.bak
-        sed \
+        sed -i \
           -e "s|DOCKER_PREBUILD_IMAGE_NAME=.*|DOCKER_PREBUILD_IMAGE_NAME=${{ needs.prepare-image.outputs.GW_PREBUILDS_IMAGE_NAME }}|g" \
           -e "s|DOCKER_PREBUILD_IMAGE_TAG=.*|DOCKER_PREBUILD_IMAGE_TAG=${{ needs.prepare-image.outputs.GW_PREBUILD_IMAGE_TAG }}|g" \
-          .build.mode.env.bak > .build.mode.env
+          .build.mode.env
         if [ -n "${{ github.event.inputs.godwoken }}" ]; then
-          mv .build.mode.env .build.mode.env.bak
-          sed \
+          sed -i \
             -e "s|MANUAL_BUILD_GODWOKEN=false|MANUAL_BUILD_GODWOKEN=true|g" \
             -e "s|GODWOKEN_GIT_CHECKOUT=.*|GODWOKEN_GIT_CHECKOUT=${{ github.event.inputs.godwoken }}|g" \
             -e "s|BUILD_GODWOKEN_ON_LOCAL_OVER_DOCKER=false|BUILD_GODWOKEN_ON_LOCAL_OVER_DOCKER=true|g" \
-            .build.mode.env.bak > .build.mode.env
+            .build.mode.env
         fi
         if [ -n "${{ github.event.inputs.godwoken-scripts }}" ]; then
-          mv .build.mode.env .build.mode.env.bak
-          sed \
+          sed -i \
             -e "s|MANUAL_BUILD_SCRIPTS=false|MANUAL_BUILD_SCRIPTS=true|g" \
             -e "s|SCRIPTS_GIT_CHECKOUT=.*|SCRIPTS_GIT_CHECKOUT=${{ github.event.inputs.godwoken-scripts }}|g" \
-            .build.mode.env.bak > .build.mode.env
+            .build.mode.env
         fi
         if [ -n "${{ github.event.inputs.polyjuice }}" ]; then
-          mv .build.mode.env .build.mode.env.bak
-          sed \
+          sed -i \
             -e "s|MANUAL_BUILD_POLYJUICE=false|MANUAL_BUILD_POLYJUICE=true|g" \
             -e "s|POLYJUICE_GIT_CHECKOUT=.*|POLYJUICE_GIT_CHECKOUT=${{ github.event.inputs.polyjuice }}|g" \
-            .build.mode.env.bak > .build.mode.env
+            .build.mode.env
         fi
         cat .build.mode.env
 
     - name: Start Godwoken-Kicker services
       working-directory: kicker
       run: |
+        # add debug logs
+        sed -i \
+          -e "s|RUST_LOG=info|RUST_LOG=info,ckb_script::verify=debug|g" \
+          docker/layer2/entrypoint.sh
         docker system df -v
         docker-compose --version
         make init
         make start
         docker-compose --file docker/docker-compose.yml logs --tail 6
+      # FIXME: Sometimes, Godwoken service is not running
+      # https://github.com/Flouse/godwoken/runs/3639382192?check_suite_focus=true#step:8:667
 
-    # FIXME: Godwoken service is not running - https://github.com/Flouse/godwoken/runs/3639382192?check_suite_focus=true#step:8:667
-    - name: Make sure the services of Kicker are OK
+    - name: Enable offchain validator of Godwoken
       working-directory: kicker
       run: |
+        sudo chown -R `whoami` workspace/config.toml
+        grep -q "\[offchain_validator\]" workspace/config.toml \
+        || make stop && cat >> workspace/config.toml << __EOF__
+
+        [offchain_validator]
+        verify_withdrawal_signature = true
+        verify_tx_signature = true
+        verify_tx_execution = true
+        verify_max_cycles = 70000000
+        dump_tx_on_failure = true
+        __EOF__
         make start
         docker-compose --file docker/docker-compose.yml logs --tail 6
         sudo chown -R `whoami` cache/build
-      # TODO: check servics 
+
+    # TODO: check servics, eg. curl localhost:8024
 
     - uses: actions/setup-node@v2
       with:
