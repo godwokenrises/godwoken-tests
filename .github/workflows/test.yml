@@ -220,15 +220,27 @@ jobs:
         make init
         make start
         docker-compose --file docker/docker-compose.yml logs --tail 6
+      # FIXME: Sometimes, Godwoken service is not running
+      # https://github.com/Flouse/godwoken/runs/3639382192?check_suite_focus=true#step:8:667
 
-    # FIXME: Godwoken service is not running - https://github.com/Flouse/godwoken/runs/3639382192?check_suite_focus=true#step:8:667
-    - name: Make sure the services of Kicker are OK
+    - name: Enable offchain validator of Godwoken
       working-directory: kicker
       run: |
+        grep -q "\[offchain_validator\]" workspace/config.toml \
+        || make stop && cat >> workspace/config.toml << __EOF__
+
+        [offchain_validator]
+        verify_withdrawal_signature = true
+        verify_tx_signature = true
+        verify_tx_execution = true
+        verify_max_cycles = 70000000
+        dump_tx_on_failure = true
+        __EOF__
         make start
         docker-compose --file docker/docker-compose.yml logs --tail 6
         sudo chown -R `whoami` cache/build
-      # TODO: check servics 
+
+    # TODO: check servics, eg. curl localhost:8024
 
     - uses: actions/setup-node@v2
       with:
