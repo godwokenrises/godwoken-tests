@@ -45,10 +45,10 @@ env:
   GW_PREBUILD_IMAGE_TAG: docker-publish
   GODWOKEN_GIT_URL: https://github.com/nervosnetwork/godwoken.git
   GODWOKEN_REF: master
-  GW_SCRIPTS_GIT_URL: https://github.com/nervosnetwork/godwoken-scripts.git
-  GW_SCRIPTS_REF: master
-  POLYJUICE_GIT_URL: https://github.com/nervosnetwork/godwoken-polyjuice.git
-  POLYJUICE_REF: main
+  GW_SCRIPTS_GIT_URL: https://github.com/zeroqn/godwoken-scripts.git
+  GW_SCRIPTS_REF: hotfix-recover-account-invalid-data-format
+  POLYJUICE_GIT_URL: https://github.com/zeroqn/godwoken-polyjuice.git
+  POLYJUICE_REF: hotfix-recover-account-invalid-data-format
 
 jobs:
   prepare-image:
@@ -438,4 +438,3 @@ jobs:
       if: ${{ failure() }} # TODO: or cancelled() 
       uses: mxschmitt/action-tmate@v3
       timeout-minutes: 30
-    
