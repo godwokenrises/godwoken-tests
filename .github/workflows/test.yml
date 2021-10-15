@@ -227,6 +227,7 @@ jobs:
       working-directory: kicker
       run: |
         grep -q "\[offchain_validator\]" workspace/config.toml \
+        || sudo chown `whoami` workspace/config.toml \
         || make stop && cat >> workspace/config.toml << __EOF__
 
         [offchain_validator]
