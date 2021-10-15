@@ -1,0 +1,123 @@
+name: Integration Test
+
+on:
+  workflow_dispatch:
+    inputs:
+      gw_prebuild_image_name:
+        description: 'The prebuild image name'
+        required: true
+        default: 'ghcr.io/flouse/godwoken-prebuilds'
+      gw_prebuild_image_tag:
+        description: 'The prebuild image tag'
+        required: true
+        default: 'latest'
+      godwoken:
+        description: 'Godwoken version'
+        required: false
+        # default: 'The version in prebuild-image'
+      godwoken-scripts:
+        description: 'Godwoken-scripts version'
+        required: false
+        # default: 'The version in prebuild-image'
+      polyjuice:
+        description: 'Polyjuice version'
+        required: false
+        # default: 'The version in prebuild-image'
+  schedule:
+    - cron: "0 0 * * *"
+
+env:
+  GW_PREBUILDS_IMAGE_NAME: ghcr.io/flouse/godwoken-prebuilds
+  GW_PREBUILD_IMAGE_TAG: docker-publish
+  GODWOKEN_GIT_URL: https://github.com/nervosnetwork/godwoken.git
+  GODWOKEN_REF: master
+  GW_SCRIPTS_GIT_URL: https://github.com/nervosnetwork/godwoken-scripts.git
+  GW_SCRIPTS_REF: master
+  POLYJUICE_GIT_URL: https://github.com/nervosnetwork/godwoken-polyjuice.git
+  POLYJUICE_REF: main
+
+jobs:
+  prepare-image:
+    runs-on: ubuntu-latest
+    outputs: # Map a step output to a job output
+      GW_PREBUILDS_IMAGE_NAME: ${{ steps.env-switcher.outputs.GW_PREBUILDS_IMAGE_NAME }}
+      GW_PREBUILD_IMAGE_TAG: ${{ steps.env-switcher.outputs.GW_PREBUILD_IMAGE_TAG }}
+    steps:
+    - name: Setup envs
+      id: env-switcher
+      run: |
+        echo "inputs: ${{ toJSON(github.event.inputs) }}"
+        if [ -n "${{ github.event.inputs.gw_prebuild_image_name }}" ]; then 
+          echo "GW_PREBUILDS_IMAGE=${{ github.event.inputs.gw_prebuild_image_name }}:${{ github.event.inputs.gw_prebuild_image_tag }}" >> $GITHUB_ENV
+          echo "::set-output name=GW_PREBUILDS_IMAGE_NAME::${{ github.event.inputs.gw_prebuild_image_name }}"
+          echo "::set-output name=GW_PREBUILD_IMAGE_TAG::${{ github.event.inputs.gw_prebuild_image_tag }}"
+        else
+          echo "GW_PREBUILDS_IMAGE=${{ env.GW_PREBUILDS_IMAGE_NAME }}:${{ env.GW_PREBUILD_IMAGE_TAG }}" >> $GITHUB_ENV
+          echo "::set-output name=GW_PREBUILDS_IMAGE_NAME::${{ env.GW_PREBUILDS_IMAGE_NAME }}"
+          echo "::set-output name=GW_PREBUILD_IMAGE_TAG::${{ env.GW_PREBUILD_IMAGE_TAG }}"
+        fi
+    - run: |
+        echo "env.GW_PREBUILDS_IMAGE: ${{ env.GW_PREBUILDS_IMAGE }}"
+        echo "TODO: build image from https://github.com/Flouse/godwoken-docker-prebuilds"
+    
+    # TODO: build image if the tag is not exist
+
+  sync-to-tip:
+    timeout-minutes: 4000
+    needs: prepare-image
+    # runs-on: ubuntu-latest
+    runs-on: [self-hosted, linux, x64]
+    steps:
+    - uses: actions/checkout@v2
+    - name: sync-to-tip
+      continue-on-error: true
+      if: always()
+      run: |
+        sudo apt install jq -y
+        cd configs
+        docker rm /readonly-testnet-node-sync-to-tip 2>/dev/null
+        docker run -w /deploy --network host \
+          --name readonly-testnet-node-sync-to-tip \
+          -d --restart unless-stopped	\
+          -v `pwd`/gw-testnet-config.toml:/deploy/gw-testnet-config.toml \
+          -v `pwd`/pk:/deploy/pk \
+          ${{ env.GW_PREBUILDS_IMAGE_NAME }}:${{ env.GW_PREBUILD_IMAGE_TAG }} \
+          bash -c "godwoken run -c gw-testnet-config.toml"
+        echo "sleep for 300sec" && sleep 300
+        docker logs readonly-testnet-node-sync-to-tip -n 10
+    - name: Setup python
+      uses: actions/setup-python@v2
+      with:
+        python-version: 3.8
+    - name: check sync status
+      timeout-minutes: 4000
+      run: |
+        pip install -U pip && pip install requests
+        python .github/workflows/sync_to_tip.py | tee log
+    - name: Post Run - Construct Report
+      run: |
+        echo 'SYNC_TESTNET_REPORT<<EOF' >> $GITHUB_ENV
+        echo $(tail -n 1 log)           >> $GITHUB_ENV
+        echo 'EOF'                      >> $GITHUB_ENV
+        echo 'ISSUE_NUMBER=20' >> $GITHUB_ENV
+    - name: Post Run - Comment Report
+      uses: peter-evans/create-or-update-comment@v1
+      with:
+        issue-number: ${{ env.ISSUE_NUMBER }}
+        body: |
+          **Sync-Mainnet Report**: https://www.github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          ```yaml
+          ${{ env.SYNC_MAINNET_REPORT }}
+          ```
+    - name: Setup tmate session for debugging if something failed
+      if: ${{ failure() }} # TODO: or cancelled() 
+      uses: mxschmitt/action-tmate@v3
+      timeout-minutes: 30
+    - name: Clean docker
+      continue-on-error: true
+      if: ${{ always() }} # TODO: or cancelled() 
+      run: |
+        echo "Clean Docker"
+        docker kill $(docker ps -q) 2>/dev/null
+        docker rm $(docker ps -q) 2>/dev/null
+

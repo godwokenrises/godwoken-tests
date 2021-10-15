@@ -76,60 +76,6 @@ jobs:
     
     # TODO: build image if the tag is not exist
 
-  readonly-testnet-node-sync-to-tip:
-    needs: prepare-image
-    runs-on: ubuntu-latest
-    if: ${{ false }} # testnet-sync: false
-    steps:
-    - uses: actions/checkout@v2
-
-    - name: Download ckb-indexer-data
-      run: |
-        docker run --rm \
-          -v /ckb-indexer-data:/ckb-indexer-data \
-          ghcr.io/flouse/testnet-polyjuice-api:latest bash -c \
-          "cp /godwoken-polyman/packages/runner/db/ckb-indexer-testnet/* /ckb-indexer-data/"
-        sudo chown -R `whoami` /ckb-indexer-data
-
-    - name: Start ckb-indexer
-      run: |
-        docker create --name ckb-indexer-0.3 -p 8116:8116 \
-          -v /ckb-indexer-data:/ckb-indexer-data \
-          ${{ env.GW_PREBUILDS_IMAGE_NAME }}:${{ env.GW_PREBUILD_IMAGE_TAG }} \
-          sh -c "RUST_LOG=info ckb-indexer -c https://testnet.ckbapp.dev/rpc -s /ckb-indexer-data -l 0.0.0.0:8116"
-        docker start ckb-indexer-0.3
-        echo "sleep 1 minute..." && sleep 60
-        docker logs ckb-indexer-0.3 --tail 20
-
-    # - name: Store Cache of Godwoken Testnet
-    #   uses: actions/cache@v2
-    #   with:
-    #     path: |
-    #       configs/store.db
-    #     key: ${{ runner.os }}-cache-${{ hashFiles('**/store.db') }}
-    #     ore-keys: |
-    #       ${{ runner.os }}-cache-
-    - name: readonly-testnet-node-sync-to-tip
-      run: |
-        cd configs
-        mv gw-testnet-config.toml gw-testnet-config.toml.bak
-        sed "s+indexer_url =.*+indexer_url = 'http://localhost:8116'+g" gw-testnet-config.toml.bak > gw-testnet-config.toml
-        docker run -w /deploy --network host \
-          --name readonly-testnet-node-sync-to-tip \
-          -d --restart unless-stopped	\
-          -v `pwd`/gw-testnet-config.toml:/deploy/gw-testnet-config.toml \
-          -v `pwd`/pk:/deploy/pk \
-          -v `pwd`/store.db:/deploy/store.db \
-          ${{ env.GW_PREBUILDS_IMAGE_NAME }}:${{ env.GW_PREBUILD_IMAGE_TAG }} \
-          bash -c "godwoken run -c gw-testnet-config.toml"
-        docker logs readonly-testnet-node-sync-to-tip -f
-      timeout-minutes: 120
-
-    - name: Setup tmate session for debugging if something failed
-      if: ${{ failure() }} # TODO: or cancelled() 
-      uses: mxschmitt/action-tmate@v3
-      timeout-minutes: 30
-
   # Run integration-tests on devnet deployed by Godowoken-Kicker
   test-on-devnet:
     needs: prepare-image

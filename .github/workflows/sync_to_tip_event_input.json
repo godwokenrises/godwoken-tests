@@ -1,0 +1,6 @@
+{
+	"inputs": {
+		"gw_prebuild_image_name": "ghcr.io/flouse/godwoken-prebuilds",
+		"gw_prebuild_image_tag": "latest"
+	}
+}
