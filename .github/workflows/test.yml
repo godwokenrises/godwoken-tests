@@ -35,7 +35,7 @@ on:
     branches:
     - CI
     - readonly-testnet-node-sync-to-tip
-    - manual-trigger
+    - test-deposit-withdrawal
   pull_request:
     branches:
     - develop
@@ -263,8 +263,8 @@ jobs:
             --private-key 0x6cd5e7be2f6504aa5ae7c0c04178d8f47b7cfc63b71d95d9e6282f5b090431bf \
             --capacity 333322221111 \
         | tee result
-        if grep -q "Deposit success" result; then
-          echo "The deposited asset can be withdrawn only after finalize_blocks(default to 20) layer2 blocks."          
+        if egrep -q "Deposit success" result; then
+          echo "The deposited asset can be withdrawn only after [finalize_blocks] layer2 blocks."          
         else
           exit 1
         fi
@@ -296,22 +296,34 @@ jobs:
         ENV_PATH=../../tools/packages/tools/configs/devnet.env yarn ts-node ./scripts/deploy.ts
       timeout-minutes: 60
     
+    # TODO
+    # - name: Try to withdraw unfinalized asset
+
+    - name: Try to unlock when no valid withdrawal exists => No valid withdrawal cell found
+      working-directory: tools
+      run: |
+        LUMOS_CONFIG_FILE=../configs/lumos-config.json \
+          node ./packages/tools/lib/account-cli.js unlock \
+            --private-key 0x6cd5e7be2f6504aa5ae7c0c04178d8f47b7cfc63b71d95d9e6282f5b090431bf \
+        2>&1 | tee result || true
+        egrep -q "No valid withdrawal cell found" result || exit 1
+
     # Note:
     # The deposited asset can be withdrawn only after `finalize_blocks`(default to 20) layer2 blocks.
-    - name: Wait until [finalize_blocks(default to 20)] layer2 blocks passed
+    - name: Wait until [finalize_blocks] layer2 blocks passed
       uses: actions/github-script@v5
       with:
         script: |
           const getTipBlockNumber = require("./scripts/fetch-tip-block-number");
           const depositBlockNum = ${{ steps.deposit-block-num.outputs.result }};
           const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
-          (async (waitBlocks = 20) => {
+          (async (waitBlocks = 10) => {
             while (await getTipBlockNumber() - depositBlockNum < waitBlocks) {
               console.log(`Wait until ${waitBlocks} layer2 blocks passed`);
               await sleep(45000);
             }
           })();
-          
+
     - name: Request withdrawal from layer2 back to layer1
       working-directory: tools
       run: |
@@ -321,11 +333,53 @@ jobs:
             --capacity 33322221111 \
             --owner-ckb-address ckt1qyqf22qfzaer95xm5d2m5km0f6k288x9warqnhsf4m \
         | tee result
-        if grep -q "withdrawal success" result; then
+        if egrep -q "withdrawal success" result; then
           echo "Success! Withdrawal request sent. Please Wait for challenge period duration to unlock the funds."
         else
           exit 1
         fi
+
+    - name: Try to unlock unfinalized withdrawal => withdrawal cell not finalized
+      working-directory: tools
+      run: |
+        echo "sleep 1 minute..." && sleep 60
+        LUMOS_CONFIG_FILE=../configs/lumos-config.json \
+          node ./packages/tools/lib/account-cli.js unlock \
+            --private-key 0x6cd5e7be2f6504aa5ae7c0c04178d8f47b7cfc63b71d95d9e6282f5b090431bf \
+        2>&1 | tee result || true
+        egrep -q "withdrawal cell not finalized" result || exit 1
+    
+    - name: Get current layer2 block number
+      id: withdrawal-block-num
+      uses: actions/github-script@v5
+      with:
+        script: |
+          const getTipBlockNumber = require("./scripts/fetch-tip-block-number");
+          return await getTipBlockNumber();
+        result-encoding: string
+
+    - name: Wait until [finalize_blocks] layer2 blocks passed
+      uses: actions/github-script@v5
+      with:
+        script: |
+          const getTipBlockNumber = require("./scripts/fetch-tip-block-number");
+          const withdrawalBlockNum = ${{ steps.withdrawal-block-num.outputs.result }};
+          const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
+          (async (waitBlocks = 10) => {
+            while (await getTipBlockNumber() - withdrawalBlockNum < waitBlocks) {
+              console.log(`Wait until ${waitBlocks} layer2 blocks passed`);
+              await sleep(45000);
+            }
+          })();
+
+    - name: Unlock the withdrawable funds after [CHALLENGE_MATURITY_BLOCKS] blocks to complete the withdrawal process
+      working-directory: tools
+      run: |
+        LUMOS_CONFIG_FILE=../configs/lumos-config.json \
+          node ./packages/tools/lib/account-cli.js unlock \
+            --private-key 0x6cd5e7be2f6504aa5ae7c0c04178d8f47b7cfc63b71d95d9e6282f5b090431bf \
+        | tee result
+        egrep -q "tx 0x.+ committed" result || exit 1
 
     - name: Save logs
       if: always()
@@ -349,7 +403,8 @@ jobs:
       uses: mxschmitt/action-tmate@v3
       timeout-minutes: 30
 
-
+  # godwoken-config.toml of testnet
+  # https://github.com/nervosnetwork/godwoken-testnet/blob/master/config/config.toml
   test-on-testnet:
     runs-on: ubuntu-latest
     if: ${{ true }}
@@ -389,6 +444,7 @@ jobs:
       run: |
         node ./packages/tools/lib/account-cli.js get-balance \
           --account 0xc700b4f327f908240eea61c717606e34fae7d28f
+    # FIXME get-balance = 0 ?
 
     # TODO: avoid DuplicatedTransaction
     # https://github.com/nervosnetwork/godwoken-tests/runs/3883800375?check_suite_focus=true#step:8:30
@@ -402,7 +458,7 @@ jobs:
           --private-key 0x6cd5e7be2f6504aa5ae7c0c04178d8f47b7cfc63b71d95d9e6282f5b090431bf \
           --capacity 50012340000 \
         | tee result
-        if grep -q "Deposit success" result; then
+        if egrep -q "Deposit success" result; then
           echo "The deposited asset can be withdrawn only after finalize_blocks(default to 20) layer2 blocks."          
         else
           exit 1
@@ -417,7 +473,7 @@ jobs:
           --capacity 33322221111 \
           --owner-ckb-address ckt1qyqf22qfzaer95xm5d2m5km0f6k288x9warqnhsf4m \
         | tee result
-        if grep -q "withdrawal success" result; then
+        if egrep -q "withdrawal success" result; then
           echo "Success! Withdrawal request sent. Please Wait for challenge period duration to unlock the funds."
         else
           exit 1
@@ -430,7 +486,10 @@ jobs:
           --indexer https://testnet.ckbapp.dev/indexer \
           --rpc https://testnet.ckbapp.dev/rpc \
           --private-key 0x6cd5e7be2f6504aa5ae7c0c04178d8f47b7cfc63b71d95d9e6282f5b090431bf \
-        | tee result
+        2>&1 | tee result || true
+      # TODO: egrep result
+      # [INFO]: withdrawal cell not finalized
+      # tx 0x4005ef6ba83151f947b0433d22acb8efd04dcb92b2debd29a05ec0b97e797d23 committed!
 
     - name: Setup tmate session for debugging if something failed
       if: ${{ failure() }} # TODO: or cancelled() 
