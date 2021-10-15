@@ -287,14 +287,14 @@ jobs:
         ENV_PATH=../../tools/packages/tools/configs/devnet.env yarn ts-node ./scripts/multicall.ts
         ENV_PATH=../../tools/packages/tools/configs/devnet.env yarn ts-node ./scripts/create2.ts
         ENV_PATH=../../tools/packages/tools/configs/devnet.env yarn ts-node ./scripts/stable-swap-3-pool.ts
-      timeout-minutes: 30
+      timeout-minutes: 6
 
     - name: Testcase - Pancakeswap
       working-directory: testcases/pancakeswap-contracts-godwoken
       run: |
         yarn && yarn compile
         ENV_PATH=../../tools/packages/tools/configs/devnet.env yarn ts-node ./scripts/deploy.ts
-      timeout-minutes: 60
+      timeout-minutes: 2
     
     # TODO
     # - name: Try to withdraw unfinalized asset
