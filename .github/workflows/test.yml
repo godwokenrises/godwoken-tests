@@ -406,6 +406,14 @@ jobs:
         name: kicker-logs
         path: |
           /tmp/kicker.log
+    
+    - name: Archive the dumped transactions in kicker/workspace/debug-tx-dump
+      if: always()
+      uses: actions/upload-artifact@v2
+      with:
+        name: debug-tx-dump
+        path: |
+          kicker/workspace/debug-tx-dump
 
     # - name: Stop containers of Kicker
     #   if: always()
