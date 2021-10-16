@@ -459,7 +459,20 @@ jobs:
           --capacity 50012340000 \
         | tee result
         if egrep -q "Deposit success" result; then
-          echo "The deposited asset can be withdrawn only after finalize_blocks(default to 20) layer2 blocks."          
+          echo "The deposited asset can be withdrawn only after [finalize_blocks] layer2 blocks."          
+        else
+          exit 1
+        fi
+        # deposit to --eth-address 0xD1667CBf1cc60da94c1cf6C9cfb261e71b6047f7
+        node ./packages/tools/lib/account-cli.js deposit \
+          --rpc https://testnet.ckbapp.dev/rpc \
+          --indexer https://testnet.ckbapp.dev/indexer \
+          --private-key 0x6cd5e7be2f6504aa5ae7c0c04178d8f47b7cfc63b71d95d9e6282f5b090431bf \
+          --eth-address 0xD1667CBf1cc60da94c1cf6C9cfb261e71b6047f7 \
+          --capacity 50012340000 \
+        | tee result
+        if egrep -q "Deposit success" result; then
+          echo "The deposited asset can be withdrawn only after [finalize_blocks] layer2 blocks."          
         else
           exit 1
         fi
