@@ -126,7 +126,7 @@ jobs:
       timeout-minutes: 120
 
     - name: Setup tmate session for debugging if something failed
-      if: ${{ failure() }} # TODO: or cancelled() 
+      if: ${{ failure() || cancelled() }}
       uses: mxschmitt/action-tmate@v3
       timeout-minutes: 30
 
@@ -399,7 +399,7 @@ jobs:
     #   run: make stop
 
     - name: Setup tmate session for debugging if something failed
-      if: ${{ failure() }}
+      if: ${{ failure() || cancelled() }}
       uses: mxschmitt/action-tmate@v3
       timeout-minutes: 30
 
@@ -503,7 +503,7 @@ jobs:
       # tx 0x4005ef6ba83151f947b0433d22acb8efd04dcb92b2debd29a05ec0b97e797d23 committed!
 
     - name: Setup tmate session for debugging if something failed
-      if: ${{ failure() }} # TODO: or cancelled() 
+      if: ${{ failure() || cancelled() }}
       uses: mxschmitt/action-tmate@v3
       timeout-minutes: 30
     
