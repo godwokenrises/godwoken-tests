@@ -446,30 +446,28 @@ jobs:
           --account 0xc700b4f327f908240eea61c717606e34fae7d28f
     # FIXME get-balance = 0 ?
 
-    # TODO: avoid DuplicatedTransaction
-    # https://github.com/nervosnetwork/godwoken-tests/runs/3883800375?check_suite_focus=true#step:8:30
-
     - name: Deposit from layer1 to layer2 on testnet
       working-directory: tools
       run: |
+        # deposit to self
         node ./packages/tools/lib/account-cli.js deposit \
           --rpc https://testnet.ckbapp.dev/rpc \
           --indexer https://testnet.ckbapp.dev/indexer \
           --private-key 0x6cd5e7be2f6504aa5ae7c0c04178d8f47b7cfc63b71d95d9e6282f5b090431bf \
-          --capacity 50012340000 \
+          --capacity 5001234000$[ $RANDOM % 10 ] \
         | tee result
         if egrep -q "Deposit success" result; then
           echo "The deposited asset can be withdrawn only after [finalize_blocks] layer2 blocks."          
         else
           exit 1
         fi
-        # deposit to --eth-address 0xD1667CBf1cc60da94c1cf6C9cfb261e71b6047f7
+        # deposit to another eth-address 0xD1667CBf1cc60da94c1cf6C9cfb261e71b6047f7
         node ./packages/tools/lib/account-cli.js deposit \
           --rpc https://testnet.ckbapp.dev/rpc \
           --indexer https://testnet.ckbapp.dev/indexer \
           --private-key 0x6cd5e7be2f6504aa5ae7c0c04178d8f47b7cfc63b71d95d9e6282f5b090431bf \
           --eth-address 0xD1667CBf1cc60da94c1cf6C9cfb261e71b6047f7 \
-          --capacity 50012340000 \
+          --capacity 5001234000$[ $RANDOM % 10 ] \
         | tee result
         if egrep -q "Deposit success" result; then
           echo "The deposited asset can be withdrawn only after [finalize_blocks] layer2 blocks."          
