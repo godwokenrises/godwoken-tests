@@ -5,7 +5,6 @@ async function main() {
 
   // console.log("call:", contractFact.interface.encodeFunctionData("sum", [64]));
   // const recurContract = await contractFact.deploy();
-//   console.log("Token address:", token.address);
 
   const recurContract = await ethers.getContractAt("RecursionContract",
                   "0x852ea212fa775d0a73222d9c8bf72f099ca8033e");
