@@ -210,9 +210,13 @@ jobs:
     - name: Start Godwoken-Kicker services
       working-directory: kicker
       run: |
-        # add debug logs
+        echo "tune rollupConfig.finality_blocks to 10"
         sed -i \
-          -e "s|RUST_LOG=info|RUST_LOG=info,ckb_script::verify=debug|g" \
+          -e 's|\\\"finality_blocks\\\": 100|\\\"finality_blocks\\\": 10|' \
+          docker/layer2/entrypoint.sh
+        echo "add debug logs for ckb_script::verify module"
+        sed -i \
+          -e 's|RUST_LOG=info|RUST_LOG=info,ckb_script::verify=debug|' \
           docker/layer2/entrypoint.sh
         docker system df -v
         docker-compose --version
