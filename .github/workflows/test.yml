@@ -312,7 +312,7 @@ jobs:
       run: |
         yarn && yarn compile
         ENV_PATH=../../tools/packages/tools/configs/devnet.env yarn ts-node ./scripts/deploy.ts
-      timeout-minutes: 2
+      timeout-minutes: 6
     
     # TODO
     # - name: Try to withdraw unfinalized asset
