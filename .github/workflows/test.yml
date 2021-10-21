@@ -41,8 +41,8 @@ on:
     - develop
 
 env:
-  GW_PREBUILDS_IMAGE_NAME: ghcr.io/flouse/godwoken-prebuilds
-  GW_PREBUILD_IMAGE_TAG: docker-publish
+  GW_PREBUILDS_IMAGE_NAME: nervos/godwoken-prebuilds
+  GW_PREBUILD_IMAGE_TAG: v0.6.7-rc3
   GODWOKEN_GIT_URL: https://github.com/nervosnetwork/godwoken.git
   GODWOKEN_REF: master
   GW_SCRIPTS_GIT_URL: https://github.com/nervosnetwork/godwoken-scripts.git
@@ -173,11 +173,13 @@ jobs:
         test "$(moleculec --version)" = "Moleculec 0.7.2" \
         || CARGO_TARGET_DIR=target/ cargo install moleculec --version 0.7.2 --force
     - name: Install Capsule
+      env:
+        CAPSULE_VERSION: v0.7.0
       run: |
-        test "$(capsule -V)" = "Capsule 0.4.6 36d59e0" \
-        || CARGO_TARGET_DIR=target/ cargo install ckb-capsule \
-        --git https://github.com/nervosnetwork/capsule.git \
-        --tag v0.4.6
+        test "$(capsule -V)" = "Capsule 0.7.0 56bf934" \
+        || (curl -OL https://github.com/nervosnetwork/capsule/releases/download/${CAPSULE_VERSION}/capsule_${CAPSULE_VERSION}_x86_64-linux.tar.gz \
+        && tar xf capsule_${CAPSULE_VERSION}_x86_64-linux.tar.gz \
+        && mv capsule_${CAPSULE_VERSION}_x86_64-linux/capsule ~/.cargo/bin/)
 
     - name: Replace the envs in kicker/docker/.build.mode.env
       working-directory: kicker/docker/
@@ -210,9 +212,13 @@ jobs:
     - name: Start Godwoken-Kicker services
       working-directory: kicker
       run: |
-        # add debug logs
+        echo "tune rollupConfig.finality_blocks to 10"
         sed -i \
-          -e "s|RUST_LOG=info|RUST_LOG=info,ckb_script::verify=debug|g" \
+          -e 's|\\\"finality_blocks\\\": 100|\\\"finality_blocks\\\": 10|' \
+          docker/layer2/entrypoint.sh
+        echo "add debug logs for ckb_script::verify module"
+        sed -i \
+          -e 's|RUST_LOG=info|RUST_LOG=info,ckb_script::verify=debug|' \
           docker/layer2/entrypoint.sh
         docker system df -v
         docker-compose --version
@@ -241,6 +247,7 @@ jobs:
         sudo chown -R `whoami` cache/build
 
     # TODO: check servics, eg. curl localhost:8024
+    # use godwoken.getTipBlockHash to check the status of Godwoken
 
     - uses: actions/setup-node@v2
       with:
@@ -306,7 +313,7 @@ jobs:
       run: |
         yarn && yarn compile
         ENV_PATH=../../tools/packages/tools/configs/devnet.env yarn ts-node ./scripts/deploy.ts
-      timeout-minutes: 2
+      timeout-minutes: 6
     
     # TODO
     # - name: Try to withdraw unfinalized asset
@@ -455,23 +462,25 @@ jobs:
       working-directory: tools
       run: yarn && yarn generate-testnet-configs && yarn build-all
     
-    # Using test account:
-    #   Erivate-key: 0x6cd5e7be2f6504aa5ae7c0c04178d8f47b7cfc63b71d95d9e6282f5b090431bf
-    #   ETH address: 0x6daf63d8411d6e23552658e3cfb48416a6a2ca78
-    #   godwoken short address: 0xc700b4f327f908240eea61c717606e34fae7d28f
+    # Using test account: https://explorer.nervos.org/aggron/address/ckt1qyqf22qfzaer95xm5d2m5km0f6k288x9warqnhsf4m
+    #   Private-key: 0x6cd5e7be2f6504aa5ae7c0c04178d8f47b7cfc63b71d95d9e6282f5b090431bf
     #   CKB address: ckt1qyqf22qfzaer95xm5d2m5km0f6k288x9warqnhsf4m
-    #   Explorer: https://explorer.nervos.org/aggron/address/ckt1qyqf22qfzaer95xm5d2m5km0f6k288x9warqnhsf4m
-    - name: Get the balance of test account on testnet
+    #   ETH address: 0x6daf63d8411d6e23552658e3cfb48416a6a2ca78
+    #   Godwoken script hash(160): 0x8bf6c7014c32887b38c739b8f8eed124e4ff25a5
+    - name: Get the gw.ckb.balance of test account on testnet
       working-directory: tools
       run: |
+        echo "Godwoken CKB of https://explorer.nervos.org/aggron/address/ckt1qyqf22qfzaer95xm5d2m5km0f6k288x9warqnhsf4m"
         node ./packages/tools/lib/account-cli.js get-balance \
-          --account 0xc700b4f327f908240eea61c717606e34fae7d28f
-    # FIXME get-balance = 0 ?
+          --account 0x8bf6c7014c32887b38c739b8f8eed124e4ff25a5
+        # echo "Godwoken CKB of https://explorer.nervos.org/aggron/address/ckt1q3dz2p4mdrvp5ywu4kk5edl2uc4p03puvx07g7kgqdau3n3dmypkqnxzuefxyp9wdghglncj77k5wt6p59sx6kukyjlwh5s467qgp8m25yqqqqqsqqqqqvqqqqqfjqqqqphn8hm78llmgau5l89rwep3rza8jgr6eyjedgz4t6gr3q5w23e4w6gqqqqpqqqqqqcqqqqqxyqqqqx7asf60w8pqpte2sfcfn90fdfzxue7ff2g8sawe9wacnqat6jmygqngqqqqpxv9ejjvgz2u63w3l839aadguh5rgtqd4devf97a0fpt4uqsz0k45tx0jl3e3sd49xpeakfe7exrecmvprlwq9rqgqqqqqqcqgtcnpf"
+        node ./packages/tools/lib/account-cli.js get-balance \
+          --account 0x6ef31a7a8cdba3263e1d6ca6736fb6b7563b5b6d
 
     - name: Deposit from layer1 to layer2 on testnet
       working-directory: tools
       run: |
-        # deposit to self
+        echo "deposit to self(ETH address: 0x6daf63d8411d6e23552658e3cfb48416a6a2ca78)"
         node ./packages/tools/lib/account-cli.js deposit \
           --rpc https://testnet.ckbapp.dev/rpc \
           --indexer https://testnet.ckbapp.dev/indexer \
@@ -483,7 +492,9 @@ jobs:
         else
           exit 1
         fi
-        # deposit to another eth-address 0xD1667CBf1cc60da94c1cf6C9cfb261e71b6047f7
+        # Using ETH address: 0xD1667CBf1cc60da94c1cf6C9cfb261e71b6047f7
+        # Godwoken script hash(160): 0x6ef31a7a8cdba3263e1d6ca6736fb6b7563b5b6d
+        echo "deposit to another eth-address 0xD1667CBf1cc60da94c1cf6C9cfb261e71b6047f7"
         node ./packages/tools/lib/account-cli.js deposit \
           --rpc https://testnet.ckbapp.dev/rpc \
           --indexer https://testnet.ckbapp.dev/indexer \
