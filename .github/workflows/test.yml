@@ -305,7 +305,7 @@ jobs:
         ENV_PATH=../../tools/packages/tools/configs/devnet.env yarn ts-node ./scripts/multicall.ts
         ENV_PATH=../../tools/packages/tools/configs/devnet.env yarn ts-node ./scripts/create2.ts
         ENV_PATH=../../tools/packages/tools/configs/devnet.env yarn ts-node ./scripts/stable-swap-3-pool.ts
-      timeout-minutes: 6
+      timeout-minutes: 20
 
     # This testcase require some block time to confirm error receipt is cleared
     - name: Testcase - Godwoken Polyjuice Compatibility Examples(Revert Message)
