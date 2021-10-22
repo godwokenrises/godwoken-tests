@@ -305,6 +305,7 @@ jobs:
         ENV_PATH=../../tools/packages/tools/configs/devnet.env yarn ts-node ./scripts/multicall.ts
         ENV_PATH=../../tools/packages/tools/configs/devnet.env yarn ts-node ./scripts/create2.ts
         ENV_PATH=../../tools/packages/tools/configs/devnet.env yarn ts-node ./scripts/stable-swap-3-pool.ts
+        ENV_PATH=../../tools/packages/tools/configs/devnet.env yarn ts-node ./scripts/revert-msg.ts
       timeout-minutes: 6
 
     - name: Testcase - Pancakeswap
