@@ -305,8 +305,14 @@ jobs:
         ENV_PATH=../../tools/packages/tools/configs/devnet.env yarn ts-node ./scripts/multicall.ts
         ENV_PATH=../../tools/packages/tools/configs/devnet.env yarn ts-node ./scripts/create2.ts
         ENV_PATH=../../tools/packages/tools/configs/devnet.env yarn ts-node ./scripts/stable-swap-3-pool.ts
-        ENV_PATH=../../tools/packages/tools/configs/devnet.env yarn ts-node ./scripts/revert-msg.ts
       timeout-minutes: 6
+
+    # This testcase require some block time to confirm error receipt is cleared
+    - name: Testcase - Godwoken Polyjuice Compatibility Examples(Revert Message)
+      working-directory: testcases/godwoken-polyjuice-compatibility-examples
+      run: |
+        ENV_PATH=../../tools/packages/tools/configs/devnet.env yarn ts-node ./scripts/revert-msg.ts
+      timeout-minutes: 20
 
     - name: Testcase - Pancakeswap
       working-directory: testcases/pancakeswap-contracts-godwoken
