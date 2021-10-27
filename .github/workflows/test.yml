@@ -335,7 +335,7 @@ jobs:
           const getTipBlockNumber = require("./scripts/fetch-tip-block-number");
           const depositBlockNum = ${{ steps.deposit-block-num.outputs.result }};
           const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
-          (async (waitBlocks = 10) => {
+          (async (waitBlocks = 11) => {
             while (await getTipBlockNumber() - depositBlockNum < waitBlocks) {
               console.log(`Wait until ${waitBlocks} layer2 blocks passed`);
               await sleep(45000);
@@ -472,7 +472,7 @@ jobs:
         echo "Godwoken CKB of https://explorer.nervos.org/aggron/address/ckt1qyqf22qfzaer95xm5d2m5km0f6k288x9warqnhsf4m"
         node ./packages/tools/lib/account-cli.js get-balance \
           --account 0x8bf6c7014c32887b38c739b8f8eed124e4ff25a5
-        # echo "Godwoken CKB of https://explorer.nervos.org/aggron/address/ckt1q3dz2p4mdrvp5ywu4kk5edl2uc4p03puvx07g7kgqdau3n3dmypkqnxzuefxyp9wdghglncj77k5wt6p59sx6kukyjlwh5s467qgp8m25yqqqqqsqqqqqvqqqqqfjqqqqphn8hm78llmgau5l89rwep3rza8jgr6eyjedgz4t6gr3q5w23e4w6gqqqqpqqqqqqcqqqqqxyqqqqx7asf60w8pqpte2sfcfn90fdfzxue7ff2g8sawe9wacnqat6jmygqngqqqqpxv9ejjvgz2u63w3l839aadguh5rgtqd4devf97a0fpt4uqsz0k45tx0jl3e3sd49xpeakfe7exrecmvprlwq9rqgqqqqqqcqgtcnpf"
+        echo "Godwoken CKB of https://explorer.nervos.org/aggron/address/ckt1qs95f2qqxn8vj83wyw696sc6krnp6hn420aqa4eew6ky8xrednwkr5tx0jl3e3sd49xpeakfe7exrecmvprlwjuh5yt"
         node ./packages/tools/lib/account-cli.js get-balance \
           --account 0x6ef31a7a8cdba3263e1d6ca6736fb6b7563b5b6d
 
