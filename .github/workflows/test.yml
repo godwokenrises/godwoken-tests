@@ -530,6 +530,12 @@ jobs:
           --rpc https://testnet.ckbapp.dev/rpc \
           --private-key 0x6cd5e7be2f6504aa5ae7c0c04178d8f47b7cfc63b71d95d9e6282f5b090431bf \
         2>&1 | tee result || true
+        sleep 60
+        node ./packages/tools/lib/account-cli.js unlock \
+          --indexer https://testnet.ckbapp.dev/indexer \
+          --rpc https://testnet.ckbapp.dev/rpc \
+          --private-key 0x6cd5e7be2f6504aa5ae7c0c04178d8f47b7cfc63b71d95d9e6282f5b090431bf \
+        2>&1 | tee result || true
       # TODO: egrep result
       # [INFO]: withdrawal cell not finalized
       # tx 0x4005ef6ba83151f947b0433d22acb8efd04dcb92b2debd29a05ec0b97e797d23 committed!
