@@ -313,6 +313,14 @@ jobs:
         yarn && yarn compile
         ENV_PATH=../../tools/packages/tools/configs/devnet.env yarn ts-node ./scripts/deploy.ts
       timeout-minutes: 6
+
+    - name: Testcase - LendingContracts
+      working-directory: testcases/lending-contracts
+      run: |
+        yarn && yarn build
+        echo "The configs should have been updated:"
+        cat config.json
+        yarn deploy-dev
     
     # TODO
     # - name: Try to withdraw unfinalized asset

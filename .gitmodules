@@ -12,3 +12,6 @@
 [submodule "testcases/pancakeswap-contracts-godwoken"]
 	path = testcases/pancakeswap-contracts-godwoken
 	url = https://github.com/honestgoing/pancakeswap-contracts-godwoken.git
+[submodule "testcases/lending-contracts"]
+	path = testcases/lending-contracts
+	url = https://github.com/Flouse/godwoken-test.git
