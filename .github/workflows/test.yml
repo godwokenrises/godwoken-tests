@@ -238,7 +238,7 @@ jobs:
         verify_withdrawal_signature = true
         verify_tx_signature = true
         verify_tx_execution = true
-        verify_max_cycles = 70000000
+        verify_max_cycles = 140000000
         dump_tx_on_failure = true
         __EOF__
         make start
@@ -413,7 +413,9 @@ jobs:
     - name: Save logs
       if: always()
       working-directory: kicker/docker
-      run: docker-compose logs --tail 60000 > /tmp/kicker.log
+      run: |
+        docker-compose logs --tail 66
+        docker-compose logs --tail 60000 > /tmp/kicker.log
     - name: Archive logs
       if: always()
       uses: actions/upload-artifact@v2
