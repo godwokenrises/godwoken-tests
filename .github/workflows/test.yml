@@ -321,6 +321,7 @@ jobs:
         echo "The configs should have been updated:"
         cat config.json
         yarn deploy-dev
+      timeout-minutes: 12
     
     # TODO
     # - name: Try to withdraw unfinalized asset
