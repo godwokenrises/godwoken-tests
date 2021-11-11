@@ -317,10 +317,10 @@ jobs:
     - name: Testcase - LendingContracts
       working-directory: testcases/lending-contracts
       run: |
-        yarn && yarn build
+        yarn
         echo "The configs should have been updated:"
         cat config.json
-        yarn deploy-dev
+        yarn deploy
       timeout-minutes: 12
     
     # TODO
