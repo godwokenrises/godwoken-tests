@@ -41,14 +41,14 @@ on:
     - develop
 
 env:
-  GW_PREBUILDS_IMAGE_NAME: nervos/godwoken-prebuilds
-  GW_PREBUILD_IMAGE_TAG: v0.6.7-rc3
-  GODWOKEN_GIT_URL: https://github.com/nervosnetwork/godwoken.git
-  GODWOKEN_REF: master
-  GW_SCRIPTS_GIT_URL: https://github.com/nervosnetwork/godwoken-scripts.git
-  GW_SCRIPTS_REF: master
-  POLYJUICE_GIT_URL: https://github.com/nervosnetwork/godwoken-polyjuice.git
-  POLYJUICE_REF: main
+  GW_PREBUILDS_IMAGE_NAME: ghcr.io/flouse/godwoken-prebuilds
+  GW_PREBUILD_IMAGE_TAG: develop
+  # GODWOKEN_GIT_URL: https://github.com/nervosnetwork/godwoken.git
+  # GODWOKEN_REF: master
+  # GW_SCRIPTS_GIT_URL: https://github.com/nervosnetwork/godwoken-scripts.git
+  # GW_SCRIPTS_REF: master
+  # POLYJUICE_GIT_URL: https://github.com/nervosnetwork/godwoken-polyjuice.git
+  # POLYJUICE_REF: main
 
 jobs:
   prepare-image:
@@ -238,7 +238,7 @@ jobs:
         verify_withdrawal_signature = true
         verify_tx_signature = true
         verify_tx_execution = true
-        verify_max_cycles = 70000000
+        verify_max_cycles = 140000000
         dump_tx_on_failure = true
         __EOF__
         make start
@@ -313,6 +313,15 @@ jobs:
         yarn && yarn compile
         ENV_PATH=../../tools/packages/tools/configs/devnet.env yarn ts-node ./scripts/deploy.ts
       timeout-minutes: 6
+
+    - name: Testcase - LendingContracts
+      working-directory: testcases/lending-contracts
+      run: |
+        yarn
+        echo "The configs should have been updated:"
+        cat config.json
+        yarn deploy
+      timeout-minutes: 12
     
     # TODO
     # - name: Try to withdraw unfinalized asset
@@ -404,7 +413,9 @@ jobs:
     - name: Save logs
       if: always()
       working-directory: kicker/docker
-      run: docker-compose logs --tail 60000 > /tmp/kicker.log
+      run: |
+        docker-compose logs --tail 66
+        docker-compose logs --tail 60000 > /tmp/kicker.log
     - name: Archive logs
       if: always()
       uses: actions/upload-artifact@v2
