@@ -41,8 +41,8 @@ on:
     - develop
 
 env:
-  GW_PREBUILDS_IMAGE_NAME: ghcr.io/flouse/godwoken-prebuilds
-  GW_PREBUILD_IMAGE_TAG: check-fee
+  GW_PREBUILDS_IMAGE_NAME: nervos/godwoken-prebuilds
+  GW_PREBUILD_IMAGE_TAG: v0.7.0-rc1
   # GODWOKEN_GIT_URL: https://github.com/nervosnetwork/godwoken.git
   # GODWOKEN_REF: master
   # GW_SCRIPTS_GIT_URL: https://github.com/nervosnetwork/godwoken-scripts.git
