@@ -41,14 +41,14 @@ on:
     - develop
 
 env:
-  GW_PREBUILDS_IMAGE_NAME: nervos/godwoken-prebuilds
-  GW_PREBUILD_IMAGE_TAG: v0.6.7-rc3
-  GODWOKEN_GIT_URL: https://github.com/nervosnetwork/godwoken.git
-  GODWOKEN_REF: master
-  GW_SCRIPTS_GIT_URL: https://github.com/nervosnetwork/godwoken-scripts.git
-  GW_SCRIPTS_REF: master
-  POLYJUICE_GIT_URL: https://github.com/nervosnetwork/godwoken-polyjuice.git
-  POLYJUICE_REF: main
+  GW_PREBUILDS_IMAGE_NAME: ghcr.io/flouse/godwoken-prebuilds
+  GW_PREBUILD_IMAGE_TAG: develop
+  # GODWOKEN_GIT_URL: https://github.com/nervosnetwork/godwoken.git
+  # GODWOKEN_REF: master
+  # GW_SCRIPTS_GIT_URL: https://github.com/nervosnetwork/godwoken-scripts.git
+  # GW_SCRIPTS_REF: master
+  # POLYJUICE_GIT_URL: https://github.com/nervosnetwork/godwoken-polyjuice.git
+  # POLYJUICE_REF: main
 
 jobs:
   prepare-image:
