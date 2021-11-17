@@ -424,7 +424,7 @@ jobs:
       working-directory: kicker/docker
       run: |
         docker-compose logs --tail 66
-        docker-compose logs --tail 60000 > /tmp/kicker.log
+        docker-compose logs > /tmp/kicker.log
     - name: Archive logs
       if: always()
       uses: actions/upload-artifact@v2
