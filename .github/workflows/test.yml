@@ -208,17 +208,26 @@ jobs:
         fi
         cat .build.mode.env
 
-    - name: Start Godwoken-Kicker services
+    - name: Tune rollupConfig.finality_blocks to 10
       working-directory: kicker
       run: |
         echo "tune rollupConfig.finality_blocks to 10"
         sed -i \
           -e 's|\\\"finality_blocks\\\": 100|\\\"finality_blocks\\\": 10|' \
           docker/layer2/entrypoint.sh
+
+    - name: Add debug logs for ckb_script::verify module
+      if: ${{ false }}
+      working-directory: kicker
+      run: |
         echo "add debug logs for ckb_script::verify module"
         sed -i \
           -e 's|RUST_LOG=info|RUST_LOG=info,ckb_script::verify=debug|' \
           docker/layer2/entrypoint.sh
+
+    - name: Start Godwoken-Kicker services
+      working-directory: kicker
+      run: |
         docker system df -v
         docker-compose --version
         make init
@@ -432,15 +441,15 @@ jobs:
         path: |
           kicker/workspace/debug-tx-dump
 
-    # - name: Stop containers of Kicker
-    #   if: always()
-    #   working-directory: kicker
-    #   run: make stop
-
     - name: Setup tmate session for debugging if something failed
       if: ${{ failure() || cancelled() }}
       uses: mxschmitt/action-tmate@v3
       timeout-minutes: 30
+
+    - name: Stop containers of Kicker
+      if: always()
+      working-directory: kicker
+      run: make stop
 
   # godwoken-config.toml of testnet
   # https://github.com/nervosnetwork/godwoken-testnet/blob/master/config/config.toml
