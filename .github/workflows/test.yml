@@ -241,7 +241,7 @@ jobs:
       run: |
         sudo chown -R `whoami` workspace/config.toml
         grep -q "\[offchain_validator\]" workspace/config.toml \
-        || make stop && cat >> workspace/config.toml << __EOF__
+        || cat >> workspace/config.toml << __EOF__
 
         [offchain_validator]
         verify_withdrawal_signature = true
@@ -250,12 +250,15 @@ jobs:
         verify_max_cycles = 140000000
         dump_tx_on_failure = true
         __EOF__
-        make start
+        docker restart docker_godwoken_1
         docker-compose --file docker/docker-compose.yml logs --tail 6
         sudo chown -R `whoami` cache/build
 
-    # TODO: check servics, eg. curl localhost:8024
-    # use godwoken.getTipBlockHash to check the status of Godwoken
+    - name: Check if Godwoken is running
+      working-directory: kicker
+      run: |
+        source gw_util.sh
+        isGodwokenRpcRunning
 
     - uses: actions/setup-node@v2
       with:
