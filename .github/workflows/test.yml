@@ -313,8 +313,8 @@ jobs:
       working-directory: testcases/godwoken-polyjuice-compatibility-examples
       run: |
         yarn install && yarn compile
-        ENV_PATH=../../tools/packages/tools/configs/devnet.env yarn ts-node ./scripts/box-proxy.ts
         ENV_PATH=../../tools/packages/tools/configs/devnet.env yarn ts-node ./scripts/multi-sign-wallet.ts
+        ENV_PATH=../../tools/packages/tools/configs/devnet.env yarn ts-node ./scripts/box-proxy.ts
         ENV_PATH=../../tools/packages/tools/configs/devnet.env yarn ts-node ./scripts/multicall.ts
         ENV_PATH=../../tools/packages/tools/configs/devnet.env yarn ts-node ./scripts/create2.ts
         ENV_PATH=../../tools/packages/tools/configs/devnet.env yarn ts-node ./scripts/stable-swap-3-pool.ts
