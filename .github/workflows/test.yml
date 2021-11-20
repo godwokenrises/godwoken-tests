@@ -42,7 +42,7 @@ on:
 
 env:
   GW_PREBUILDS_IMAGE_NAME: ghcr.io/flouse/godwoken-prebuilds
-  GW_PREBUILD_IMAGE_TAG: develop
+  GW_PREBUILD_IMAGE_TAG: fix-first-block-error
   # GODWOKEN_GIT_URL: https://github.com/nervosnetwork/godwoken.git
   # GODWOKEN_REF: master
   # GW_SCRIPTS_GIT_URL: https://github.com/nervosnetwork/godwoken-scripts.git
@@ -208,17 +208,26 @@ jobs:
         fi
         cat .build.mode.env
 
-    - name: Start Godwoken-Kicker services
+    - name: Tune rollupConfig.finality_blocks to 10
       working-directory: kicker
       run: |
         echo "tune rollupConfig.finality_blocks to 10"
         sed -i \
           -e 's|\\\"finality_blocks\\\": 100|\\\"finality_blocks\\\": 10|' \
           docker/layer2/entrypoint.sh
+
+    - name: Add debug logs for ckb_script::verify module
+      if: ${{ false }}
+      working-directory: kicker
+      run: |
         echo "add debug logs for ckb_script::verify module"
         sed -i \
           -e 's|RUST_LOG=info|RUST_LOG=info,ckb_script::verify=debug|' \
           docker/layer2/entrypoint.sh
+
+    - name: Start Godwoken-Kicker services
+      working-directory: kicker
+      run: |
         docker system df -v
         docker-compose --version
         make init
@@ -229,10 +238,11 @@ jobs:
 
     - name: Enable offchain validator of Godwoken
       working-directory: kicker
+      if: ${{ false }}
       run: |
         sudo chown -R `whoami` workspace/config.toml
         grep -q "\[offchain_validator\]" workspace/config.toml \
-        || make stop && cat >> workspace/config.toml << __EOF__
+        || cat >> workspace/config.toml << __EOF__
 
         [offchain_validator]
         verify_withdrawal_signature = true
@@ -241,12 +251,15 @@ jobs:
         verify_max_cycles = 140000000
         dump_tx_on_failure = true
         __EOF__
-        make start
+        docker restart docker_godwoken_1
         docker-compose --file docker/docker-compose.yml logs --tail 6
-        sudo chown -R `whoami` cache/build
 
-    # TODO: check servics, eg. curl localhost:8024
-    # use godwoken.getTipBlockHash to check the status of Godwoken
+    - name: Check if Godwoken is running
+      working-directory: kicker
+      run: |
+        source gw_util.sh
+        isGodwokenRpcRunning
+        sudo chown -R `whoami` cache/build
 
     - uses: actions/setup-node@v2
       with:
@@ -300,8 +313,8 @@ jobs:
       working-directory: testcases/godwoken-polyjuice-compatibility-examples
       run: |
         yarn install && yarn compile
-        ENV_PATH=../../tools/packages/tools/configs/devnet.env yarn ts-node ./scripts/box-proxy.ts
         ENV_PATH=../../tools/packages/tools/configs/devnet.env yarn ts-node ./scripts/multi-sign-wallet.ts
+        ENV_PATH=../../tools/packages/tools/configs/devnet.env yarn ts-node ./scripts/box-proxy.ts
         ENV_PATH=../../tools/packages/tools/configs/devnet.env yarn ts-node ./scripts/multicall.ts
         ENV_PATH=../../tools/packages/tools/configs/devnet.env yarn ts-node ./scripts/create2.ts
         ENV_PATH=../../tools/packages/tools/configs/devnet.env yarn ts-node ./scripts/stable-swap-3-pool.ts
@@ -369,12 +382,12 @@ jobs:
     - name: Try to unlock unfinalized withdrawal => withdrawal cell not finalized
       working-directory: tools
       run: |
-        echo "sleep 1 minute..." && sleep 60
+        echo "sleep 2 minutes after withdrawal_request..." && sleep 120
         LUMOS_CONFIG_FILE=../configs/lumos-config.json \
           node ./packages/tools/lib/account-cli.js unlock \
             --private-key 0x6cd5e7be2f6504aa5ae7c0c04178d8f47b7cfc63b71d95d9e6282f5b090431bf \
         2>&1 | tee result || true
-        egrep -q "withdrawal cell not finalized" result || exit 1
+        egrep -q "not finalized" result || exit 1
     
     - name: Get current layer2 block number
       id: withdrawal-block-num
@@ -415,7 +428,7 @@ jobs:
       working-directory: kicker/docker
       run: |
         docker-compose logs --tail 66
-        docker-compose logs --tail 60000 > /tmp/kicker.log
+        docker-compose logs > /tmp/kicker.log
     - name: Archive logs
       if: always()
       uses: actions/upload-artifact@v2
@@ -432,15 +445,15 @@ jobs:
         path: |
           kicker/workspace/debug-tx-dump
 
-    # - name: Stop containers of Kicker
-    #   if: always()
-    #   working-directory: kicker
-    #   run: make stop
-
     - name: Setup tmate session for debugging if something failed
       if: ${{ failure() || cancelled() }}
       uses: mxschmitt/action-tmate@v3
       timeout-minutes: 30
+
+    - name: Stop containers of Kicker
+      if: always()
+      working-directory: kicker
+      run: make stop
 
   # godwoken-config.toml of testnet
   # https://github.com/nervosnetwork/godwoken-testnet/blob/master/config/config.toml
