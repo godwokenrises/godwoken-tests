@@ -382,12 +382,12 @@ jobs:
     - name: Try to unlock unfinalized withdrawal => withdrawal cell not finalized
       working-directory: tools
       run: |
-        echo "sleep 1 minute..." && sleep 60
+        echo "sleep 2 minutes after withdrawal_request..." && sleep 120
         LUMOS_CONFIG_FILE=../configs/lumos-config.json \
           node ./packages/tools/lib/account-cli.js unlock \
             --private-key 0x6cd5e7be2f6504aa5ae7c0c04178d8f47b7cfc63b71d95d9e6282f5b090431bf \
         2>&1 | tee result || true
-        egrep -q "withdrawal cell not finalized" result || exit 1
+        egrep -q "not finalized" result || exit 1
     
     - name: Get current layer2 block number
       id: withdrawal-block-num
