@@ -42,7 +42,7 @@ on:
 
 env:
   GW_PREBUILDS_IMAGE_NAME: ghcr.io/flouse/godwoken-prebuilds
-  GW_PREBUILD_IMAGE_TAG: fix-first-block-error
+  GW_PREBUILD_IMAGE_TAG: check-fee
   # GODWOKEN_GIT_URL: https://github.com/nervosnetwork/godwoken.git
   # GODWOKEN_REF: master
   # GW_SCRIPTS_GIT_URL: https://github.com/nervosnetwork/godwoken-scripts.git
