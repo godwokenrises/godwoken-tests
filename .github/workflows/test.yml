@@ -254,6 +254,16 @@ jobs:
         docker restart docker_godwoken_1
         docker-compose --file docker/docker-compose.yml logs --tail 6
 
+    - name: Enable dump mem block rpc
+      working-directory: kicker
+      run: |
+        sudo chown -R `whoami` workspace/config.toml
+        make stop
+        sed -i -e "s|enable_methods = \[\]|enable_methods = \[\"test\"\]|g" workspace/config.toml
+        cat workspace/config.toml | grep enable_methods
+        make start
+        sudo chown -R `whoami` cache/build
+
     - name: Check if Godwoken is running
       working-directory: kicker
       run: |
@@ -308,6 +318,12 @@ jobs:
           const getTipBlockNumber = require("./scripts/fetch-tip-block-number");
           return await getTipBlockNumber();
         result-encoding: string
+
+    - name: Test mem pool restore manager
+      working-directory: testcases/mem-pool-restore-manager
+      run: |
+        ./test-restore-manager
+      timeout-minutes: 6
 
     - name: Testcase - Godwoken Polyjuice Compatibility Examples
       working-directory: testcases/godwoken-polyjuice-compatibility-examples

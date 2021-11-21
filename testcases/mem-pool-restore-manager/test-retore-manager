@@ -1,0 +1,78 @@
+#!/bin/bash
+
+tip_block_hash() {
+    echo $(curl http://localhost:8119 -S -s -X POST -H "Content-Type: application/json" -d '{"jsonrpc": "2.0", "method":"gw_get_tip_block_hash", "params": [], "id": 1}' 2>&1)
+}
+
+dump_mem_block() {
+    echo $(curl http://localhost:8119 -S -s -X POST -H "Content-Type: application/json" -d '{"jsonrpc": "2.0", "method":"gw_dump_mem_block", "params": [], "id": 1}')
+}
+
+restart_godwoken() {
+    # Shutdown godwoken
+    docker exec docker_godwoken_1 pgrep godwoken | xargs kill -2
+    while :
+    do
+        local block_hash_res=$(tip_block_hash)
+        if [[ "$block_hash_res" =~ .*Recv.failure.* ]]; then
+            break
+        else
+            echo "Waiting godwoken shutdown"
+            sleep 1
+        fi
+    done
+
+    # Restart godwoken"
+    docker start docker_godwoken_1
+
+    while :
+    do
+        local block_hash_res=$(tip_block_hash)
+        echo "$block_hash_res"
+        if [[ "$block_hash_res" =~ .*Recv.failure.* ]]; then
+            echo "Waiting godwoken start"
+            sleep 1
+        else
+            break
+        fi
+    done
+}
+
+test_restore_manager() {
+    local count=10
+
+    while :
+    do
+        local mem_block_hash_before=$(dump_mem_block)
+        local tip_block_hash_before=$(tip_block_hash)
+        echo "$mem_block_hash_before"
+        echo "$tip_block_hash_before"
+
+        restart_godwoken
+
+        local tip_block_hash_after=$(tip_block_hash)
+        local mem_block_hash_after=$(dump_mem_block)
+        echo "$tip_block_hash_after"
+        echo "$mem_block_hash_after"
+
+        if [[ "$tip_block_hash_after" != "$tip_block_hash_before" ]]; then
+            sleep 1s
+
+            count=$(( count - 1 ))
+            echo "Retry left ${count}"
+
+            if [ count == 0 ]; then
+                echo "Reach max retry count, test failure"
+                exit -1
+            fi
+        elif [[ "$mem_block_hash_after" != "$mem_block_hash_before" ]]; then
+            echo "Mem block not matched, test failure"
+            exit -1
+        else
+            echo "Mem block matched, test pass"
+            exit 0
+        fi
+    done
+}
+
+test_restore_manager
