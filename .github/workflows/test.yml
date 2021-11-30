@@ -233,16 +233,42 @@ jobs:
         make init
         make start
         docker-compose --file docker/docker-compose.yml logs --tail 6
-      # FIXME: Sometimes, Godwoken service is not running
-      # https://github.com/Flouse/godwoken/runs/3639382192?check_suite_focus=true#step:8:667
+        sudo chown -R `whoami` workspace/config.toml
+
+    # Related PR: https://github.com/nervosnetwork/godwoken/pull/415
+    # feat(RPC): check if the fee or gasPrice is enough
+    - name: Tune [mem_pool.fee_config] in gw-config.toml
+      working-directory: kicker
+      run: |
+        grep -q "\[mem_pool.fee_config\]" workspace/config.toml \
+          || cat >> workspace/config.toml << __EOF__
+
+        [mem_pool.fee_config]
+        # the minimal fee of meta contract:
+        # meta_contract_minimum_fee = fee_rate * meta_contract_fee_weight
+        meta_contract_fee_weight = 2
+        # the minimal fee of a native sudt transfer transaction:
+        # sudt_transfer_minimum_fee = fee_rate * meta_contract_fee_weight
+        sudt_transfer_fee_weight = 2
+        # the minimal fee of a withdrawal request:
+        # withdrawal_minimum_fee = fee_rate * withdraw_fee_weight
+        withdraw_fee_weight = 2
+
+        # HashMap<fee_sudt_id, fee_rate>
+        [mem_pool.fee_config.fee_rates]
+        # (CKB_SUDT_ID -> 500)
+        0x1 = 500
+        # (Other_sUDT_ID -> fee_rate)
+        0x2 = 600
+        __EOF__
 
     - name: Enable offchain validator of Godwoken
       working-directory: kicker
+      # TODO: Enable offchain validator when the challenge part is fixed with new state_db implementation
       if: ${{ false }}
       run: |
-        sudo chown -R `whoami` workspace/config.toml
         grep -q "\[offchain_validator\]" workspace/config.toml \
-        || cat >> workspace/config.toml << __EOF__
+          || cat >> workspace/config.toml << __EOF__
 
         [offchain_validator]
         verify_withdrawal_signature = true
@@ -251,6 +277,11 @@ jobs:
         verify_max_cycles = 140000000
         dump_tx_on_failure = true
         __EOF__
+
+    - name: Restart Godwoken to apply new configs
+      working-directory: kicker
+      run: |
+        cat workspace/config.toml
         docker restart docker_godwoken_1
         docker-compose --file docker/docker-compose.yml logs --tail 6
 
