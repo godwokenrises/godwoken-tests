@@ -417,7 +417,7 @@ jobs:
     - name: Setup tmate session for debugging if something failed
       if: ${{ failure() || cancelled() }}
       uses: mxschmitt/action-tmate@v3
-      timeout-minutes: 30
+      timeout-minutes: 15
 
     - name: Stop containers of Kicker
       if: always()
@@ -537,7 +537,7 @@ jobs:
     - name: Setup tmate session for debugging if something failed
       if: ${{ failure() || cancelled() }}
       uses: mxschmitt/action-tmate@v3
-      timeout-minutes: 30
+      timeout-minutes: 15
 
   # disabled
   readonly-testnet-node-sync-to-tip:
@@ -591,4 +591,4 @@ jobs:
     - name: Setup tmate session for debugging if something failed
       if: ${{ failure() || cancelled() }}
       uses: mxschmitt/action-tmate@v3
-      timeout-minutes: 30
+      timeout-minutes: 15
