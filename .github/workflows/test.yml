@@ -33,22 +33,16 @@ on:
       #   default: 'INFO'
   push:
     branches:
-    - CI
+    - add-check-fee-config
     - readonly-testnet-node-sync-to-tip
-    - test-deposit-withdrawal
   pull_request:
     branches:
     - develop
 
 env:
+  # Image built from https://github.com/Flouse/godwoken-docker-prebuilds/tree/develop
   GW_PREBUILDS_IMAGE_NAME: ghcr.io/flouse/godwoken-prebuilds
-  GW_PREBUILD_IMAGE_TAG: check-fee
-  # GODWOKEN_GIT_URL: https://github.com/nervosnetwork/godwoken.git
-  # GODWOKEN_REF: master
-  # GW_SCRIPTS_GIT_URL: https://github.com/nervosnetwork/godwoken-scripts.git
-  # GW_SCRIPTS_REF: master
-  # POLYJUICE_GIT_URL: https://github.com/nervosnetwork/godwoken-polyjuice.git
-  # POLYJUICE_REF: main
+  GW_PREBUILD_IMAGE_TAG: develop
 
 jobs:
   prepare-image:
@@ -73,61 +67,6 @@ jobs:
     - run: |
         echo "env.GW_PREBUILDS_IMAGE: ${{ env.GW_PREBUILDS_IMAGE }}"
         echo "TODO: build image from https://github.com/Flouse/godwoken-docker-prebuilds"
-    
-    # TODO: build image if the tag is not exist
-
-  readonly-testnet-node-sync-to-tip:
-    needs: prepare-image
-    runs-on: ubuntu-latest
-    if: ${{ false }} # testnet-sync: false
-    steps:
-    - uses: actions/checkout@v2
-
-    - name: Download ckb-indexer-data
-      run: |
-        docker run --rm \
-          -v /ckb-indexer-data:/ckb-indexer-data \
-          ghcr.io/flouse/testnet-polyjuice-api:latest bash -c \
-          "cp /godwoken-polyman/packages/runner/db/ckb-indexer-testnet/* /ckb-indexer-data/"
-        sudo chown -R `whoami` /ckb-indexer-data
-
-    - name: Start ckb-indexer
-      run: |
-        docker create --name ckb-indexer-0.3 -p 8116:8116 \
-          -v /ckb-indexer-data:/ckb-indexer-data \
-          ${{ env.GW_PREBUILDS_IMAGE_NAME }}:${{ env.GW_PREBUILD_IMAGE_TAG }} \
-          sh -c "RUST_LOG=info ckb-indexer -c https://testnet.ckbapp.dev/rpc -s /ckb-indexer-data -l 0.0.0.0:8116"
-        docker start ckb-indexer-0.3
-        echo "sleep 1 minute..." && sleep 60
-        docker logs ckb-indexer-0.3 --tail 20
-
-    # - name: Store Cache of Godwoken Testnet
-    #   uses: actions/cache@v2
-    #   with:
-    #     path: |
-    #       configs/store.db
-    #     key: ${{ runner.os }}-cache-${{ hashFiles('**/store.db') }}
-    #     ore-keys: |
-    #       ${{ runner.os }}-cache-
-    - name: readonly-testnet-node-sync-to-tip
-      run: |
-        cd configs
-        sed -i "s+indexer_url =.*+indexer_url = 'http://localhost:8116'+g" gw-testnet-config.toml
-        docker run -w /deploy --network host \
-          --name readonly-testnet-node-sync-to-tip \
-          -d --restart unless-stopped	\
-          -v `pwd`/gw-testnet-config.toml:/deploy/gw-testnet-config.toml \
-          -v `pwd`/pk:/deploy/pk \
-          -v `pwd`/store.db:/deploy/store.db \
-          ${{ env.GW_PREBUILDS_IMAGE_NAME }}:${{ env.GW_PREBUILD_IMAGE_TAG }} \
-          bash -c "godwoken run -c gw-testnet-config.toml"
-        docker logs readonly-testnet-node-sync-to-tip -f
-      timeout-minutes: 120
-
-    - name: Setup tmate session for debugging if something failed
-      if: ${{ failure() || cancelled() }}
-      uses: mxschmitt/action-tmate@v3
-      timeout-minutes: 30
 
   # Run integration-tests on devnet deployed by Godowoken-Kicker
   test-on-devnet:
@@ -452,8 +391,6 @@ jobs:
             --private-key 0x6cd5e7be2f6504aa5ae7c0c04178d8f47b7cfc63b71d95d9e6282f5b090431bf \
         | tee result
         egrep -q "tx 0x.+ committed" result || exit 1
-      # FIXME: error when send transaction: Error: JSONRPCError:
-      #  server error {"code":-301,"message":"TransactionFailedToResolve: Resolve failed Dead(OutPoint(0x869499a4212ac40c5fbc4ef40098d2230de3fa51d8f26bc7cbd82d5151133e2e00000000))","data":"Resolve(Dead(OutPoint(0x869499a4212ac40c5fbc4ef40098d2230de3fa51d8f26bc7cbd82d5151133e2e00000000)))"}
 
     - name: Save logs
       if: always()
@@ -601,4 +538,57 @@ jobs:
       if: ${{ failure() || cancelled() }}
       uses: mxschmitt/action-tmate@v3
       timeout-minutes: 30
-    
+
+  # disabled
+  readonly-testnet-node-sync-to-tip:
+    needs: prepare-image
+    runs-on: ubuntu-latest
+    if: ${{ false }} # testnet-sync: false
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Download ckb-indexer-data
+      run: |
+        docker run --rm \
+          -v /ckb-indexer-data:/ckb-indexer-data \
+          ghcr.io/flouse/testnet-polyjuice-api:latest bash -c \
+          "cp /godwoken-polyman/packages/runner/db/ckb-indexer-testnet/* /ckb-indexer-data/"
+        sudo chown -R `whoami` /ckb-indexer-data
+
+    - name: Start ckb-indexer
+      run: |
+        docker create --name ckb-indexer-0.3 -p 8116:8116 \
+          -v /ckb-indexer-data:/ckb-indexer-data \
+          ${{ env.GW_PREBUILDS_IMAGE_NAME }}:${{ env.GW_PREBUILD_IMAGE_TAG }} \
+          sh -c "RUST_LOG=info ckb-indexer -c https://testnet.ckbapp.dev/rpc -s /ckb-indexer-data -l 0.0.0.0:8116"
+        docker start ckb-indexer-0.3
+        echo "sleep 1 minute..." && sleep 60
+        docker logs ckb-indexer-0.3 --tail 20
+
+    # - name: Store Cache of Godwoken Testnet
+    #   uses: actions/cache@v2
+    #   with:
+    #     path: |
+    #       configs/store.db
+    #     key: ${{ runner.os }}-cache-${{ hashFiles('**/store.db') }}
+    #     ore-keys: |
+    #       ${{ runner.os }}-cache-
+    - name: readonly-testnet-node-sync-to-tip
+      run: |
+        cd configs
+        sed -i "s+indexer_url =.*+indexer_url = 'http://localhost:8116'+g" gw-testnet-config.toml
+        docker run -w /deploy --network host \
+          --name readonly-testnet-node-sync-to-tip \
+          -d --restart unless-stopped	\
+          -v `pwd`/gw-testnet-config.toml:/deploy/gw-testnet-config.toml \
+          -v `pwd`/pk:/deploy/pk \
+          -v `pwd`/store.db:/deploy/store.db \
+          ${{ env.GW_PREBUILDS_IMAGE_NAME }}:${{ env.GW_PREBUILD_IMAGE_TAG }} \
+          bash -c "godwoken run -c gw-testnet-config.toml"
+        docker logs readonly-testnet-node-sync-to-tip -f
+      timeout-minutes: 120
+
+    - name: Setup tmate session for debugging if something failed
+      if: ${{ failure() || cancelled() }}
+      uses: mxschmitt/action-tmate@v3
+      timeout-minutes: 30
