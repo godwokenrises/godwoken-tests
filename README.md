@@ -1,10 +1,55 @@
 # Godwoken Tests
 
-This repository contains integration tests that test [Godwoken](https://github.com/nervosnetwork/godwoken).
+This repository contains integration tests that test [Godwoken](https://github.com/nervosnetwork/godwoken). You can trigger a test workflow [here](https://github.com/nervosnetwork/godwoken-tests/actions/workflows/test.yml) or run tests locally.
+
+## Key Env
+In a Github workflow, the `GW_PREBUILDS_IMAGE` env will replace the `DOCKER_PREBUILD_IMAGE_NAME` env in `kicker/docker/.build.mode.env`. You could change this image as you like, such as `nervos/godwoken-prebuilds:latest`.
+```TOML
+# .github/workflows/test.yml
+
+env:
+  # Image built from https://github.com/Flouse/godwoken-docker-prebuilds/tree/develop
+  GW_PREBUILDS_IMAGE_NAME: ghcr.io/flouse/godwoken-prebuilds
+  GW_PREBUILD_IMAGE_TAG: develop
+```
+
+## Test cases in `test.yml`
+```TOML
+# .github/workflows/test.yml
+
+- name: Testcase - Godwoken Polyjuice Compatibility Examples
+    working-directory: testcases/godwoken-polyjuice-compatibility-examples
+    run: |
+    yarn install && yarn compile
+    ENV_PATH=../../tools/packages/tools/configs/devnet.env yarn ts-node ./scripts/multi-sign-wallet.ts
+    ENV_PATH=../../tools/packages/tools/configs/devnet.env yarn ts-node ./scripts/box-proxy.ts
+    ENV_PATH=../../tools/packages/tools/configs/devnet.env yarn ts-node ./scripts/multicall.ts
+    ENV_PATH=../../tools/packages/tools/configs/devnet.env yarn ts-node ./scripts/create2.ts
+    ENV_PATH=../../tools/packages/tools/configs/devnet.env yarn ts-node ./scripts/stable-swap-3-pool.ts
+    timeout-minutes: 6
+
+- name: Testcase - Pancakeswap
+    working-directory: testcases/pancakeswap-contracts-godwoken
+    run: |
+    yarn && yarn compile
+    ENV_PATH=../../tools/packages/tools/configs/devnet.env yarn ts-node ./scripts/deploy.ts
+    timeout-minutes: 6
+
+- name: Testcase - LendingContracts
+    working-directory: testcases/lending-contracts
+    run: |
+    yarn
+    echo "The configs should have been updated:"
+    cat config.json
+    yarn deploy
+    timeout-minutes: 12
+```
+More cases could be added into `.github/workflows/test.yml`.
+
 
 ## How to create a godwoken integration-test workflow
 
-### Prerequisites
+#### Prerequisites
 Admin rights(`actions:write` permission) to this repository is required.
 
 ### 2 Methods
