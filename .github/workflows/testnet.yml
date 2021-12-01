@@ -1,0 +1,92 @@
+name: Stress testing on Godwoken testnet
+
+on:
+  push:
+    branches:
+    - "benchmark"
+
+jobs:
+  batch-deposits:
+    runs-on: ubuntu-latest
+    if: ${{ true }}
+    steps:
+    - uses: actions/checkout@v2
+      with:
+        submodules: 'recursive'
+    
+    - uses: actions/setup-node@v2
+      with:
+        node-version: '14'
+
+    - name: Get yarn cache directory path
+      id: yarn-cache-dir-path
+      run: echo "::set-output name=dir::$(yarn cache dir)"
+    - name: Node Cache
+      uses: actions/cache@v2
+      id: yarn-cache # use this to check for `cache-hit` (`steps.yarn-cache.outputs.cache-hit != 'true'`)
+      with:
+        path: ${{ steps.yarn-cache-dir-path.outputs.dir }}
+        key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
+        restore-keys: |
+          ${{ runner.os }}-yarn-
+
+    - name: Generate the configs of testnet
+      working-directory: tools
+      run: yarn && yarn generate-testnet-configs && yarn build-all
+
+    - name: Batch deposits from layer1 to layer2
+      working-directory: tools/packages/tools
+      run: |
+        export accountNum=2
+        yarn ts-node src/benchmark/batch-deposits.ts $accountNum
+
+    - name: Setup tmate session for debugging if something failed
+      if: ${{ failure() || cancelled() }}
+      uses: mxschmitt/action-tmate@v3
+      timeout-minutes: 10
+
+  
+  batch-withdrawals:
+    runs-on: ubuntu-latest
+    if: ${{ true }}
+    steps:
+    - uses: actions/checkout@v2
+      with:
+        submodules: 'recursive'
+    
+    - uses: actions/setup-node@v2
+      with:
+        node-version: '14'
+
+    - name: Get yarn cache directory path
+      id: yarn-cache-dir-path
+      run: echo "::set-output name=dir::$(yarn cache dir)"
+    - name: Node Cache
+      uses: actions/cache@v2
+      id: yarn-cache # use this to check for `cache-hit` (`steps.yarn-cache.outputs.cache-hit != 'true'`)
+      with:
+        path: ${{ steps.yarn-cache-dir-path.outputs.dir }}
+        key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
+        restore-keys: |
+          ${{ runner.os }}-yarn-
+
+    - name: Generate the configs of testnet
+      working-directory: tools
+      run: yarn && yarn generate-testnet-configs && yarn build-all
+
+    - name: Batch withdraw-request from layer2 to layer1
+      working-directory: tools/packages/tools
+      run: |
+        export accountNum=2
+        yarn ts-node src/benchmark/batch-withdrawals.ts $accountNum
+    
+    - name: Setup tmate session for debugging if something failed
+      if: ${{ failure() || cancelled() }}
+      uses: mxschmitt/action-tmate@v3
+      timeout-minutes: 10
+
+  # TODO: Unlock the withdrawable funds to complete the withdrawal process
+
+  # TODO: Claimed testnet 10000 CKB for every account from the faucet everyday
+  # get-testnet-faucet:
+  #   if:
