@@ -36,9 +36,10 @@ jobs:
 
     - name: Batch deposits from layer1 to layer2
       working-directory: tools/packages/tools
+      env:
+        ACCOUNT_NUM: 265
       run: |
-        export accountNum=2
-        yarn ts-node src/benchmark/batch-deposits.ts $accountNum
+        yarn ts-node src/benchmark/batch-deposits.ts $ACCOUNT_NUM
 
     - name: Setup tmate session for debugging if something failed
       if: ${{ failure() || cancelled() }}
@@ -76,9 +77,10 @@ jobs:
 
     - name: Batch withdraw-request from layer2 to layer1
       working-directory: tools/packages/tools
+      env:
+        ACCOUNT_NUM: 60
       run: |
-        export accountNum=2
-        yarn ts-node src/benchmark/batch-withdrawals.ts $accountNum
+        yarn ts-node src/benchmark/batch-withdrawals.ts $ACCOUNT_NUM
     
     - name: Setup tmate session for debugging if something failed
       if: ${{ failure() || cancelled() }}
@@ -86,7 +88,3 @@ jobs:
       timeout-minutes: 10
 
   # TODO: Unlock the withdrawable funds to complete the withdrawal process
-
-  # TODO: Claimed testnet 10000 CKB for every account from the faucet everyday
-  # get-testnet-faucet:
-  #   if:
