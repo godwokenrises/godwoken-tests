@@ -258,7 +258,13 @@ jobs:
       working-directory: kicker
       run: |
         source gw_util.sh
-        isGodwokenRpcRunning
+        if isGodwokenRpcRunning; then
+          echo "Go to next step";
+        else
+          echo "Try to start Kicker services again."
+          make start
+          isGodwokenRpcRunning
+        fi
         sudo chown -R `whoami` cache/build
 
     - uses: actions/setup-node@v2
