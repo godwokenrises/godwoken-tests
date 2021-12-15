@@ -1,0 +1,57 @@
+name: StressTesting
+
+on:
+  # push:
+  #   branches:
+  #   - "benchmark"
+  workflow_dispatch:
+    inputs:
+      account_num:
+        description: 'The number of accounts used for testing'
+        required: false
+        default: '50'
+      # TODO: How long to keep testing?
+
+jobs:
+  Pancakeswap:
+    strategy:
+      fail-fast: false
+      matrix:
+        net: ['testnet', 'alphanet']
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+      with:
+        submodules: 'recursive'
+    - uses: actions/setup-node@v2
+      with:
+        node-version: '16'
+    - name: Get yarn cache directory path
+      id: yarn-cache-dir-path
+      run: echo "::set-output name=dir::$(yarn cache dir)"
+    - name: Node Cache
+      uses: actions/cache@v2
+      id: yarn-cache # use this to check for `cache-hit` (`steps.yarn-cache.outputs.cache-hit != 'true'`)
+      with:
+        path: ${{ steps.yarn-cache-dir-path.outputs.dir }}
+        key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
+        restore-keys: |
+          ${{ runner.os }}-yarn-
+    - name: check IP
+      run: curl https://cip.cc
+
+    - name: Testcase - Pancakeswap `Mint` and `Add Liquidity`
+      working-directory: testcases/pancakeswap-contracts-godwoken
+      run: |
+        yarn && yarn compile
+        yarn ${{ matrix.net }}-test
+
+    # TODO:
+    # - name: Testcase - LendingContracts
+    #   working-directory: testcases/lending-contracts
+    #   run: |
+    #     yarn
+    #     echo "The configs should have been updated:"
+    #     cat config.json
+    #     yarn deploy
+    #   timeout-minutes: 12
