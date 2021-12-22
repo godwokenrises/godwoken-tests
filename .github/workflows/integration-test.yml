@@ -298,7 +298,7 @@ jobs:
         LUMOS_CONFIG_FILE=../configs/lumos-config.json \
           node ./packages/tools/lib/account-cli.js deposit \
             --private-key 0x6cd5e7be2f6504aa5ae7c0c04178d8f47b7cfc63b71d95d9e6282f5b090431bf \
-            --capacity 333322221111 \
+            --capacity 1234512345678 \
         | tee result
         if egrep -q "Deposit success" result; then
           echo "The deposited asset can be withdrawn only after [finalize_blocks] layer2 blocks."          
@@ -354,6 +354,14 @@ jobs:
         2>&1 | tee result || true
         egrep -q "No valid withdrawal cell found" result || exit 1
 
+    # address: ckt1qyqvkvvs6ljvm35stq796ksrev5ptnq9xwmst8xw53
+    # lock_args: "0xcb3190d7e4cdc690583c5d5a03cb2815cc0533b7"
+    - name: Check withdrawal address for godwoken unlock test doesn't have any capacity
+      working-directory: testcases/unlock-withdrawal-to-owner
+      run: |
+        ./get_cells_capacity 0xcb3190d7e4cdc690583c5d5a03cb2815cc0533b7 | tee result_unlock_withdrawal || true
+        egrep -q "0x0" result_unlock_withdrawal || exit 1
+
     # Note:
     # The deposited asset can be withdrawn only after `finalize_blocks`(default to 20) layer2 blocks.
     - name: Wait until [finalize_blocks] layer2 blocks passed
@@ -382,6 +390,24 @@ jobs:
         | tee result
         if egrep -q "withdrawal success" result; then
           echo "Success! Withdrawal request sent. Please Wait for challenge period duration to unlock the funds."
+        else
+          exit 1
+        fi
+
+    # Withdraw to different address, but let godwoken unlock withdraw for us
+    - name: Request withdrawal from layer2 back to layer1 (godwoken unlock)
+      working-directory: kicker/workspace
+      run: |
+        echo "0x6cd5e7be2f6504aa5ae7c0c04178d8f47b7cfc63b71d95d9e6282f5b090431bf" > withdraw_pk
+        RUST_LOG=info bin/gw-tools withdraw \
+          --capacity 666 \
+          --config-path config.toml \
+          --owner-ckb-address ckt1qyqvkvvs6ljvm35stq796ksrev5ptnq9xwmst8xw53 \
+          --privkey-path withdraw_pk \
+          --scripts-deployment-path deploy/scripts-deploy-result.json \
+        | tee result_unlock_withdrawal
+        if egrep -q "withdraw success" result_unlock_withdrawal; then
+          echo "Success! Withdrawal request extra sent. Please Wait for challenge period and godwoken will unlock withdrawal for us"
         else
           exit 1
         fi
@@ -429,6 +455,19 @@ jobs:
         egrep -q "tx 0x.+ committed" result || exit 1
       # FIXME: error when send transaction: Error: JSONRPCError:
       #  server error {"code":-301,"message":"TransactionFailedToResolve: Resolve failed Dead(OutPoint(0x869499a4212ac40c5fbc4ef40098d2230de3fa51d8f26bc7cbd82d5151133e2e00000000))","data":"Resolve(Dead(OutPoint(0x869499a4212ac40c5fbc4ef40098d2230de3fa51d8f26bc7cbd82d5151133e2e00000000)))"}
+
+    # address: ckt1qyqvkvvs6ljvm35stq796ksrev5ptnq9xwmst8xw53
+    # lock_args: "0xcb3190d7e4cdc690583c5d5a03cb2815cc0533b7"
+    - name: Check whether godwoken unlock withdrawal
+      working-directory: testcases/unlock-withdrawal-to-owner
+      run: |
+        ./get_cells_capacity 0xcb3190d7e4cdc690583c5d5a03cb2815cc0533b7 | tee result_unlock_withdrawal || true
+        if egrep -q "0x0" result_unlock_withdrawal; then
+          echo "godwoken unlock withdrawal failed"
+          exit 1
+        else
+          echo "godwoken unlock withdrawal for us"
+        fi
 
     - name: Save logs
       if: always()
