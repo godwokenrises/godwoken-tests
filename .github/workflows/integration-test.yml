@@ -404,13 +404,7 @@ jobs:
           --config-path config.toml \
           --owner-ckb-address ckt1qyqvkvvs6ljvm35stq796ksrev5ptnq9xwmst8xw53 \
           --privkey-path withdraw_pk \
-          --scripts-deployment-path deploy/scripts-deploy-result.json \
-        | tee result_unlock_withdrawal
-        if egrep -q "withdraw success" result_unlock_withdrawal; then
-          echo "Success! Withdrawal request extra sent. Please Wait for challenge period and godwoken will unlock withdrawal for us"
-        else
-          exit 1
-        fi
+          --scripts-deployment-path deploy/scripts-deploy-result.json
 
     - name: Try to unlock unfinalized withdrawal => withdrawal cell not finalized
       working-directory: tools
@@ -438,7 +432,7 @@ jobs:
           const getTipBlockNumber = require("./scripts/fetch-tip-block-number");
           const withdrawalBlockNum = ${{ steps.withdrawal-block-num.outputs.result }};
           const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
-          (async (waitBlocks = 11) => {
+          (async (waitBlocks = 12) => {
             while (await getTipBlockNumber() - withdrawalBlockNum < waitBlocks) {
               console.log(`Wait until ${waitBlocks} layer2 blocks passed`);
               await sleep(45000);
