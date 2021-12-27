@@ -464,7 +464,7 @@ jobs:
       with:
         script: |
           const getTipBlockNumber = require("./scripts/fetch-tip-block-number");
-          const withdrawalBlockNum = ${{ steps.withdrawal-block-num.outputs.result }};
+          const withdrawalBlockNum = ${{ steps.withdrawal-block-num2.outputs.result }};
           const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
           (async (waitBlocks = 15) => {
             while (await getTipBlockNumber() - withdrawalBlockNum < waitBlocks) {
