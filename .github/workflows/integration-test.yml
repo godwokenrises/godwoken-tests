@@ -42,7 +42,7 @@ on:
 
 env:
   GW_PREBUILDS_IMAGE_NAME: ghcr.io/zeroqn/godwoken-prebuilds
-  GW_PREBUILD_IMAGE_TAG: docker-publish-v0.8-unlock-withdrawal-to-owner
+  GW_PREBUILD_IMAGE_TAG: docker-publish-v0.9-unlock-withdrawal-to-owner
   # GODWOKEN_GIT_URL: https://github.com/nervosnetwork/godwoken.git
   # GODWOKEN_REF: master
   # GW_SCRIPTS_GIT_URL: https://github.com/nervosnetwork/godwoken-scripts.git
