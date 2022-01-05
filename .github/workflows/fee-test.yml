@@ -39,7 +39,7 @@ jobs:
           ${{ runner.os }}-yarn-
 
     - name: Start Test
-      working-directory: testcase/gw-fee-test
+      working-directory: testcases/gw-fee-test
       run: |
         yarn && yarn accounts
         EXECUTE_NUMBER=500 yarn start:${{ matrix.net }}
