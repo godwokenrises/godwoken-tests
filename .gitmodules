@@ -15,3 +15,6 @@
 [submodule "testcases/lending-contracts"]
 	path = testcases/lending-contracts
 	url = https://github.com/Flouse/godwoken-test.git
+[submodule "testcases/gw-fee-test"]
+	path = testcases/gw-fee-test
+	url = https://github.com/RetricSu/gw-fee-test.git
