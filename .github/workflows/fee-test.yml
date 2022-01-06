@@ -16,7 +16,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        net: ['alphanet', "testnet"]
+        net: ['alphanet']
     runs-on: ubuntu-latest
 
     steps:
@@ -42,4 +42,4 @@ jobs:
       working-directory: testcases/gw-fee-test
       run: |
         yarn && yarn accounts
-        MAX_ACCOUNT=600 TEST_CASE=4 yarn start:${{ matrix.net }}
+        POLL_TX_RECEIPT_TIME_OUT=300000 MAX_ACCOUNT=600 TEST_CASE=1 yarn start:${{ matrix.net }}
