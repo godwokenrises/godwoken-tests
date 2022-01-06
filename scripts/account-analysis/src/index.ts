@@ -8,7 +8,7 @@ import dotenv from "dotenv";
 
 const { readFile, writeFile } = fs;
 const logger = Logger.globalLogger();
-const INTERVAL = 100; // ms
+const INTERVAL = 200; // ms
 
 dotenv.config({
   path: path.resolve(process.env.ENV_PATH ?? "./testnet.env"),
