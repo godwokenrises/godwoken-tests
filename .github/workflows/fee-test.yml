@@ -42,4 +42,4 @@ jobs:
       working-directory: testcases/gw-fee-test
       run: |
         yarn && yarn accounts
-        MAX_ACCOUNT=600 TEST_CASE=3 yarn start:${{ matrix.net }}
+        MAX_ACCOUNT=600 TEST_CASE=4 yarn start:${{ matrix.net }}
