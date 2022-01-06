@@ -36,6 +36,20 @@ jobs:
       working-directory: scripts/account-analysis
       run: npm install && npm run compile
 
+    - name: Cache account data 
+      uses: actions/cache@v2
+      with:
+        key: account-data-${{ hashFiles('**/package-lock.json') }}
+        path: |
+          scripts/account-analysis/dist/account_data_${{ matrix.net }}.json
     - name: Account Analysis
       working-directory: scripts/account-analysis
       run: npm run analyze:${{ matrix.net }}
+
+    - name: Archive the account data in dist/account_data_${{ matrix.net }}.json
+      if: always()
+      uses: actions/upload-artifact@v2
+      with:
+        name: account-data
+        path: |
+          scripts/account-analysis/dist/account_data_${{ matrix.net }}.json
