@@ -16,7 +16,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        net: ['alphanet']
+        net: ['alphanet', "testnet"]
     runs-on: ubuntu-latest
 
     steps:
