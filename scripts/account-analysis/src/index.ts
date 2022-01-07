@@ -130,23 +130,28 @@ async function loadAccountData(): Promise<void> {
 async function initAccounts() {
   await loadAccountData();
 
-  const maxAccountId = parseInt(process.env.MAX_ACCOUNT_ID);
+  const maxAccountIdFromEnv = parseInt(process.env.MAX_ACCOUNT_ID);
   let stopSignal = false;
-  for (let id = 0; id < maxAccountId; id++) {
+  let prevScriptHash = undefined;
+  let id = -1;
+  while (++id < maxAccountIdFromEnv || !stopSignal) {
     if (accounts.has(id)) continue;
 
     accounts.set(id, new Account({id}));
     accounts.get(id).getScriptHash().then(scriptHash => {
       logger.debug(`scriptHash of account ${id} is ${scriptHash}`);
+
+      // check if 2 consecutive accounts's scriptHashes are ZERO_HASH
+      if (prevScriptHash !== scriptHash) {
+        prevScriptHash = scriptHash;
+      } else if (scriptHash === ZERO_HASH) {
+        logger.info(`scriptHash of account ${id} is ${scriptHash}`);
+        stopSignal = true;
+      }
     });
 
     await sleep(INTERVAL);
-    // TODO: stopSignal
-    if (stopSignal) {
-      break;
-    }
   }
-  saveAccountData();
 }
 
 (async function analyze(): Promise<void> {
@@ -170,7 +175,7 @@ async function initAccounts() {
     if (!accounts.has(idx)) throw new Error("account id error");
 
     const account: Account = accounts.get(idx);
-    if (account.type) continue;
+    account.type || await sleep(INTERVAL + 10);
 
     if (await account.getScriptHash() === ZERO_HASH) {
       account.type = AccountType.ZERO;
@@ -219,8 +224,7 @@ async function initAccounts() {
         break;
     }
 
-    if (idx % 1000 === 0) saveAccountData();
-    await sleep(INTERVAL + 10);
+    if ((idx + 1) % 10000 === 0) saveAccountData();
   }
 
   logger.info(`Total account num: ${accounts.size}`);
