@@ -333,14 +333,14 @@ jobs:
         ENV_PATH=../../tools/packages/tools/configs/devnet.env yarn ts-node ./scripts/deploy.ts
       timeout-minutes: 6
 
-    # - name: Testcase - LendingContracts
-    #   working-directory: testcases/lending-contracts
-    #   run: |
-    #     yarn
-    #     echo "The configs should have been updated:"
-    #     cat config.json
-    #     yarn deploy
-    #   timeout-minutes: 12
+    - name: Testcase - LendingContracts
+      working-directory: testcases/lending-contracts
+      run: |
+        yarn
+        echo "The configs should have been updated:"
+        cat config.json
+        yarn deploy
+      timeout-minutes: 12
     
     # TODO
     # - name: Try to withdraw unfinalized asset
