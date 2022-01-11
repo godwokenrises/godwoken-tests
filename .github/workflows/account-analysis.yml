@@ -1,0 +1,55 @@
+name: Account Analysis
+
+on:
+  push:
+    branches:
+    - develop
+    - account-analysis
+
+jobs:
+  account-analysis:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        net: ['testnet', 'mainnet']
+    
+    steps:
+    - uses: actions/checkout@v2
+      with:
+        submodules: 'recursive' 
+    - uses: actions/setup-node@v2
+      with:
+        node-version: '16'
+    - name: Get npm cache directory
+      id: npm-cache-dir
+      run: echo "::set-output name=dir::$(npm config get cache)"
+    - uses: actions/cache@v2
+      id: npm-cache # use this to check for `cache-hit` ==> if: steps.npm-cache.outputs.cache-hit != 'true'
+      with:
+        path: ${{ steps.npm-cache-dir.outputs.dir }}
+        key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+        restore-keys: |
+          ${{ runner.os }}-node-
+
+    - name: Compile
+      working-directory: scripts/account-analysis
+      run: npm install && npm run compile
+
+    - name: Cache the account data 
+      uses: actions/cache@v2
+      with:
+        key: account-data-${{ hashFiles('**/package-lock.json') }}
+        path: |
+          scripts/account-analysis/dist/account_data_${{ matrix.net }}.json
+    - name: Account Analysis
+      working-directory: scripts/account-analysis
+      run: npm run analyze:${{ matrix.net }}
+
+    - name: Archive the account data in dist/account_data_${{ matrix.net }}.json
+      if: always()
+      uses: actions/upload-artifact@v2
+      with:
+        name: account-data
+        path: |
+          scripts/account-analysis/dist/account_data_${{ matrix.net }}.json
