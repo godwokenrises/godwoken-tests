@@ -455,10 +455,10 @@ jobs:
         path: |
           kicker/workspace/debug-tx-dump
 
-    - name: Setup tmate session for debugging if something failed
-      if: ${{ failure() || cancelled() }}
-      uses: mxschmitt/action-tmate@v3
-      timeout-minutes: 30
+    # - name: Setup tmate session for debugging if something failed
+    #   if: ${{ failure() || cancelled() }}
+    #   uses: mxschmitt/action-tmate@v3
+    #   timeout-minutes: 30
 
     - name: Stop containers of Kicker
       if: always()
