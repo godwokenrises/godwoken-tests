@@ -41,8 +41,11 @@ on:
     - develop
 
 env:
-  GW_PREBUILDS_IMAGE_NAME: nervos/godwoken-prebuilds
-  GW_PREBUILD_IMAGE_TAG: v0.7.0-rc1
+  # https://github.com/Flouse/godwoken-docker-prebuilds/pkgs/container/godwoken-prebuilds/13011506?tag=nightly
+  # built from https://github.com/Flouse/godwoken-docker-prebuilds/blob/develop/Makefile#L9-L13
+  GW_PREBUILDS_IMAGE_NAME: ghcr.io/flouse/godwoken-prebuilds
+  GW_PREBUILD_IMAGE_TAG: nightly
+
   # GODWOKEN_GIT_URL: https://github.com/nervosnetwork/godwoken.git
   # GODWOKEN_REF: master
   # GW_SCRIPTS_GIT_URL: https://github.com/nervosnetwork/godwoken-scripts.git
