@@ -12,7 +12,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        net: ['testnet', 'mainnet']
+        net: ['mainnet'] # 'testnet', 
     
     steps:
     - uses: actions/checkout@v2
