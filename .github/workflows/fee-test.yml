@@ -16,7 +16,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        net: ['alphanet']
+        net: ['alphanet', 'testnet']
     runs-on: ubuntu-latest
 
     steps:
@@ -38,8 +38,9 @@ jobs:
         restore-keys: |
           ${{ runner.os }}-yarn-
 
-    - name: Start Test 3 (batch transactions)
+    - name: Run Test 1 for 20 minutes
+      timeout-minutes: 20 # run 20 minutes
       working-directory: testcases/gw-fee-test
       run: |
         yarn && yarn accounts
-        POLL_TX_RECEIPT_TIME_OUT=300000 MAX_ACCOUNT=600 TEST_CASE=1 yarn start:${{ matrix.net }}
+        MODE=forever TEST_CASE=1 POLL_TX_RECEIPT_TIME_OUT=60000 yarn start:${{ matrix.net }}
