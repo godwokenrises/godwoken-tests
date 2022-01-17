@@ -38,9 +38,9 @@ jobs:
         restore-keys: |
           ${{ runner.os }}-yarn-
 
-    - name: Run Test 1 for 20 minutes
-      timeout-minutes: 20 # run 20 minutes
+    - name: Run Test 1 forever
+      #timeout-minutes: 20 # run 20 minutes
       working-directory: testcases/gw-fee-test
       run: |
         yarn && yarn accounts
-        MODE=forever TEST_CASE=1 POLL_TX_RECEIPT_TIME_OUT=60000 yarn start:${{ matrix.net }}
+        MODE=forever TEST_CASE=1 POLL_TX_RECEIPT_TIME_OUT=45000 yarn start:${{ matrix.net }}
