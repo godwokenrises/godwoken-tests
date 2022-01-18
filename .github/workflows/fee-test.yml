@@ -42,4 +42,4 @@ jobs:
       working-directory: testcases/gw-fee-test
       run: |
         yarn && yarn account
-        timeout 5s MODE=forever TEST_CASE=1 POLL_TX_RECEIPT_TIME_OUT=45000 yarn start:${{ matrix.net }}
+        MODE=forever TEST_CASE=1 POLL_TX_RECEIPT_TIME_OUT=45000 timeout 5s yarn start:${{ matrix.net }}
