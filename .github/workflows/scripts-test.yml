@@ -12,7 +12,7 @@ on:
   - cron:  '* 1 * * *'
 
 jobs:
-  fee-test:
+  scripts-test:
     strategy:
       fail-fast: false
       matrix:
