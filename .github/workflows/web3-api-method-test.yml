@@ -14,6 +14,7 @@ on:
 jobs:
   web3-api-method-test:
     strategy:
+      fail-fast: false
       matrix:
         net: ['alphanet', 'testnet']
     runs-on: ubuntu-latest
