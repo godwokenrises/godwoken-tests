@@ -12,7 +12,7 @@ on:
   - cron:  '* */4 * * *'
 
 jobs:
-  fee-test:
+  web3-api-method-test:
     strategy:
       matrix:
         net: ['alphanet', 'testnet']
