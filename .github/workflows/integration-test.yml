@@ -1,6 +1,10 @@
 name: Integration Test
 
 on:
+  # Run integration test after the nightly image built
+  schedule:
+  - cron: '00 12 * * *'
+
   workflow_dispatch:
     inputs:
       gw_prebuild_image_name:
