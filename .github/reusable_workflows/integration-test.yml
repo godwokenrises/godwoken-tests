@@ -1,11 +1,7 @@
-name: Integration Test
+name: Called Integration Test
 
 on:
-  # Run integration test after the nightly image built
-  schedule:
-  - cron: '00 12 * * *'
-
-  workflow_dispatch:
+  workflow_call:
     inputs:
       gw_prebuild_image_name:
         description: 'The prebuild image name'
@@ -14,17 +10,17 @@ on:
       gw_prebuild_image_tag:
         description: 'The prebuild image tag'
         required: true
-        default: 'latest'
-      godwoken:
-        description: 'Godwoken version'
+        default: 'develop'
+      godwoken_ref:
+        description: 'Godwoken version reference'
         required: false
         # default: 'The version in prebuild-image'
-      godwoken-scripts:
-        description: 'Godwoken-scripts version'
+      gw_scripts_ref:
+        description: 'Godwoken-scripts version reference'
         required: false
         # default: 'The version in prebuild-image'
-      polyjuice:
-        description: 'Polyjuice version'
+      polyjuice_ref:
+        description: 'Polyjuice version reference'
         required: false
         # default: 'The version in prebuild-image'
       testnet-sync:
@@ -37,9 +33,7 @@ on:
       #   default: 'INFO'
   push:
     branches:
-    - CI
-    - readonly-testnet-node-sync-to-tip
-    - '!v1'
+    - reusable_workflow
   pull_request:
     branches:
     - develop
@@ -67,11 +61,11 @@ jobs:
     - name: Setup envs
       id: env-switcher
       run: |
-        echo "inputs: ${{ toJSON(github.event.inputs) }}"
-        if [ -n "${{ github.event.inputs.gw_prebuild_image_name }}" ]; then 
-          echo "GW_PREBUILDS_IMAGE=${{ github.event.inputs.gw_prebuild_image_name }}:${{ github.event.inputs.gw_prebuild_image_tag }}" >> $GITHUB_ENV
-          echo "::set-output name=GW_PREBUILDS_IMAGE_NAME::${{ github.event.inputs.gw_prebuild_image_name }}"
-          echo "::set-output name=GW_PREBUILD_IMAGE_TAG::${{ github.event.inputs.gw_prebuild_image_tag }}"
+        echo "inputs: ${{ toJSON(inputs) }}"
+        if [ -n "${{ inputs.gw_prebuild_image_name }}" ]; then 
+          echo "GW_PREBUILDS_IMAGE=${{ inputs.gw_prebuild_image_name }}:${{ inputs.gw_prebuild_image_tag }}" >> $GITHUB_ENV
+          echo "::set-output name=GW_PREBUILDS_IMAGE_NAME::${{ inputs.gw_prebuild_image_name }}"
+          echo "::set-output name=GW_PREBUILD_IMAGE_TAG::${{ inputs.gw_prebuild_image_tag }}"
         else
           echo "GW_PREBUILDS_IMAGE=${{ env.GW_PREBUILDS_IMAGE_NAME }}:${{ env.GW_PREBUILD_IMAGE_TAG }}" >> $GITHUB_ENV
           echo "::set-output name=GW_PREBUILDS_IMAGE_NAME::${{ env.GW_PREBUILDS_IMAGE_NAME }}"
@@ -83,89 +77,25 @@ jobs:
     
     # TODO: build image if the tag is not exist
 
-  readonly-testnet-node-sync-to-tip:
-    needs: prepare-image
-    runs-on: ubuntu-latest
-    if: ${{ false }} # testnet-sync: false
-    steps:
-    - uses: actions/checkout@v2
-
-    - name: Download ckb-indexer-data
-      run: |
-        docker run --rm \
-          -v /ckb-indexer-data:/ckb-indexer-data \
-          ghcr.io/flouse/testnet-polyjuice-api:latest bash -c \
-          "cp /godwoken-polyman/packages/runner/db/ckb-indexer-testnet/* /ckb-indexer-data/"
-        sudo chown -R `whoami` /ckb-indexer-data
-
-    - name: Start ckb-indexer
-      run: |
-        docker create --name ckb-indexer-0.3 -p 8116:8116 \
-          -v /ckb-indexer-data:/ckb-indexer-data \
-          ${{ env.GW_PREBUILDS_IMAGE_NAME }}:${{ env.GW_PREBUILD_IMAGE_TAG }} \
-          sh -c "RUST_LOG=info ckb-indexer -c https://testnet.ckbapp.dev/rpc -s /ckb-indexer-data -l 0.0.0.0:8116"
-        docker start ckb-indexer-0.3
-        echo "sleep 1 minute..." && sleep 60
-        docker logs ckb-indexer-0.3 --tail 20
-
-    # - name: Store Cache of Godwoken Testnet
-    #   uses: actions/cache@v2
-    #   with:
-    #     path: |
-    #       configs/store.db
-    #     key: ${{ runner.os }}-cache-${{ hashFiles('**/store.db') }}
-    #     ore-keys: |
-    #       ${{ runner.os }}-cache-
-    - name: readonly-testnet-node-sync-to-tip
-      run: |
-        cd configs
-        sed -i "s+indexer_url =.*+indexer_url = 'http://localhost:8116'+g" gw-testnet-config.toml
-        docker run -w /deploy --network host \
-          --name readonly-testnet-node-sync-to-tip \
-          -d --restart unless-stopped	\
-          -v `pwd`/gw-testnet-config.toml:/deploy/gw-testnet-config.toml \
-          -v `pwd`/pk:/deploy/pk \
-          -v `pwd`/store.db:/deploy/store.db \
-          ${{ env.GW_PREBUILDS_IMAGE_NAME }}:${{ env.GW_PREBUILD_IMAGE_TAG }} \
-          bash -c "godwoken run -c gw-testnet-config.toml"
-        docker logs readonly-testnet-node-sync-to-tip -f
-      timeout-minutes: 120
-
-    - name: Setup tmate session for debugging if something failed
-      if: ${{ failure() || cancelled() }}
-      uses: mxschmitt/action-tmate@v3
-      timeout-minutes: 30
 
   # Run integration-tests on devnet deployed by Godowoken-Kicker
   test-on-devnet:
     needs: prepare-image
     runs-on: ubuntu-latest
     if: ${{ true }}
-    env:
-      FINALITY_BLOCKS_NUM: 4
     steps:
+    # git checkout godwoken-test
+    # see: https://github.com/actions/checkout
     - uses: actions/checkout@v2
       with:
+        repository: nervosnetwork/godwoken-tests
+        ref: reusable_workflow
         submodules: 'recursive'
     
     # set up buildx/BuildKit runner in the context,
     # make the Docker cache exportable and thus properly cacheable
     - name: Set up Docker Buildx
       uses: docker/setup-buildx-action@v1
-
-    # # In this step, this action saves a list of existing images,
-    # # the cache is created without them in the post run.
-    # # It also restores the cache if it exists.
-    # - uses: satackey/action-docker-layer-caching@v0.0.11
-    #   continue-on-error: true # Ignore the failure of a step and avoid terminating the job.
-
-    # - name: Cache Docker layers
-    #   uses: actions/cache@v2
-    #   with:
-    #     path: /tmp/.buildx-cache
-    #     key: ${{ runner.os }}-buildx-${{ github.sha }}
-    #     restore-keys: |
-    #       ${{ runner.os }}-buildx-
     
     - name: Rust Cache
       uses: actions/cache@v2
@@ -183,56 +113,57 @@ jobs:
         || CARGO_TARGET_DIR=target/ cargo install moleculec --version 0.7.2 --force
     - name: Install Capsule
       env:
-        CAPSULE_VERSION: v0.7.0
+        CAPSULE_VERSION: v0.7.3
       run: |
-        test "$(capsule -V)" = "Capsule 0.7.0 56bf934" \
+        capsule -V \
         || (curl -OL https://github.com/nervosnetwork/capsule/releases/download/${CAPSULE_VERSION}/capsule_${CAPSULE_VERSION}_x86_64-linux.tar.gz \
         && tar xf capsule_${CAPSULE_VERSION}_x86_64-linux.tar.gz \
         && mv capsule_${CAPSULE_VERSION}_x86_64-linux/capsule ~/.cargo/bin/)
 
-    - name: Replace the envs in kicker/docker/.build.mode.env
+    - name: Replace the environments in kicker/docker/.build.mode.env
       working-directory: kicker/docker/
       run: |
         sed -i \
           -e "s|DOCKER_PREBUILD_IMAGE_NAME=.*|DOCKER_PREBUILD_IMAGE_NAME=${{ needs.prepare-image.outputs.GW_PREBUILDS_IMAGE_NAME }}|g" \
           -e "s|DOCKER_PREBUILD_IMAGE_TAG=.*|DOCKER_PREBUILD_IMAGE_TAG=${{ needs.prepare-image.outputs.GW_PREBUILD_IMAGE_TAG }}|g" \
           .build.mode.env
-        if [ -n "${{ github.event.inputs.godwoken }}" ]; then
+        if [ -n "${{ inputs.godwoken_ref }}" ]; then
           sed -i \
             -e "s|MANUAL_BUILD_GODWOKEN=false|MANUAL_BUILD_GODWOKEN=true|g" \
-            -e "s|GODWOKEN_GIT_CHECKOUT=.*|GODWOKEN_GIT_CHECKOUT=${{ github.event.inputs.godwoken }}|g" \
+            -e "s|GODWOKEN_GIT_CHECKOUT=.*|GODWOKEN_GIT_CHECKOUT=${{ inputs.godwoken_ref }}|g" \
             .build.mode.env
         fi
-        if [ -n "${{ github.event.inputs.godwoken-scripts }}" ]; then
+        if [ -n "${{ inputs.gw_scripts_ref }}" ]; then
           sed -i \
             -e "s|MANUAL_BUILD_SCRIPTS=false|MANUAL_BUILD_SCRIPTS=true|g" \
-            -e "s|SCRIPTS_GIT_CHECKOUT=.*|SCRIPTS_GIT_CHECKOUT=${{ github.event.inputs.godwoken-scripts }}|g" \
+            -e "s|SCRIPTS_GIT_CHECKOUT=.*|SCRIPTS_GIT_CHECKOUT=${{ inputs.gw_scripts_ref }}|g" \
             .build.mode.env
         fi
-        if [ -n "${{ github.event.inputs.polyjuice }}" ]; then
+        if [ -n "${{ inputs.polyjuice_ref }}" ]; then
           sed -i \
             -e "s|MANUAL_BUILD_POLYJUICE=false|MANUAL_BUILD_POLYJUICE=true|g" \
-            -e "s|POLYJUICE_GIT_CHECKOUT=.*|POLYJUICE_GIT_CHECKOUT=${{ github.event.inputs.polyjuice }}|g" \
+            -e "s|POLYJUICE_GIT_CHECKOUT=.*|POLYJUICE_GIT_CHECKOUT=${{ inputs.polyjuice_ref }}|g" \
             .build.mode.env
         fi
+        echo "This .build.mode.env will be used:"
         cat .build.mode.env
 
-    - name: Tune rollupConfig.finality_blocks to ${{ env.FINALITY_BLOCKS_NUM }}
+    - name: Tune rollupConfig.finality_blocks to 2
       working-directory: kicker
       run: |
-        echo "tune rollupConfig.finality_blocks to ${{ env.FINALITY_BLOCKS_NUM }}"
+        echo "tune rollupConfig.finality_blocks to 2"
         sed -i \
-          -e 's|\\\"finality_blocks\\\": 100|\\\"finality_blocks\\\": ${{ env.FINALITY_BLOCKS_NUM }}|' \
+          -e 's|\\\"finality_blocks\\\": 100|\\\"finality_blocks\\\": 2|' \
           docker/layer2/entrypoint.sh
 
-    - name: Add debug logs for ckb_script::verify module
-      if: ${{ false }}
-      working-directory: kicker
-      run: |
-        echo "add debug logs for ckb_script::verify module"
-        sed -i \
-          -e 's|RUST_LOG=info|RUST_LOG=info,ckb_script::verify=debug|' \
-          docker/layer2/entrypoint.sh
+    # - name: Add debug logs for ckb_script::verify module
+    #   if: ${{ false }}
+    #   working-directory: kicker
+    #   run: |
+    #     echo "add debug logs for ckb_script::verify module"
+    #     sed -i \
+    #       -e 's|RUST_LOG=info|RUST_LOG=info,ckb_script::verify=debug|' \
+    #       docker/layer2/entrypoint.sh
 
     - name: Start Godwoken-Kicker services
       working-directory: kicker
@@ -279,16 +210,17 @@ jobs:
     - uses: actions/setup-node@v2
       with:
         node-version: '16'
+    - name: Get yarn cache directory path
+      id: yarn-cache-dir-path
+      run: echo "::set-output name=dir::$(yarn cache dir)"
     - name: Node Cache
       uses: actions/cache@v2
-      id: npm-and-yarn-cache # use this to check for `cache-hit` (`steps.yarn-cache.outputs.cache-hit != 'true'`)
+      id: yarn-cache # use this to check for `cache-hit` (`steps.yarn-cache.outputs.cache-hit != 'true'`)
       with:
-        path: |
-          ${{ steps.yarn-cache-dir-path.outputs.dir }}
-          ~/.npm
-        key: ${{ runner.os }}-node_modules-${{ hashFiles('**/package-lock.json', '**/yarn.lock') }}
+        path: ${{ steps.yarn-cache-dir-path.outputs.dir }}
+        key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
         restore-keys: |
-          ${{ runner.os }}-node_modules-
+          ${{ runner.os }}-yarn-
 
     - name: Generate devnet envfile from godwoken-config.toml
       working-directory: tools
@@ -349,6 +281,9 @@ jobs:
         cat config.json
         yarn deploy
       timeout-minutes: 12
+    
+    # TODO
+    # - name: Try to withdraw unfinalized asset
 
     - name: Try to unlock when no valid withdrawal exists => No valid withdrawal cell found
       working-directory: tools
@@ -426,6 +361,8 @@ jobs:
             --private-key 0x6cd5e7be2f6504aa5ae7c0c04178d8f47b7cfc63b71d95d9e6282f5b090431bf \
         | tee result
         egrep -q "tx 0x.+ committed" result || exit 1
+      # FIXME: error when send transaction: Error: JSONRPCError:
+      #  server error {"code":-301,"message":"TransactionFailedToResolve: Resolve failed Dead(OutPoint(0x869499a4212ac40c5fbc4ef40098d2230de3fa51d8f26bc7cbd82d5151133e2e00000000))","data":"Resolve(Dead(OutPoint(0x869499a4212ac40c5fbc4ef40098d2230de3fa51d8f26bc7cbd82d5151133e2e00000000)))"}
 
     - name: Save logs
       if: always()
