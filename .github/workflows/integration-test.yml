@@ -140,6 +140,8 @@ jobs:
     needs: prepare-image
     runs-on: ubuntu-latest
     if: ${{ true }}
+    env:
+      FINALITY_BLOCKS_NUM: 3
     steps:
     - uses: actions/checkout@v2
       with:
@@ -214,12 +216,12 @@ jobs:
         fi
         cat .build.mode.env
 
-    - name: Tune rollupConfig.finality_blocks to 2
+    - name: Tune rollupConfig.finality_blocks to ${{ env.FINALITY_BLOCKS_NUM }}
       working-directory: kicker
       run: |
-        echo "tune rollupConfig.finality_blocks to 2"
+        echo "tune rollupConfig.finality_blocks to ${{ env.FINALITY_BLOCKS_NUM }}"
         sed -i \
-          -e 's|\\\"finality_blocks\\\": 100|\\\"finality_blocks\\\": 2|' \
+          -e 's|\\\"finality_blocks\\\": 100|\\\"finality_blocks\\\": ${{ env.FINALITY_BLOCKS_NUM }}|' \
           docker/layer2/entrypoint.sh
 
     - name: Add debug logs for ckb_script::verify module
@@ -368,7 +370,7 @@ jobs:
         script: |
           const { getTipBlockNumber, waitXl2BlocksPassed } = require("./scripts/helper");
           const depositBlockNum = ${{ steps.deposit-block-num.outputs.result }};
-          await waitXl2BlocksPassed(3, depositBlockNum);
+          await waitXl2BlocksPassed(${{ env.FINALITY_BLOCKS_NUM }} + 1, depositBlockNum);
 
     - name: Request withdrawal from layer2 back to layer1
       working-directory: tools
@@ -386,12 +388,12 @@ jobs:
           exit 1
         fi
     
-    - name: Wait one layer2 blocks passed
+    - name: Wait 2 layer2 blocks passed
       uses: actions/github-script@v5
       with:
         script: |
           const { waitXl2BlocksPassed } = require("./scripts/helper");
-          await waitXl2BlocksPassed(1);
+          await waitXl2BlocksPassed(2);
 
     - name: Try to unlock unfinalized withdrawal => "withdrawal cell not finalized"
       working-directory: tools
@@ -415,9 +417,9 @@ jobs:
       uses: actions/github-script@v5
       with:
         script: |
-          const { getTipBlockNumber } = require("./scripts/helper");
+          const { waitXl2BlocksPassed } = require("./scripts/helper");
           const withdrawalBlockNum = ${{ steps.withdrawal-block-num.outputs.result }};
-          await waitXl2BlocksPassed(3, withdrawalBlockNum);
+          await waitXl2BlocksPassed(${{ env.FINALITY_BLOCKS_NUM }} + 1, withdrawalBlockNum);
 
     - name: Unlock the withdrawable funds after [CHALLENGE_MATURITY_BLOCKS] blocks to complete the withdrawal process
       working-directory: tools
