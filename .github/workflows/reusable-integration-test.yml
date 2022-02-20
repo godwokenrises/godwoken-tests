@@ -6,27 +6,33 @@ on:
       gw_prebuild_image_name:
         description: 'The prebuild image name'
         required: true
+        type: string
         default: 'ghcr.io/flouse/godwoken-prebuilds'
       gw_prebuild_image_tag:
         description: 'The prebuild image tag'
         required: true
+        type: string
         default: 'develop'
       godwoken_ref:
         description: 'Godwoken version reference'
         required: false
+        type: string
         # default: 'The version in prebuild-image'
       gw_scripts_ref:
         description: 'Godwoken-scripts version reference'
         required: false
+        type: string
         # default: 'The version in prebuild-image'
       polyjuice_ref:
         description: 'Polyjuice version reference'
         required: false
+        type: string
         # default: 'The version in prebuild-image'
       testnet-sync:
         description: 'Whether to run a godwoken readonly node and sync to testnet tip'
         required: false
-        default: 'false'
+        type: boolean
+        default: false
       # logLevel:
       #   description: 'Log level'   
       #   required: false
