@@ -35,7 +35,6 @@ on:
     branches:
     - CI
     - readonly-testnet-node-sync-to-tip
-    - test-deposit-withdrawal
   pull_request:
     branches:
     - develop
@@ -211,12 +210,12 @@ jobs:
         fi
         cat .build.mode.env
 
-    - name: Tune rollupConfig.finality_blocks to 10
+    - name: Tune rollupConfig.finality_blocks to 2
       working-directory: kicker
       run: |
-        echo "tune rollupConfig.finality_blocks to 10"
+        echo "tune rollupConfig.finality_blocks to 2"
         sed -i \
-          -e 's|\\\"finality_blocks\\\": 100|\\\"finality_blocks\\\": 10|' \
+          -e 's|\\\"finality_blocks\\\": 100|\\\"finality_blocks\\\": 2|' \
           docker/layer2/entrypoint.sh
 
     - name: Add debug logs for ckb_script::verify module
@@ -366,7 +365,7 @@ jobs:
           const getTipBlockNumber = require("./scripts/fetch-tip-block-number");
           const depositBlockNum = ${{ steps.deposit-block-num.outputs.result }};
           const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
-          (async (waitBlocks = 11) => {
+          (async (waitBlocks = 3) => {
             while (await getTipBlockNumber() - depositBlockNum < waitBlocks) {
               console.log(`Wait until ${waitBlocks} layer2 blocks passed`);
               await sleep(45000);
@@ -415,7 +414,7 @@ jobs:
           const getTipBlockNumber = require("./scripts/fetch-tip-block-number");
           const withdrawalBlockNum = ${{ steps.withdrawal-block-num.outputs.result }};
           const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
-          (async (waitBlocks = 11) => {
+          (async (waitBlocks = 3) => {
             while (await getTipBlockNumber() - withdrawalBlockNum < waitBlocks) {
               console.log(`Wait until ${waitBlocks} layer2 blocks passed`);
               await sleep(45000);
@@ -455,10 +454,10 @@ jobs:
         path: |
           kicker/workspace/debug-tx-dump
 
-    # - name: Setup tmate session for debugging if something failed
-    #   if: ${{ failure() || cancelled() }}
-    #   uses: mxschmitt/action-tmate@v3
-    #   timeout-minutes: 30
+    - name: Setup tmate session for debugging if something failed
+      if: ${{ failure() || cancelled() }}
+      uses: mxschmitt/action-tmate@v3
+      timeout-minutes: 30
 
     - name: Stop containers of Kicker
       if: always()
