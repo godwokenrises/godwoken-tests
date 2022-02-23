@@ -141,7 +141,7 @@ jobs:
     runs-on: ubuntu-latest
     if: ${{ true }}
     env:
-      FINALITY_BLOCKS_NUM: 3
+      FINALITY_BLOCKS_NUM: 4
     steps:
     - uses: actions/checkout@v2
       with:
