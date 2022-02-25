@@ -9,20 +9,23 @@ on:
   # Note: GitHub Actions does not support the non-standard syntax @yearly, @monthly, @weekly, @daily, @hourly, and @reboot.
   # You can use crontab guru (https://crontab.guru/) to help generate your cron syntax and confirm what time it will run.
   # To help you get started, there is also a list of crontab guru examples (https://crontab.guru/examples.html).
-  - cron:  '0 */2 * * *' # every 2nd hour
+  - cron:  '0 */6 * * *' # every 2nd hour
 
 jobs:
   deposit-and-withdraw:
     strategy:
       fail-fast: false
       matrix:
-        net: ['testnet', 'alphanet']
+        net: ['alphanet', 'testnet', 'testnet_v1']
     runs-on: ubuntu-latest
 
     steps:
     - uses: actions/checkout@v2
       with:
         submodules: 'recursive'
+        repository: Flouse/godwoken-examples
+        ref: v1
+
     - uses: actions/setup-node@v2
       with:
         node-version: '16'
@@ -49,8 +52,11 @@ jobs:
     - name: Deposit and Withdraw for all the accounts
       working-directory: tools/packages/tools
       run: |
+        [[ ${{ matrix.net }} == "alphanet" ]] && sleep 60
         [[ ${{ matrix.net }} == "testnet" ]] && sleep 120
+
         # Withdraw requests
-        GW_NET=${{ matrix.net }} node lib/benchmark/batch-withdrawals.js &
+        # GW_NET=${{ matrix.net }} node lib/benchmark/batch-withdrawals.js &
+        
         # Deposits
         GW_NET=${{ matrix.net }} node lib/benchmark/batch-deposits.js
