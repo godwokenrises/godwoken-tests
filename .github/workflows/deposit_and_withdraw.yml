@@ -42,15 +42,13 @@ jobs:
           ${{ runner.os }}-yarn-
 
     - name: Build-all
-      working-directory: tools
       run: yarn && yarn build-all 
 
     - name: Generate Testnet Configs
-      working-directory: tools
       run: yarn generate-${{ matrix.net }}-configs
 
     - name: Deposit and Withdraw for all the accounts
-      working-directory: tools/packages/tools
+      working-directory: packages/tools
       run: |
         [[ ${{ matrix.net }} == "alphanet" ]] && sleep 60
         [[ ${{ matrix.net }} == "testnet" ]] && sleep 120
