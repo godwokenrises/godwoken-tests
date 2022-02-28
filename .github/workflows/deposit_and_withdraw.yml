@@ -54,7 +54,8 @@ jobs:
         [[ ${{ matrix.net }} == "testnet" ]] && sleep 120
 
         # Withdraw requests
-        # GW_NET=${{ matrix.net }} node lib/benchmark/batch-withdrawals.js &
+        [[ ${{ matrix.net }} != "testnet_v1" ]] && GW_NET=${{ matrix.net }} node lib/benchmark/batch-withdrawals.js &
+        [[ ${{ matrix.net }} == "testnet_v1" ]] && GW_NET=testnet_v1 node lib/benchmark/batch-withdrawals-v1.js
         
         # Deposits
         GW_NET=${{ matrix.net }} node lib/benchmark/batch-deposits.js
