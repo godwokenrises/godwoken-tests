@@ -1,13 +1,22 @@
 require("@nomiclabs/hardhat-waffle");
 
 const INFURA_PROJECT_ID = "719d739434254b88ac95d53e2b6ac997";
-const PRIVATE_KEY = "9f411d8059c607af690181f1008851790bd46e446b6167196862bc5a6e1784c2";
+// eth_address: 0xe16b3481c0a69e948a612c77a8d64ec36f1d57f8
+const PRIVATE_KEY = "1390c30e5d5867ee7246619173b5922d3b04009cab9e9d91e14506231281a997";
 
 /**
  * @type import('hardhat/config').HardhatUserConfig
  */
 module.exports = {
   networks: {
+    gw_devnet_v1: {
+      url: `http://localhost:8024`,
+      accounts: [`0x6cd5e7be2f6504aa5ae7c0c04178d8f47b7cfc63b71d95d9e6282f5b090431bf`],
+    },
+    gw_testnet_v1: {
+      url: `https://godwoken-testnet-web3-v1-rpc.ckbapp.dev`,
+      accounts: [`0x${PRIVATE_KEY}`],
+    },
     rinkeby: {
       url: `https://rinkeby.infura.io/v3/${INFURA_PROJECT_ID}`,
       accounts: [`0x${PRIVATE_KEY}`],
