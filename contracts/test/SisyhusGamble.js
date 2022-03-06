@@ -31,7 +31,7 @@ describe("SisyphusGamble", function () {
     expect(await erc20.balanceOf(sender.address)).to.equal(balanceOfSender - 1);
     console.log(`  Getting Sisyphus Gamble Venues...`);
     let gameList = await sisyphusGambleVenues.getSisyphusGambleVenues();
-    // console.log(gameList);
+    console.log("gameList:", gameList);
     let sisyphusGambleAddress = gameList[0].sisyphusGamble;
     console.log(`  Sisyphus gamble venues deployed on address: ${sisyphusGambleAddress}`);
 
@@ -45,7 +45,7 @@ describe("SisyphusGamble", function () {
     await gambleContract.gamble(1);
     expect(await gambleContract.totalPrize()).eq(4);
 
-    console.log("Claim Prize");
+    console.log(">> Claim Prize");
     balanceOfSender = await erc20.balanceOf(sender.address);
     console.log(`  sender's balnace = ${balanceOfSender}`);
 

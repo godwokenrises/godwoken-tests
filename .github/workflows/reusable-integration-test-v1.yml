@@ -7,7 +7,6 @@ on:
         type: string
         description: 'Godwoken Kicker version reference'
         required: false
-        # default: the version in kicker dir or 'compatibility-changes'
       gw_prebuild_image_name:
         description: 'The prebuild image name'
         required: false
@@ -47,22 +46,11 @@ on:
     branches:
     - develop
 
-env:
-  GW_PREBUILDS_IMAGE_NAME: ghcr.io/flouse/godwoken-prebuilds
-  GW_PREBUILD_IMAGE_TAG: nightly
-
-  # GODWOKEN_GIT_URL: https://github.com/nervosnetwork/godwoken.git
-  # GODWOKEN_REF: master
-  # GW_SCRIPTS_GIT_URL: https://github.com/nervosnetwork/godwoken-scripts.git
-  # GW_SCRIPTS_REF: master
-  # POLYJUICE_GIT_URL: https://github.com/nervosnetwork/godwoken-polyjuice.git
-  # POLYJUICE_REF: main
-
 jobs:
-  # Run integration-tests on devnet deployed by Godowoken-Kicker
+  # Run integration-tests on devnet_v1 deployed by Godowoken-Kicker
   test-on-devnet-v1:
-    # needs: prepare-image
-
+    env:
+      FINALITY_BLOCKS_NUM: 4
     runs-on: ubuntu-latest
     if: ${{ true }}
     steps:
@@ -72,6 +60,14 @@ jobs:
         repository: nervosnetwork/godwoken-tests
         ref: v1
         submodules: 'recursive'
+
+    - name: checkout Kicker
+      if: ${{ inputs.kicker_ref }}
+      working-directory: kicker
+      run: |
+        echo "git checkout origin/${{ inputs.kicker_ref }}"
+        git fetch origin ${{ inputs.kicker_ref }}
+        git checkout FETCH_HEAD
 
     - name: Rust Cache
       uses: actions/cache@v2
@@ -96,13 +92,15 @@ jobs:
         && tar xf capsule_${CAPSULE_VERSION}_x86_64-linux.tar.gz \
         && mv capsule_${CAPSULE_VERSION}_x86_64-linux/capsule ~/.cargo/bin/)
 
-    - name: Replace the environments in kicker/docker/.build.mode.env
+    - name: Edit `kicker/docker/.build.mode.env`
       working-directory: kicker/docker/
       run: |
-        # sed -i \
-        #   -e "s|DOCKER_PREBUILD_IMAGE_NAME=.*|DOCKER_PREBUILD_IMAGE_NAME=${{ needs.prepare-image.outputs.GW_PREBUILDS_IMAGE_NAME }}|g" \
-        #   -e "s|DOCKER_PREBUILD_IMAGE_TAG=.*|DOCKER_PREBUILD_IMAGE_TAG=${{ needs.prepare-image.outputs.GW_PREBUILD_IMAGE_TAG }}|g" \
-        #   .build.mode.env
+        if [ -n "${{ inputs.gw_prebuild_image_name }}" ]; then
+          sed -i "s|DOCKER_PREBUILD_IMAGE_NAME=.*|DOCKER_PREBUILD_IMAGE_NAME=${{ inputs.gw_prebuild_image_name }}|g" .build.mode.env
+        fi
+        if [ -n "${{ inputs.gw_prebuild_image_tag }}" ]; then
+          sed -i "s|DOCKER_PREBUILD_IMAGE_TAG=.*|DOCKER_PREBUILD_IMAGE_TAG=${{ inputs.gw_prebuild_image_tag }}|g" .build.mode.env
+        fi
         if [ -n "${{ inputs.godwoken_ref }}" ]; then
           sed -i \
             -e "s|MANUAL_BUILD_GODWOKEN=false|MANUAL_BUILD_GODWOKEN=true|g" \
@@ -124,12 +122,12 @@ jobs:
         echo "This .build.mode.env will be used:"
         cat .build.mode.env
 
-    - name: Tune rollupConfig.finality_blocks to 2
+    - name: Tune rollupConfig.finality_blocks to ${{ env.FINALITY_BLOCKS_NUM }}
       working-directory: kicker
       run: |
-        echo "tune rollupConfig.finality_blocks to 2"
+        echo "tune rollupConfig.finality_blocks to ${{ env.FINALITY_BLOCKS_NUM }}"
         sed -i \
-          -e 's|\\\"finality_blocks\\\": 100|\\\"finality_blocks\\\": 2|' \
+          -e 's|\\\"finality_blocks\\\": 100|\\\"finality_blocks\\\": ${{ env.FINALITY_BLOCKS_NUM }}|' \
           docker/layer2/entrypoint.sh
     # - name: Add debug logs for ckb_script::verify module
     #   if: ${{ false }}
@@ -164,34 +162,28 @@ jobs:
       run: |
         docker system df -v
         docker-compose --version
-        make init
         make start
         docker-compose --file docker/docker-compose.yml logs --tail 6
       # FIXME: Sometimes, Godwoken service is not running
       # https://github.com/Flouse/godwoken/runs/3639382192?check_suite_focus=true#step:8:667
 
-    - name: Setup tmate session for debugging if something failed
-      if: ${{ failure() || cancelled() }}
-      uses: mxschmitt/action-tmate@v3
-      timeout-minutes: 10
+    # - name: Enable offchain validator of Godwoken
+    #   working-directory: kicker
+    #   if: ${{ false }}
+    #   run: |
+    #     sudo chown -R `whoami` workspace/config.toml
+    #     grep -q "\[offchain_validator\]" workspace/config.toml \
+    #     || cat >> workspace/config.toml << __EOF__
 
-    - name: Enable offchain validator of Godwoken
-      working-directory: kicker
-      if: ${{ false }}
-      run: |
-        sudo chown -R `whoami` workspace/config.toml
-        grep -q "\[offchain_validator\]" workspace/config.toml \
-        || cat >> workspace/config.toml << __EOF__
-
-        [offchain_validator]
-        verify_withdrawal_signature = true
-        verify_tx_signature = true
-        verify_tx_execution = true
-        verify_max_cycles = 140000000
-        dump_tx_on_failure = true
-        __EOF__
-        docker restart docker_godwoken_1
-        docker-compose --file docker/docker-compose.yml logs --tail 6
+    #     [offchain_validator]
+    #     verify_withdrawal_signature = true
+    #     verify_tx_signature = true
+    #     verify_tx_execution = true
+    #     verify_max_cycles = 140000000
+    #     dump_tx_on_failure = true
+    #     __EOF__
+    #     docker restart docker_godwoken_1
+    #     docker-compose --file docker/docker-compose.yml logs --tail 6
 
     - name: Check if Godwoken is running
       working-directory: kicker
@@ -212,48 +204,65 @@ jobs:
     - name: Get yarn cache directory path
       id: yarn-cache-dir-path
       run: echo "::set-output name=dir::$(yarn cache dir)"
-    # FIXME: Error: The template is not valid. .github/workflows/reusable-integration-test-v1.yml (Line: 240, Col: 14): hashFiles('**/yarn.lock') failed. Fail to hash files under directory '/home/runner/work/godwoken-tests/godwoken-tests'
-    # - name: Node Cache
-    #   uses: actions/cache@v2
-    #   id: yarn-cache # use this to check for `cache-hit` (`steps.yarn-cache.outputs.cache-hit != 'true'`)
-    #   with:
-    #     path: ${{ steps.yarn-cache-dir-path.outputs.dir }}
-    #     key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
-    #     restore-keys: |
-    #       ${{ runner.os }}-yarn-
+    - name: Node Cache
+      uses: actions/cache@v2
+      id: npm-and-yarn-cache # use this to check for `cache-hit` (`steps.yarn-cache.outputs.cache-hit != 'true'`)
+      with:
+        path: |
+          ${{ steps.yarn-cache-dir-path.outputs.dir }}
+          ~/.npm
+        key: ${{ runner.os }}-node_modules-${{ hashFiles('**/package-lock.json') }}
+        restore-keys: |
+          ${{ runner.os }}-node_modules-
 
-    - name: Deposit from layer1 to layer2
-      working-directory: tools
-      run: |
-        LUMOS_CONFIG_FILE=../configs/lumos-config.json \
-          node ./packages/tools/lib/account-cli.js deposit \
-            --private-key 0x6cd5e7be2f6504aa5ae7c0c04178d8f47b7cfc63b71d95d9e6282f5b090431bf \
-            --capacity 333322221111 \
-        | tee result
-        if egrep -q "Deposit success" result; then
-          echo "The deposited asset can be withdrawn only after [finalize_blocks] layer2 blocks."          
-        else
-          exit 1
-        fi
-    
-    - name: Get current layer2 block number
-      id: deposit-block-num
+    - name: Wait 3 layer2 blocks passed
       uses: actions/github-script@v5
       with:
         script: |
-          const { getTipBlockNumber } = require("./scripts/helper");
-          return await getTipBlockNumber();
-        result-encoding: string
+          const { waitXl2BlocksPassed } = require("./scripts/helper");
+          await waitXl2BlocksPassed(3);
+
+    - name: Run hardhat test --network gw_devnet_v1
+      working-directory: contracts
+      run: npm install && npm run test
+
+    - name: Setup tmate session for debugging if something failed
+      if: ${{ failure() || cancelled() }}
+      uses: mxschmitt/action-tmate@v3
+      timeout-minutes: 30
+
+    # - name: Deposit from layer1 to layer2
+    #   working-directory: tools
+    #   run: |
+    #     LUMOS_CONFIG_FILE=../configs/lumos-config.json \
+    #       node ./packages/tools/lib/account-cli.js deposit \
+    #         --private-key 0x6cd5e7be2f6504aa5ae7c0c04178d8f47b7cfc63b71d95d9e6282f5b090431bf \
+    #         --capacity 333322221111 \
+    #     | tee result
+    #     if egrep -q "Deposit success" result; then
+    #       echo "The deposited asset can be withdrawn only after [finalize_blocks] layer2 blocks."          
+    #     else
+    #       exit 1
+    #     fi
+    
+    # - name: Get current layer2 block number
+    #   id: deposit-block-num
+    #   uses: actions/github-script@v5
+    #   with:
+    #     script: |
+    #       const { getTipBlockNumber } = require("./scripts/helper");
+    #       return await getTipBlockNumber();
+    #     result-encoding: string
 
     # Note:
     # The deposited asset can be withdrawn only after `finalize_blocks` layer2 blocks.
-    - name: Wait until [finalize_blocks] layer2 blocks passed
-      uses: actions/github-script@v5
-      with:
-        script: |
-          const { getTipBlockNumber, waitXl2BlocksPassed } = require("./scripts/helper");
-          const depositBlockNum = ${{ steps.deposit-block-num.outputs.result }};
-          await waitXl2BlocksPassed(${{ env.FINALITY_BLOCKS_NUM }} + 1, depositBlockNum);
+    # - name: Wait until [finalize_blocks] layer2 blocks passed
+    #   uses: actions/github-script@v5
+    #   with:
+    #     script: |
+    #       const { getTipBlockNumber, waitXl2BlocksPassed } = require("./scripts/helper");
+    #       const depositBlockNum = ${{ steps.deposit-block-num.outputs.result }};
+    #       await waitXl2BlocksPassed(${{ env.FINALITY_BLOCKS_NUM }} + 1, depositBlockNum);
 
     # TODO: use new withdrawal workflow
     # - name: Request withdrawal from layer2 back to layer1
