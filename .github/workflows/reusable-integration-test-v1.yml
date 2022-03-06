@@ -7,7 +7,7 @@ on:
         type: string
         description: 'Godwoken Kicker version reference'
         required: false
-        default: 'v1'
+        # default: the version in kicker dir or 'compatibility-changes'
       gw_prebuild_image_name:
         description: 'The prebuild image name'
         required: true
@@ -82,15 +82,9 @@ jobs:
           echo "::set-output name=GW_PREBUILDS_IMAGE_NAME::${{ env.GW_PREBUILDS_IMAGE_NAME }}"
           echo "::set-output name=GW_PREBUILD_IMAGE_TAG::${{ env.GW_PREBUILD_IMAGE_TAG }}"
         fi
-    - run: |
-        echo "env.GW_PREBUILDS_IMAGE: ${{ env.GW_PREBUILDS_IMAGE }}"
-        echo "TODO: build image from https://github.com/Flouse/godwoken-docker-prebuilds"
-    
-    # TODO: build image if the tag is not exist
-
 
   # Run integration-tests on devnet deployed by Godowoken-Kicker
-  test-on-devnet:
+  test-on-devnet-v1:
     needs: prepare-image
     runs-on: ubuntu-latest
     if: ${{ true }}
@@ -246,16 +240,6 @@ jobs:
         key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
         restore-keys: |
           ${{ runner.os }}-yarn-
-
-    - name: Generate devnet envfile from godwoken-config.toml
-      working-directory: tools
-      run: |
-        yarn install && yarn build-all
-        export SCRIPT_DEPLOY_RESULT_PATH=../kicker/workspace/deploy/scripts-deploy-result.json
-        export GODWOKEN_CONFIG_PATH=../kicker/workspace/config.toml
-        yarn run copy-configs && yarn run convert-config-format
-        cd packages/tools
-        yarn generate-envfile
 
     - name: Deposit from layer1 to layer2
       working-directory: tools
