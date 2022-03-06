@@ -19,17 +19,14 @@ on:
         description: 'Godwoken version reference'
         required: false
         type: string
-        # default: 'The version in prebuild-image'
       gw_scripts_ref:
         description: 'Godwoken-scripts version reference'
         required: false
         type: string
-        # default: 'The version in prebuild-image'
       polyjuice_ref:
         description: 'Polyjuice version reference'
         required: false
         type: string
-        # default: 'The version in prebuild-image'
       testnet-sync:
         description: 'Whether to run a godwoken readonly node and sync to testnet tip'
         required: false
@@ -51,7 +48,7 @@ jobs:
   # Run integration-tests on devnet_v1 deployed by Godowoken-Kicker
   test-on-devnet-v1:
     env:
-      FINALITY_BLOCKS_NUM: 4
+      FINALITY_BLOCKS_NUM: 3
     runs-on: ubuntu-latest
     if: ${{ true }}
     steps:
@@ -211,16 +208,16 @@ jobs:
     - name: Get yarn cache directory path
       id: yarn-cache-dir-path
       run: echo "::set-output name=dir::$(yarn cache dir)"
-    - name: Node Cache
-      uses: actions/cache@v2
-      id: npm-and-yarn-cache # use this to check for `cache-hit` (`steps.yarn-cache.outputs.cache-hit != 'true'`)
-      with:
-        path: |
-          ${{ steps.yarn-cache-dir-path.outputs.dir }}
-          ~/.npm
-        key: ${{ runner.os }}-node_modules-${{ hashFiles('**/package-lock.json', '**/yarn.lock') }}
-        restore-keys: |
-          ${{ runner.os }}-node_modules-
+    # - name: Node Cache
+    #   uses: actions/cache@v2
+    #   id: npm-and-yarn-cache # use this to check for `cache-hit` (`steps.yarn-cache.outputs.cache-hit != 'true'`)
+    #   with:
+    #     path: |
+    #       ${{ steps.yarn-cache-dir-path.outputs.dir }}
+    #       ~/.npm
+    #     key: ${{ runner.os }}-node_modules-${{ hashFiles('/home/runner/work/**/package-lock.json', '/home/runner/work/**/yarn.lock') }}
+    #     restore-keys: |
+    #       ${{ runner.os }}-node_modules-
 
     - name: Generate devnet envfile from godwoken-config.toml
       working-directory: tools
