@@ -35,10 +35,11 @@ on:
         required: false
         type: boolean
         default: false
-      # logLevel:
-      #   description: 'Log level'   
-      #   required: false
-      #   default: 'INFO'
+      log-level:
+        type: string
+        description: 'Log level'   
+        required: false
+        default: 'INFO'
   push:
     branches:
     - v1
@@ -92,7 +93,7 @@ jobs:
         && tar xf capsule_${CAPSULE_VERSION}_x86_64-linux.tar.gz \
         && mv capsule_${CAPSULE_VERSION}_x86_64-linux/capsule ~/.cargo/bin/)
 
-    - name: Edit `kicker/docker/.build.mode.env`
+    - name: Edit kicker/docker/.build.mode.env
       working-directory: kicker/docker/
       run: |
         if [ -n "${{ inputs.gw_prebuild_image_name }}" ]; then
@@ -156,8 +157,10 @@ jobs:
     #     key: ${{ runner.os }}-buildx-${{ github.sha }}
     #     restore-keys: |
     #       ${{ runner.os }}-buildx-
+    ################################
 
     - name: Start Godwoken-Kicker services
+      timeout-minutes: 10
       working-directory: kicker
       run: |
         docker system df -v
@@ -198,6 +201,10 @@ jobs:
         fi
         sudo chown -R `whoami` cache/build
 
+    - name: Deposit for 2 dev accounts
+      working-directory: kicker
+      run: source ./gw_util.sh && deposit_for_two_dev_accounts
+
     - uses: actions/setup-node@v2
       with:
         node-version: '16'
@@ -211,25 +218,25 @@ jobs:
         path: |
           ${{ steps.yarn-cache-dir-path.outputs.dir }}
           ~/.npm
-        key: ${{ runner.os }}-node_modules-${{ hashFiles('**/package-lock.json') }}
+        key: ${{ runner.os }}-node_modules-${{ hashFiles('**/package-lock.json', '**/yarn.lock') }}
         restore-keys: |
           ${{ runner.os }}-node_modules-
 
-    - name: Wait 3 layer2 blocks passed
+    - name: Generate devnet envfile from godwoken-config.toml
+      working-directory: tools
+      run: |
+        yarn install && yarn build-all
+
+    - name: Wait 1 layer2 blocks passed
       uses: actions/github-script@v5
       with:
         script: |
           const { waitXl2BlocksPassed } = require("./scripts/helper");
-          await waitXl2BlocksPassed(3);
+          await waitXl2BlocksPassed(1);
 
     - name: Run hardhat test --network gw_devnet_v1
       working-directory: contracts
       run: npm install && npm run test
-
-    - name: Setup tmate session for debugging if something failed
-      if: ${{ failure() || cancelled() }}
-      uses: mxschmitt/action-tmate@v3
-      timeout-minutes: 30
 
     # - name: Deposit from layer1 to layer2
     #   working-directory: tools
