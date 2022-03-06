@@ -4,7 +4,10 @@ const { expect } = require("chai");
   const contractFact = await ethers.getContractFactory("ErrorHandling");
   const contract = await contractFact.deploy();
 
+  contract.getRevertMsg(666);
+
   contract.getRevertMsg(444);
   contract.getRevertMsg(555);
-  contract.getRevertMsg(666);
 })();
+
+// npx hardhat run scripts/revert-test.js --network gw_devnet_v1

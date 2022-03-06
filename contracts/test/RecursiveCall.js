@@ -1,18 +1,16 @@
 const { expect } = require("chai");
 const { ethers } = require("hardhat");
 
-
 describe("Recursion Contract", function () {
   it("Deploy and call recursive functions", async () => {
-    const [owner] = await ethers.getSigners();
     const contractFact = await ethers.getContractFactory("RecursionContract");
-
-    console.log("call:", contractFact.interface.encodeFunctionData("sum", [64]));
     const recurContract = await contractFact.deploy();
+    await recurContract.deployed();
 
-
-    for (let i = 64; i <= 1025; i++) {
+    const maxDepth = 36
+    for (let i = 1; i <= maxDepth; i++) {
       let pureSumLoop = await recurContract.pureSumLoop(i);
+      // console.log("call:", contractFact.interface.encodeFunctionData("sum", [64]));
       let sum = await recurContract.sum(i);
 
       console.log("depth:", i);
@@ -22,6 +20,11 @@ describe("Recursion Contract", function () {
 
     // depth 1024
     // Error: Transaction reverted: contract call run out of gas and made the transaction revert
-  
+
   });
 });
+
+/**
+ * How to run this?
+ * > npx hardhat test test/RecursiveCall --network gw_devnet_v1
+ */

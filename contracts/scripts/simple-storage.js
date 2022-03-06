@@ -16,10 +16,15 @@ async function main() {
   // We get the contract to deploy
   const SimpleStorage = await hre.ethers.getContractFactory("contracts/SimpleStorage.sol:SimpleStorage");
   const ssContract = await SimpleStorage.deploy();
-
   await ssContract.deployed();
-
   console.log("SimpleStorage deployed to:", ssContract.address);
+
+  let storeData = await ssContract.get();
+  
+  console.log("storeData:", storeData);
+
+  await ssContract.set(10000);
+  console.log("storeData:", await ssContract.get());
 }
 
 // We recommend this pattern to be able to use async/await everywhere
@@ -28,7 +33,9 @@ main()
   .then(() => process.exit(0))
   .catch((error) => {
     console.error(error);
-    process.exit(1);
+    process.exit(1);π
   });
+
 // How to run this?
-// > npx hardhat run scripts/deploy-simple-storage.js --network gw_devnet_v1
+// > npx hardhat run scripts/simple-storage.js --network gw_testnet_v1
+// > npx hardhat run scripts/simple-storage.js --network gw_devnet_v1

@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: BUSL-1.1
 pragma solidity ^0.8;
 
-import "hardhat/console.sol";
+// import "hardhat/console.sol";
 
 // import "https://github.com/OpenZeppelin/openzeppelin-contracts/blob/master/contracts/token/ERC20/IERC20.sol";
 /**
@@ -202,8 +202,8 @@ contract SisyphusGamble is DoublyLinkedNode {
     
     function gamble(uint256 amount) public returns(uint256) {
         require(amount >= minGamble,"Gamble more to partecipate");
-        console.log("block.number", block.number);
-        console.log("endBlock", endBlock);
+        // console.log("block.number", block.number);
+        // console.log("endBlock", endBlock);
         require(block.number < endBlock,"This gambling session has already closed");
         
         lastGambler=msg.sender;
@@ -222,8 +222,8 @@ contract SisyphusGamble is DoublyLinkedNode {
     }
     
     function claimPrize() public {
-        console.log("block.number", block.number);
-        console.log("endBlock", endBlock);
+        // console.log("block.number", block.number);
+        // console.log("endBlock", endBlock);
         
         require(msg.sender == lastGambler,"You're not the last gambler");
         require(block.number >= endBlock,"Not enough blocks have passed since the last gamble");
