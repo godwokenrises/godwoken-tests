@@ -221,12 +221,14 @@ jobs:
       run: echo "::set-output name=dir::$(yarn cache dir)"
     - name: Node Cache
       uses: actions/cache@v2
-      id: yarn-cache # use this to check for `cache-hit` (`steps.yarn-cache.outputs.cache-hit != 'true'`)
+      id: npm-and-yarn-cache # use this to check for `cache-hit` (`steps.yarn-cache.outputs.cache-hit != 'true'`)
       with:
-        path: ${{ steps.yarn-cache-dir-path.outputs.dir }}
-        key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
+        path: |
+          ${{ steps.yarn-cache-dir-path.outputs.dir }}
+          ~/.npm
+        key: ${{ runner.os }}-node_modules-${{ hashFiles('/home/runner/work/**/package-lock.json', '/home/runner/work/**/yarn.lock') }}
         restore-keys: |
-          ${{ runner.os }}-yarn-
+          ${{ runner.os }}-node_modules-
 
     - name: Generate devnet envfile from godwoken-config.toml
       working-directory: tools
@@ -367,8 +369,6 @@ jobs:
             --private-key 0x6cd5e7be2f6504aa5ae7c0c04178d8f47b7cfc63b71d95d9e6282f5b090431bf \
         | tee result
         egrep -q "tx 0x.+ committed" result || exit 1
-      # FIXME: error when send transaction: Error: JSONRPCError:
-      #  server error {"code":-301,"message":"TransactionFailedToResolve: Resolve failed Dead(OutPoint(0x869499a4212ac40c5fbc4ef40098d2230de3fa51d8f26bc7cbd82d5151133e2e00000000))","data":"Resolve(Dead(OutPoint(0x869499a4212ac40c5fbc4ef40098d2230de3fa51d8f26bc7cbd82d5151133e2e00000000)))"}
 
     - name: Save logs
       if: always()
