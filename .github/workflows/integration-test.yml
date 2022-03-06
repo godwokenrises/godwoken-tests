@@ -277,18 +277,13 @@ jobs:
 
     - uses: actions/setup-node@v2
       with:
-        node-version: '14'
-    - name: Get yarn cache directory path
-      id: yarn-cache-dir-path
-      run: echo "::set-output name=dir::$(yarn cache dir)"
-    - name: Node Cache
-      uses: actions/cache@v2
-      id: yarn-cache # use this to check for `cache-hit` (`steps.yarn-cache.outputs.cache-hit != 'true'`)
+        node-version: '16'
+    - uses: actions/cache@v2
       with:
-        path: ${{ steps.yarn-cache-dir-path.outputs.dir }}
-        key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
+        path: ~/.npm
+        key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
         restore-keys: |
-          ${{ runner.os }}-yarn-
+          ${{ runner.os }}-node-
 
     - name: Generate devnet envfile from godwoken-config.toml
       working-directory: tools
@@ -454,10 +449,10 @@ jobs:
         path: |
           kicker/workspace/debug-tx-dump
 
-    - name: Setup tmate session for debugging if something failed
-      if: ${{ failure() || cancelled() }}
-      uses: mxschmitt/action-tmate@v3
-      timeout-minutes: 30
+    # - name: Setup tmate session for debugging if something failed
+    #   if: ${{ failure() || cancelled() }}
+    #   uses: mxschmitt/action-tmate@v3
+    #   timeout-minutes: 30
 
     - name: Stop containers of Kicker
       if: always()
