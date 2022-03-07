@@ -157,7 +157,7 @@ jobs:
     ################################
 
     - name: Start Godwoken-Kicker services
-      timeout-minutes: 10
+      timeout-minutes: 15
       working-directory: kicker
       run: |
         docker system df -v
