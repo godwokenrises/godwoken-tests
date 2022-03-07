@@ -7,6 +7,7 @@ on:
         type: string
         description: 'Godwoken Kicker version reference'
         required: false
+        default: 'develop'
       gw_prebuild_image_name:
         description: 'The prebuild image name'
         required: true
@@ -65,11 +66,17 @@ jobs:
       FINALITY_BLOCKS_NUM: 4
     steps:
     # git checkout godwoken-test
-    # see: https://github.com/actions/checkout
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
       with:
         repository: nervosnetwork/godwoken-tests
         ref: v0
+        submodules: 'recursive'
+    # Checkout multiple repos (nested)
+    - uses: actions/checkout@v3
+      with:
+        repository: RetricSu/godwoken-kicker
+        ref: ${{ inputs.kicker_ref }}
+        path: kicker
         submodules: 'recursive'
     
     # set up buildx/BuildKit runner in the context,

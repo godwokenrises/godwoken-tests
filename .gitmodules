@@ -2,10 +2,6 @@
 	path = tools
 	url = https://github.com/Flouse/godwoken-examples
 	branch = contracts
-[submodule "godwoken-kicker"]
-	path = kicker
-	url = https://github.com/RetricSu/godwoken-kicker
-	branch = develop
 [submodule "testcases/godwoken-polyjuice-compatibility-examples"]
 	path = testcases/godwoken-polyjuice-compatibility-examples
 	url = https://github.com/honestgoing/godwoken-polyjuice-compatibility-examples.git
