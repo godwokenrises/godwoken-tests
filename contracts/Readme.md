@@ -1,17 +1,20 @@
+# How to test your Solidity contracts on Godwoken v1
 
-
-## Deploying your contracts
 You can deploy in the localhost network following these steps:
 
-1. Start a local node
+1. Start Godwoken devnet_v1 through [Godwoken-Kicker](https://github.com/RetricSu/godwoken-kicker/tree/compatibility-changes)
 
 ```sh
-npx hardhat node
+# see: https://github.com/RetricSu/godwoken-kicker/tree/compatibility-changes
+git clone -b compatibility-changes https://github.com/RetricSu/godwoken-kicker.git
+cd godwoken-kicker
+make start
 ```
 
-2. Open a new terminal and deploy the smart contract in the localhost network
+
+2. Run tests
 ```sh
-npx hardhat run --network localhost scripts/deploy.js
+npm run test
 ```
 
 As general rule, you can target any network configured in the hardhat.config.js
