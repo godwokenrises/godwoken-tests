@@ -7,7 +7,7 @@ on:
         type: string
         description: 'Godwoken Kicker version reference'
         required: false
-        default: compatibility-changes
+        default: 'v1'
       gw_prebuild_image_name:
         description: 'The prebuild image name'
         required: false
@@ -28,11 +28,6 @@ on:
         description: 'Polyjuice version reference'
         required: false
         type: string
-      testnet-sync:
-        description: 'Whether to run a godwoken readonly node and sync to testnet tip'
-        required: false
-        type: boolean
-        default: false
       log-level:
         type: string
         description: 'Log level'   
@@ -40,7 +35,7 @@ on:
         default: 'INFO'
   push:
     branches:
-    - v1
+    - 'v1'
   pull_request:
     branches:
     - develop
@@ -51,7 +46,6 @@ jobs:
     env:
       FINALITY_BLOCKS_NUM: 3
     runs-on: ubuntu-latest
-    if: ${{ true }}
     steps:
     # Check multiple repos (nested)
     # see: https://github.com/actions/checkout#checkout-multiple-repos-nested
@@ -61,11 +55,11 @@ jobs:
         repository: nervosnetwork/godwoken-tests
         ref: v1
         submodules: 'recursive'
-    - name: Checkout Kicker
+    - name: Checkout Kicker # multiple repos (nested)
       uses: actions/checkout@v3
       with:
         repository: RetricSu/godwoken-kicker
-        ref: ${{ inputs.kicker_ref }}
+        ref: ${{ inputs.kicker_ref || 'v1' }}
         path: kicker
         submodules: 'recursive'
 

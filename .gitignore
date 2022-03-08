@@ -9,6 +9,7 @@ error.log
 
 /*indexer-data*/
 /*-cli*
+/kicker/
 
 .vscode/configurationCache.log
 .vscode/dryrun.log
