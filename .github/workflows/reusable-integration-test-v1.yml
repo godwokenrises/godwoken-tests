@@ -7,6 +7,7 @@ on:
         type: string
         description: 'Godwoken Kicker version reference'
         required: false
+        default: compatibility-changes
       gw_prebuild_image_name:
         description: 'The prebuild image name'
         required: false
@@ -52,20 +53,21 @@ jobs:
     runs-on: ubuntu-latest
     if: ${{ true }}
     steps:
-    # git checkout godwoken-test
-    - uses: actions/checkout@v2
+    # Check multiple repos (nested)
+    # see: https://github.com/actions/checkout#checkout-multiple-repos-nested
+    - name: Checkout godwoken-tests
+      uses: actions/checkout@v3
       with:
         repository: nervosnetwork/godwoken-tests
         ref: v1
         submodules: 'recursive'
-
-    - name: checkout Kicker
-      if: ${{ inputs.kicker_ref }}
-      working-directory: kicker
-      run: |
-        echo "git checkout origin/${{ inputs.kicker_ref }}"
-        git fetch origin ${{ inputs.kicker_ref }}
-        git checkout FETCH_HEAD
+    - name: Checkout Kicker
+      uses: actions/checkout@v3
+      with:
+        repository: RetricSu/godwoken-kicker
+        ref: ${{ inputs.kicker_ref }}
+        path: kicker
+        submodules: 'recursive'
 
     - name: Rust Cache
       uses: actions/cache@v2

@@ -43,42 +43,37 @@ on:
     branches:
     - develop
 
-env:
-  # https://github.com/Flouse/godwoken-docker-prebuilds/pkgs/container/godwoken-prebuilds/13011506?tag=nightly
-  # built from https://github.com/Flouse/godwoken-docker-prebuilds/blob/develop/Makefile#L9-L13
-  GW_PREBUILDS_IMAGE_NAME: ghcr.io/flouse/godwoken-prebuilds
-  GW_PREBUILD_IMAGE_TAG: nightly
-
-  # GODWOKEN_GIT_URL: https://github.com/nervosnetwork/godwoken.git
-  # GODWOKEN_REF: master
-  # GW_SCRIPTS_GIT_URL: https://github.com/nervosnetwork/godwoken-scripts.git
-  # GW_SCRIPTS_REF: master
-  # POLYJUICE_GIT_URL: https://github.com/nervosnetwork/godwoken-polyjuice.git
-  # POLYJUICE_REF: main
 
 jobs:
-
   # Run integration-tests-v0 on devnet deployed by Godowoken-Kicker
   test-on-devnet-v0:
     runs-on: ubuntu-latest
-    if: ${{ true }}
     env:
+      TOOL_REF: v0.10.x
       FINALITY_BLOCKS_NUM: 4
+
     steps:
-    # git checkout godwoken-test
-    - uses: actions/checkout@v3
+    # Check multiple repos (nested)
+    # see: https://github.com/actions/checkout#checkout-multiple-repos-nested
+    - name: Checkout godwoken-tests
+      uses: actions/checkout@v3
       with:
         repository: nervosnetwork/godwoken-tests
         ref: v0
         submodules: 'recursive'
-    # Checkout multiple repos (nested)
-    - uses: actions/checkout@v3
+    - name: Checkout Kicker # multiple repos (nested)
+      uses: actions/checkout@v3
       with:
         repository: RetricSu/godwoken-kicker
         ref: ${{ inputs.kicker_ref }}
         path: kicker
         submodules: 'recursive'
-    
+    - name: Checkout godwoken-examples (tools) to ${{ env.TOOL_REF }}
+      working-directory: tools
+      run: |
+        git fetch origin ${{ env.TOOL_REF }}
+        git checkout FETCH_HEAD
+
     # set up buildx/BuildKit runner in the context,
     # make the Docker cache exportable and thus properly cacheable
     - name: Set up Docker Buildx
