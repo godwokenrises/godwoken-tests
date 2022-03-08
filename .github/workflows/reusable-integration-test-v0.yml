@@ -10,14 +10,12 @@ on:
         default: 'develop'
       gw_prebuild_image_name:
         description: 'The prebuild image name'
-        required: true
+        required: false
         type: string
-        default: 'ghcr.io/flouse/godwoken-prebuilds'
       gw_prebuild_image_tag:
         description: 'The prebuild image tag'
-        required: true
+        required: false
         type: string
-        default: 'develop'
       godwoken_ref:
         description: 'Godwoken version reference'
         required: false
@@ -37,7 +35,6 @@ on:
         default: 'INFO'
   push:
     branches:
-    - reusable_workflow
     - v0
   pull_request:
     branches:
@@ -45,7 +42,7 @@ on:
 
 
 jobs:
-  # Run integration-tests-v0 on devnet deployed by Godowoken-Kicker
+  # Run integration-tests on devnet_v0 deployed by Godowoken-Kicker
   test-on-devnet-v0:
     runs-on: ubuntu-latest
     env:
@@ -78,7 +75,7 @@ jobs:
     # make the Docker cache exportable and thus properly cacheable
     - name: Set up Docker Buildx
       uses: docker/setup-buildx-action@v1
-    
+
     - name: Rust Cache
       uses: actions/cache@v2
       with:
