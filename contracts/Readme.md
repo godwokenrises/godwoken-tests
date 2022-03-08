@@ -6,14 +6,16 @@ You can deploy in the localhost network following these steps:
 
 ```sh
 # see: https://github.com/RetricSu/godwoken-kicker/tree/compatibility-changes
-git clone -b compatibility-changes https://github.com/RetricSu/godwoken-kicker.git
-cd godwoken-kicker
+git clone -b compatibility-changes --depth=1 https://github.com/RetricSu/godwoken-kicker.git kicker
+cd kicker
 make start
 ```
 
 
 2. Run tests
 ```sh
+# pwd = contracts
+npm install
 npm run test
 ```
 
