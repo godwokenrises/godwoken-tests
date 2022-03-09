@@ -2,6 +2,7 @@ const { expect } = require("chai");
 const { ethers, waffle } = require("hardhat");
 
 const BET_VALUE = BigInt(1 * 10 ** 3);
+const MINIMUM_USER_BALANCE_FOR_TESTING = BET_VALUE * BigInt(10);
 
 describe('HeadTail', () => {
     let provider = waffle.provider;
@@ -124,7 +125,7 @@ describe('HeadTail', () => {
 
             expect(await contract.userOneAddress()).to.be.equal(userOne.address);
 
-            await  contract.connect(userTwo).depositUserTwo(true, {
+            await contract.connect(userTwo).depositUserTwo(true, {
                 gasPrice: 0,
                 value: BET_VALUE
             });

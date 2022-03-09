@@ -11,7 +11,7 @@ module.exports = {
   networks: {
     gw_devnet_v1: {
       url: `http://localhost:8024`,
-      accounts: [`0x6cd5e7be2f6504aa5ae7c0c04178d8f47b7cfc63b71d95d9e6282f5b090431bf`, `0xd9bc30dc17023fbb68fe3002e0ff9107b241544fd6d60863081c55e383f1b5a3`],
+      accounts: [`0x6cd5e7be2f6504aa5ae7c0c04178d8f47b7cfc63b71d95d9e6282f5b090431bf`, `0x1473ec0e7c507de1d5c734a997848a78ee4d30846986d6b1d22002a57ece74ba`],
     },
     gw_testnet_v1: {
       url: `https://godwoken-testnet-web3-v1-rpc.ckbapp.dev`,
