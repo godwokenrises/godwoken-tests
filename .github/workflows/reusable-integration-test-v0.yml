@@ -5,32 +5,36 @@ on:
     inputs:
       kicker_ref:
         type: string
-        description: 'Godwoken Kicker version reference'
+        description: 'The reference of https://github.com/RetricSu/godwoken-kicker.git'
         required: false
         default: 'develop'
       gw_prebuild_image_name:
-        description: 'The prebuild image name'
+        description: 'The prebuild image name, e.g. nervos/godwoken-prebuilds or ghcr.io/flouse/godwoken-prebuilds'
         required: false
         type: string
       gw_prebuild_image_tag:
-        description: 'The prebuild image tag'
+        description: 'The prebuilt image tag'
         required: false
         type: string
       godwoken_ref:
-        description: 'Godwoken version reference'
+        description: 'The reference of https://github.com/nervosnetwork/godwoken.git'
         required: false
         type: string
       gw_scripts_ref:
-        description: 'Godwoken-scripts version reference'
+        description: 'The reference of https://github.com/nervosnetwork/godwoken-scripts.git'
         required: false
         type: string
       polyjuice_ref:
-        description: 'Polyjuice version reference'
+        description: 'The reference of https://github.com/nervosnetwork/godwoken-polyjuice.git'
+        required: false
+        type: string
+      web3_ref:
+        description: 'The reference of https://github.com/nervosnetwork/godwoken-web3.git'
         required: false
         type: string
       log-level:
         type: string
-        description: 'Log level'   
+        description: 'Log level'
         required: false
         default: 'INFO'
   push:
@@ -124,6 +128,13 @@ jobs:
           sed -i \
             -e "s|MANUAL_BUILD_POLYJUICE=false|MANUAL_BUILD_POLYJUICE=true|g" \
             -e "s|POLYJUICE_GIT_CHECKOUT=.*|POLYJUICE_GIT_CHECKOUT=${{ inputs.polyjuice_ref }}|g" \
+            .build.mode.env
+        fi
+        if [ -n "${{ inputs.web3_ref }}" ]; then
+          sed -i \
+            -e "s|MANUAL_BUILD_WEB3=false|MANUAL_BUILD_WEB3=true|g" \
+            -e "s|MANUAL_BUILD_WEB3_INDEXER=false|MANUAL_BUILD_WEB3_INDEXER=true|g" \
+            -e "s|WEB3_GIT_CHECKOUT=.*|WEB3_GIT_CHECKOUT=${{ inputs.web3_ref }}|g" \
             .build.mode.env
         fi
         echo "This .build.mode.env will be used:"
@@ -364,11 +375,6 @@ jobs:
         name: debug-tx-dump
         path: |
           kicker/workspace/debug-tx-dump
-
-    # - name: Setup tmate session for debugging if something failed
-    #   if: ${{ failure() || cancelled() }}
-    #   uses: mxschmitt/action-tmate@v3
-    #   timeout-minutes: 10
 
     - name: Stop containers of Kicker
       if: always()
