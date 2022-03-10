@@ -9,6 +9,9 @@ You can deploy in the localhost network following these steps:
 git clone -b compatibility-changes --depth=1 https://github.com/RetricSu/godwoken-kicker.git kicker
 cd kicker
 make start
+
+# Use gw-tools to deposit for 2 dev accounts in ckb/specs/dev.toml
+source ./gw_util.sh && deposit_for_two_dev_accounts
 ```
 
 
