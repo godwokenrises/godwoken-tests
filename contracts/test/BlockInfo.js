@@ -18,9 +18,7 @@ describe("BlockInfo Contract", function () {
     
     console.log('chainId', chainId.toString())
     console.log('contractChainId', contractChainId.toString())
-    // TODO: Uncomment when will be fixed
-    // taking wrong chain id inside of smart contract
-    // expect(contractChainId.toString()).to.be.equal(chainId.toString())
+    expect(contractChainId.toString()).to.be.equal(chainId.toString())
   })
 
   it("should compare web3 coinbase and conibase from EVM with same results", async () => {
