@@ -16,8 +16,6 @@ describe("BlockInfo Contract", function () {
     const { chainId } = await ethers.provider.getNetwork()
     const contractChainId = await contract.getChainId()
     
-    console.log('chainId', chainId.toString())
-    console.log('contractChainId', contractChainId.toString())
     expect(contractChainId.toString()).to.be.equal(chainId.toString())
   })
 
@@ -26,8 +24,6 @@ describe("BlockInfo Contract", function () {
     const miner = await web3.eth.getCoinbase()
     const contractMiner = await contract.getBlockCoinbase()
 
-    console.log('contractMiner', contractMiner)
-    console.log('miner', miner)
     // TODO: Uncomment when will be fixed, show as zero address
     // expect(contractMiner).to.be.equal(miner)
   })
@@ -37,8 +33,6 @@ describe("BlockInfo Contract", function () {
     const block = await web3.eth.getBlock("latest")
     const contractBlockNumber = await contract.getBlockNumber()
 
-    console.log('blockNumber', block.number)
-    console.log('contractBlockNumber', contractBlockNumber)
     expect(contractBlockNumber.toNumber()).to.be.equal(block.number)
   })
 
@@ -48,10 +42,7 @@ describe("BlockInfo Contract", function () {
     // TODO: Uncomment when will be fixed
     // throw ProviderError: data out-of-bounds (length=28, offset=32, code=BUFFER_OVERRUN, version=abi/5.0.7)
     // const contractBlockHash = await contract.getBlockHash(block.number)
-
-    console.log('blockHash', block.hash)
-    // console.log('contractBlockHash', contractBlockHash)
-    // expect(contractBlockNumber.toNumber()).to.be.equal(block.number)
+    // expect(contractBlockHash).to.be.equal(block.hash)
   })
 
   it("should mine correct event with block number and hash with OK results", async () => {
@@ -62,10 +53,6 @@ describe("BlockInfo Contract", function () {
     const txBlockHash = tx.blockHash
     const eventBlockNumber = parseInt(tx.logs[0].data.slice(0, 66), 16)
     const eventBlockHash = "0x" + tx.logs[0].data.slice(66, 130)
-    console.log('txBlockNumber', txBlockNumber)
-    console.log('eventBlockNumber', eventBlockNumber)
-    console.log('txBlockHash', txBlockHash)
-    console.log('eventBlockHash', eventBlockHash)
 
     expect(eventBlockNumber).to.be.equal(txBlockNumber)
     // TODO: Uncomment when will be fixed
