@@ -7,7 +7,7 @@ on:
         type: string
         description: 'The reference of https://github.com/RetricSu/godwoken-kicker.git'
         required: false
-        default: 'v1'
+        default: 'refs/pull/179/head'
       gw_prebuild_image_name:
         description: 'The prebuild image name, e.g. nervos/godwoken-prebuilds or ghcr.io/flouse/godwoken-prebuilds'
         required: false
