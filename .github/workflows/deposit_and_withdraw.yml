@@ -9,7 +9,7 @@ on:
   # Note: GitHub Actions does not support the non-standard syntax @yearly, @monthly, @weekly, @daily, @hourly, and @reboot.
   # You can use crontab guru (https://crontab.guru/) to help generate your cron syntax and confirm what time it will run.
   # To help you get started, there is also a list of crontab guru examples (https://crontab.guru/examples.html).
-  - cron:  '0 */6 * * *' # every 2nd hour
+  - cron:  '0 */6 * * *' # every 6 hour
 
 jobs:
   deposit-and-withdraw:
@@ -20,7 +20,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
       with:
         submodules: 'recursive'
         repository: Flouse/godwoken-examples

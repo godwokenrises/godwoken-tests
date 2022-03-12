@@ -4,7 +4,8 @@
   "description": "",
   "scripts": {
     "compile": "hardhat compile",
-    "test": "hardhat test --network gw_devnet_v1"
+    "test": "hardhat test --network gw_devnet_v1",
+    "test:gw_testnet_v1": "hardhat test --network gw_testnet_v1"
   },
   "keywords": [
     "Solidity",
