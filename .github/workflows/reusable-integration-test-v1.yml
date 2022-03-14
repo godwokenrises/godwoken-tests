@@ -148,12 +148,17 @@ jobs:
     - name: Set up Docker Buildx
       uses: docker/setup-buildx-action@v1
 
-    - name: Start Godwoken-Kicker services
-      timeout-minutes: 45
+    - name: Init Godwoken-Kicker services
       working-directory: kicker
       run: |
         docker system df -v
         docker-compose --version
+        make init
+
+    - name: Start Godwoken-Kicker services
+      timeout-minutes: 45
+      working-directory: kicker
+      run: |
         make start
         docker-compose --file docker/docker-compose.yml logs --tail 6
       # FIXME: Sometimes, Godwoken service is not running
