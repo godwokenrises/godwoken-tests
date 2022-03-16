@@ -153,13 +153,15 @@ jobs:
       run: |
         docker system df -v
         docker-compose --version
-        make init
+        set -a && source docker/.build.mode.env
+        ./kicker init
 
     - name: Start Godwoken-Kicker services
       timeout-minutes: 45
       working-directory: kicker
       run: |
-        make start
+        set -a && source docker/.build.mode.env
+        ./kicker start
         docker-compose --file docker/docker-compose.yml logs --tail 6
       # FIXME: Sometimes, Godwoken service is not running
       # https://github.com/Flouse/godwoken/runs/3639382192?check_suite_focus=true#step:8:667
@@ -180,19 +182,6 @@ jobs:
     #     __EOF__
     #     docker restart docker_godwoken_1
     #     docker-compose --file docker/docker-compose.yml logs --tail 6
-
-    - name: Check if Godwoken is running
-      working-directory: kicker
-      run: |
-        source gw_util.sh
-        if isGodwokenRpcRunning; then
-          echo "Go to next step";
-        else
-          echo "Try to start Kicker services again."
-          make start
-          isGodwokenRpcRunning
-        fi
-        sudo chown -R `whoami` cache/build
 
     - name: Deposit for 2 dev accounts
       working-directory: kicker
@@ -257,4 +246,4 @@ jobs:
     - name: Stop containers of Kicker
       if: always()
       working-directory: kicker
-      run: make stop
+      run: ./kicker stop
