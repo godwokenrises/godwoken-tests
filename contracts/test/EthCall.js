@@ -1,8 +1,9 @@
 const { expect } = require("chai");
-const { ethers } = require("hardhat");
+const { ethers, network } = require("hardhat");
+const fetch = require("node-fetch");
 
 const expectedValue = 10;
-let ethCallCacheContract;
+let ethCallContract;
 
 const expectThrowsAsync = async (method, errorMessage) => {
   let error = null;
@@ -20,15 +21,15 @@ const expectThrowsAsync = async (method, errorMessage) => {
 describe("Eth_Call Cache Test", function () {
   before("Deploy and Set", async () => {
     const contractFact = await ethers.getContractFactory("CallTest");
-    ethCallCacheContract = await contractFact.deploy();
-    await ethCallCacheContract.deployed();
-    await ethCallCacheContract.set(expectedValue);
+    ethCallContract = await contractFact.deploy();
+    await ethCallContract.deployed();
+    await ethCallContract.set(expectedValue);
   });
 
   it("batch call", async () => {
     const count = 100;
     const p = new Array(count).fill(1).map(async () => {
-      const value = await ethCallCacheContract.get();
+      const value = await ethCallContract.get();
       return value;
     });
     const ps = Promise.all(p);
@@ -46,16 +47,39 @@ describe("Eth_Call Cache Test", function () {
     const p = new Array(count).fill(1).map(async () => {
       const errMsg = "revert: you trigger death value!";
       const method = async () => {
-        await ethCallCacheContract.getRevertMsg(triggerValue);
+        await ethCallContract.getRevertMsg(triggerValue);
       };
       await expectThrowsAsync(method, errMsg);
     });
     const ps = Promise.all(p);
     await ps;
   });
+
+  it("call without from address", async () => {
+    const transaction = await ethCallContract.populateTransaction.get();
+    // ethers.provider will auto fill from address, so we use fetch to call rpc
+    const body =
+      '{"jsonrpc": "2.0", "method":"eth_call", "params": [{"to":"' +
+      transaction.to +
+      '", "data": "' +
+      transaction.data +
+      '"}, "latest"], "id": 1}';
+    const response = await fetch(network.config.url, {
+      body,
+      headers: {
+        Accept: "application/json",
+        "Content-Type": "application/json",
+      },
+      method: "POST",
+    });
+    const value = await response.json();
+    expect(BigInt(value.result).toString(10)).to.equal(
+      expectedValue.toString()
+    );
+  });
 });
 
 /**
  * How to run this?
- * > npx hardhat test test/EthCallCache --network gw_devnet_v1
+ * > npx hardhat test test/EthCall --network gw_devnet_v1
  */
