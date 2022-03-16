@@ -270,7 +270,10 @@ async function main() {
 	const erc20 = await deployContract();
 
 	const path = process.env.ACCOUNT_FILE_PATH;
-	const batch_num = process.env.BATCH_NUM || 30;
+	let batch_num = process.env.BATCH_NUM || 30;
+	if (typeof batch_num === 'string') {
+		batch_num = Number(batch_num);
+	}
 	const interval = 1000 * (process.env.INTERVAL || 1);
 	let accounts = await readAccountFileToSigners(path, ethers.provider);
 	accounts = await filterInvalidAccounts(accounts, erc20);
@@ -293,7 +296,7 @@ async function main() {
  * export INTERVAL=10
  * 
  * environment variables explain:
- * BATCH_NUM: max txs submitted once, default 5
+ * BATCH_NUM: max txs submitted once, default 30
  * INTERVAL: interval secs between batch requests, default 1s
  * ACCOUNT_FILE_PATH: path of generated account json file
  * 
