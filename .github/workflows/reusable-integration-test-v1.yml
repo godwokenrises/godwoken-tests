@@ -39,9 +39,8 @@ on:
   push:
     branches:
     - 'v1'
+    - 'develop'
   pull_request:
-    branches:
-    - develop
 
 jobs:
   # Run integration-tests on devnet_v1 deployed by Godowoken-Kicker
@@ -185,7 +184,13 @@ jobs:
 
     - name: Deposit for 2 dev accounts
       working-directory: kicker
-      run: source ./gw_util.sh && deposit_for_two_dev_accounts
+      run: |
+        # Deposit for the test accounts defined in `contracts/hardhat.config.js`.
+        # The corresponding private keys are
+        #   1390c30e5d5867ee7246619173b5922d3b04009cab9e9d91e14506231281a997
+        #   2dc6374a2238e414e51874f514b0fa871f8ce0eb1e7ecaa0aed229312ffc91b0
+        ./kicker deposit 0x966B30e576A4d6731996748B48Dd67C94eF29067 1000
+        ./kicker deposit 0x4fef21f1d42e0d23d72100aefe84d555781c31bb 1000
 
     - uses: actions/setup-node@v2
       with:
