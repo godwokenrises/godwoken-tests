@@ -52,20 +52,21 @@ async function readAccountFileToSigners(path, provider) {
  * Take out pks which are not a gw account or 0 balance.
  * @param {*} signers an array of ethers signer
  * @param {*} erc20 contract
- * @returns 
+ * @returns [signer, eth_address]
  */
 async function filterInvalidAccounts(signers, erc20) {
 	let promises = signers.map((signer) => {
 		const erc20_rw = erc20.connect(signer);
-		return erc20_rw.callStatic.balanceOf(signer.getAddress()).then(balance => {
+		const addr = await signer.getAddress();
+		return erc20_rw.callStatic.balanceOf(addr).then(balance => {
 			if (balance > 0) {
-				return signer;
+				return [signer, addr];
 			} else {
-				console.log(`${signer.getAddress()} has not balance`);
+				console.log(`${addr} has no balance`);
 				return null;
 			}
 		}).catch(err => {
-			console.error(`${signer.getAddress()} get balance with error: ${err}`);
+			console.error(`${addr} get balance with error: ${err}`);
 		});
 	});
 	return (await Promise.allSettled(promises))
@@ -74,13 +75,14 @@ async function filterInvalidAccounts(signers, erc20) {
 }
 
 class TestCase {
-	constructor(account) {
+	constructor(account, eth_address) {
 		this.account = account;
+		this.eth_address = eth_address;
 		this.available = true;
 	}
 
 	getAddress() {
-		return this.account.getAddress();
+		return this.eth_address;
 	}
 
 	getAccount() {
@@ -103,7 +105,7 @@ class Benchmark {
 	 * @param {int} batch_num 
 	 */
 	constructor(accounts, batch_num, amount) {
-		this.testcases = accounts.map((account) => new TestCase(account));
+		this.testcases = accounts.map((account) => new TestCase(account[0], account[1]));
 		this.batch_num = batch_num;
 		this.amount = amount;
 
