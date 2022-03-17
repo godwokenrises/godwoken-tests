@@ -50,17 +50,17 @@ async function readAccountFileToSigners(path, provider) {
 /**
  * 
  * Take out pks which are not a gw account or 0 balance.
- * @param {*} signers an array of ethers signer
+ * @param {*} testcases an array of TestCases
  * @param {*} erc20 contract
- * @returns [signer, eth_address]
+ * @returns valid testcases
  */
-async function filterInvalidAccounts(signers, erc20) {
-	let promises = signers.map((signer) => {
-		const erc20_rw = erc20.connect(signer);
-		const addr = await signer.getAddress();
+async function filterInvalidTestCases(testcases, erc20) {
+	let promises = testcases.map((testcase) => {
+		const erc20_rw = erc20.connect(testcase.getAccount());
+		const addr = testcase.getAddress();
 		return erc20_rw.callStatic.balanceOf(addr).then(balance => {
 			if (balance > 0) {
-				return [signer, addr];
+				return testcase;
 			} else {
 				console.log(`${addr} has no balance`);
 				return null;
@@ -101,11 +101,11 @@ class TestCase {
 class Benchmark {
 	/**
 	 * 
-	 * @param {[ethers.signer]} accounts 
+	 * @param {[TestCase]} testcases
 	 * @param {int} batch_num 
 	 */
-	constructor(accounts, batch_num, amount) {
-		this.testcases = accounts.map((account) => new TestCase(account[0], account[1]));
+	constructor(testcases, batch_num, amount) {
+		this.testcases = testcases;
 		this.batch_num = batch_num;
 		this.amount = amount;
 
@@ -267,10 +267,16 @@ function waitTxCommitted(hash, ticker) {
 
 }
 
-/**
- * 
- * 
- */
+
+async function toTestCases(accounts) {
+	let testcases = [];
+	for (let account of accounts) {
+		const addr = await account.getAddress();
+		let testcase = new TestCase(account, addr);
+		testcases.push(testcase);
+	}
+	return testcases;
+}
 async function main() {
 	const erc20 = await deployContract();
 
@@ -281,10 +287,11 @@ async function main() {
 	}
 	const interval = 1000 * (process.env.INTERVAL || 1);
 	let accounts = await readAccountFileToSigners(path, ethers.provider);
-	accounts = await filterInvalidAccounts(accounts, erc20);
-	console.log(`Total valid accounts: ${accounts.length}`);
+	let testcases = await toTestCases(accounts);
+	testcases = await filterInvalidTestCases(testcases, erc20);
+	console.log(`Total valid accounts: ${testcases.length}`);
 
-	let benchmark = new Benchmark(accounts, batch_num, 1);
+	let benchmark = new Benchmark(testcases, batch_num, 1);
 
 	while (true) {
 		run(erc20, benchmark);
