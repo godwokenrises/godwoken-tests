@@ -61,8 +61,11 @@ async function filterInvalidAccounts(signers, erc20) {
 			if (balance > 0) {
 				return signer;
 			} else {
+				console.log(`${signer.getAddress()} has not balance`);
 				return null;
 			}
+		}).catch(err => {
+			console.error(`${signer.getAddress()} get balance with error: ${err}`);
 		});
 	});
 	return (await Promise.allSettled(promises))
