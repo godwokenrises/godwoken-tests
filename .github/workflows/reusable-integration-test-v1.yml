@@ -92,11 +92,10 @@ jobs:
     - name: Edit kicker/docker/.build.mode.env
       working-directory: kicker/docker/
       run: |
-        if [ -n "${{ inputs.gw_prebuild_image_name }}" ]; then
-          sed -i "s|DOCKER_PREBUILD_IMAGE_NAME=.*|DOCKER_PREBUILD_IMAGE_NAME=${{ inputs.gw_prebuild_image_name }}|g" .build.mode.env
-        fi
-        if [ -n "${{ inputs.gw_prebuild_image_tag }}" ]; then
-          sed -i "s|DOCKER_PREBUILD_IMAGE_TAG=.*|DOCKER_PREBUILD_IMAGE_TAG=${{ inputs.gw_prebuild_image_tag }}|g" .build.mode.env
+        if [[ -n "${{ inputs.gw_prebuild_image_name }}" \
+           && -n "${{ inputs.gw_prebuild_image_tag }}" ]]; then
+          NEW_IMAGE=${{ inputs.gw_prebuild_image_name }}:${{ inputs.gw_prebuild_image_tag }}
+          sed -i "s|image:.*godwoken-prebuilds.*|image: $NEW_IMAGE|g" docker-compose.yml
         fi
         if [ -n "${{ inputs.godwoken_ref }}" ]; then
           sed -i \
