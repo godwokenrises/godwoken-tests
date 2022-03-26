@@ -62,7 +62,7 @@ jobs:
       with:
         repository: RetricSu/godwoken-kicker
         # If this workflow is not triggered by workflow_call event, inputs.kicker_ref is empty.
-        ref: ${{ inputs.kicker_ref || 'd25630cc74b853bd9dfd4be89bf0d0d7077f0bee' }}
+        ref: ${{ inputs.kicker_ref || '0d60b9c' }}
         path: kicker
         submodules: 'recursive'
 
