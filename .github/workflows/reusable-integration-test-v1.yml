@@ -31,6 +31,10 @@ on:
         description: 'The reference of https://github.com/nervosnetwork/godwoken-web3.git'
         required: false
         type: string
+      tests_ref:
+        description: 'The reference of https://github.com/nervosnetwork/godwoken-tests.git'
+        required: false
+        type: string
       log-level:
         type: string
         description: 'Log level'
@@ -55,7 +59,7 @@ jobs:
       uses: actions/checkout@v3
       with:
         repository: nervosnetwork/godwoken-tests
-        ref: v1
+        ref: ${{ inputs.tests_ref || 'v1' }}
         submodules: 'recursive'
     - name: Checkout Kicker # multiple repos (nested)
       uses: actions/checkout@v3
