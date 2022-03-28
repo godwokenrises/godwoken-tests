@@ -34,12 +34,12 @@ describe("BlockInfo Contract", function () {
 
   it("should compare web3 block number and block number from EVM with same results", async () => {
     // check block number
-    const block = await web3.eth.getBlock("latest")
-    const contractBlockNumber = await contract.getBlockNumber()
+    const block = await web3.eth.getBlock("latest") // tip block from web3 db
+    const contractBlockNumber = await contract.getCurrentBlockNumber() // mem block from godwoken
 
     console.log('blockNumber', block.number)
     console.log('contractBlockNumber', contractBlockNumber)
-    expect(contractBlockNumber.toNumber()).to.be.equal(block.number)
+    expect(contractBlockNumber.toNumber()).to.be.greaterThan(block.number)
   })
 
   it("should compare web3 block hash and block hash from EVM with same results", async () => {
