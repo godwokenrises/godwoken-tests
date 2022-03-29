@@ -39,7 +39,7 @@ describe("BlockInfo Contract", function () {
 
     console.log('blockNumber', block.number)
     console.log('contractBlockNumber', contractBlockNumber)
-    expect(contractBlockNumber.toNumber()).to.be.greaterThan(block.number)
+    expect(contractBlockNumber.toNumber()).to.be.greaterThanOrEqual(block.number)
   })
 
   it("should compare web3 block hash and block hash from EVM with same results", async () => {
