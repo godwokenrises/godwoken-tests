@@ -24,3 +24,8 @@ describe("Calc contract", function () {
         expect(sub).to.equal(2);
     });
 });
+
+/**
+ * How to run this test?
+ * > npx hardhat test test/Calc --network gw_devnet_v1
+ */

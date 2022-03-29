@@ -34,10 +34,9 @@ module.exports = {
       url: `https://kovan.infura.io/v3/${INFURA_PROJECT_ID}`,
       accounts: [`0x${PRIVATE_KEY}`]
     },
-    // hardhat: {
-    //   gas: 1000000000000, // Infura seems to cap it at 19981536.
-    //   gasPrice: 1
-    // }
+    hardhat: {
+      hardfork: "berlin"
+    }
   },
   solidity: {
     compilers: [
