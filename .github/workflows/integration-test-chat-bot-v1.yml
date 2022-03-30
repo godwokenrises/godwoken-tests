@@ -1,0 +1,406 @@
+name: Integration Test Chat bot
+# Triggered use /itest comment from pr
+
+on:
+  workflow_dispatch:
+    inputs:
+      dispatch:
+        type: string
+        description: "Dispatch contains pr context that want to trigger integration test"
+        required: true
+
+jobs:
+  component-info:
+    runs-on: ubuntu-latest
+    outputs:
+      components_info: ${{ steps.filter_prebuilds_components.outputs.result }}
+      comment_id: ${{ steps.post_workflow_run_comment.outputs.result }}
+    steps:
+      - uses: actions/github-script@v6
+        id: get_components
+        with:
+          script: |
+            const dispatch = JSON.parse(`${{ github.event.inputs.dispatch }}`);
+            core.info(`comment body ${dispatch.comment_body}`);
+
+            const getPrebuilds = async (org, page, perPage) => {
+              return await github.rest.packages.getAllPackageVersionsForPackageOwnedByOrg({
+                package_type: "container",
+                package_name: "godwoken-prebuilds",
+                org,
+                page,
+                per_page: perPage,
+              });
+            };
+
+            const getPrebuildsByTag = async (org, tag) => {
+              const pkgs = await getPrebuilds(org, 1, 100);
+              for (const pkg of pkgs.data) {
+                if (pkg.metadata.container.tags.includes(tag)) {
+                  return pkg;
+                }
+              }
+            };
+
+            // Parse commentBody
+            const prebuilds = {
+              org: "nervosnetwork",
+              repo: "godwoken-docker-prebuilds",
+              pattern: /prebuilds: (.*)/,
+              packageType: "container",
+              packageName: "godwoken-prebuilds",
+              tags: undefined,
+              sha: undefined,
+              htmlUrl: undefined,
+              manifest: {
+                godwoken: {
+                  pattern: /&quot;ref.component.godwoken-sha1&quot;: &quot;(.{40})&quot;,/,
+                  sha: undefined,
+                },
+                scripts: {
+                  pattern: /&quot;ref.component.godwoken-scripts-sha1&quot;: &quot;(.{40})&quot;,/,
+                  sha: undefined,
+                },
+                polyjuice: {
+                  pattern: /&quot;ref.component.godwoken-polyjuice-sha1&quot;: &quot;(.{40})&quot;,/,
+                  sha: undefined,
+                },
+              },
+            };
+            const components = {
+              godwoken: {
+                owner: "nervosnetwork",
+                repo: "godwoken",
+                branch: "compatibility-breaking-changes",
+                pattern: /godwoken: (.*)/,
+                commit: undefined,
+                htmlUrl: undefined,
+                branchOrCommit: undefined,
+                usePrebuilds: undefined,
+              },
+              scripts: {
+                owner: "nervosnetwork",
+                repo: "godwoken-scripts",
+                branch: "compatibility-breaking-changes",
+                pattern: /scripts: (.*)/,
+                commit: undefined,
+                htmlUrl: undefined,
+                branchOrCommit: undefined,
+                usePrebuilds: undefined,
+              },
+              polyjuice: {
+                owner: "nervosnetwork",
+                repo: "godwoken-polyjuice",
+                branch: "compatibility-breaking-changes",
+                pattern: /polyjuice: (.*)/,
+                commit: undefined,
+                htmlUrl: undefined,
+                branchOrCommit: undefined,
+                usePrebuilds: undefined,
+              },
+              web3: {
+                owner: "nervosnetwork",
+                repo: "godwoken-web3",
+                branch: "compatibility-breaking-changes",
+                pattern: /web3: (.*)/,
+                commit: undefined,
+                htmlUrl: undefined,
+                branchOrCommit: undefined,
+              },
+              kicker: {
+                owner: "RetricSu",
+                repo: "godwoken-kicker",
+                branch: "compatibility-changes",
+                pattern: /kicker: (.*)/,
+                commit: undefined,
+                htmlUrl: undefined,
+                branchOrCommit: undefined,
+              },
+              tests: {
+                owner: "nervosnetwork",
+                repo: "godwoken-tests",
+                branch: "develop",
+                pattern: /tests: (.*)/,
+                commit: undefined,
+                htmlUrl: undefined,
+                branchOrCommit: undefined,
+              },
+            };
+
+            // Fetch pr commit
+            const pr = (
+              await github.rest.pulls.get({
+                owner: dispatch.repo.owner,
+                repo: dispatch.repo.repo,
+                pull_number: dispatch.issue.number,
+              })
+            ).data.head;
+            core.info(`${JSON.stringify(pr.ref)}`);
+            core.info(`${JSON.stringify(pr.repo.name)}`);
+
+            // Fetch prebuilds
+            const matchPrebuilds = async () => {
+              const match = prebuilds.pattern.exec(`${dispatch.comment_body}`);
+              if (match) {
+                return await getPrebuildsByTag(prebuilds.org, match[1]);
+              } else {
+                return (await getPrebuilds(prebuilds.org, 1, 2)).data[0];
+              }
+            };
+            const pkg = await matchPrebuilds();
+
+            prebuilds.tags = pkg.metadata.container.tags;
+            prebuilds.htmlUrl = pkg.html_url;
+            prebuilds.sha = pkg.name;
+            core.info(`pkg: ${JSON.stringify(pkg)}`);
+
+            // Fetch prebuilds components commit;
+            const packagePage = JSON.stringify(
+              await github.request(`GET ${prebuilds.htmlUrl}`)
+            );
+            const manifestContesnt = packagePage.substring(packagePage.indexOf("Manifest"));
+            for (const name in prebuilds.manifest) {
+              const label = prebuilds.manifest[name];
+              const match = label.pattern.exec(manifestContesnt);
+              if (match) {
+                label.sha = match[1];
+              } else {
+                console.log(`${manifestContesnt}`);
+                throw `${name}-sha1 not found`;
+              }
+            }
+            core.info(`${JSON.stringify(prebuilds)}`);
+
+            for (const name in components) {
+              const comp = components[name];
+
+              // Ref from pr is priority
+              if (pr.repo.name === comp.repo) {
+                comp.branchOrCommit = pr.sha;
+                continue;
+              }
+
+              const match = comp.pattern.exec(`${dispatch.comment_body}`);
+              if (match) {
+                comp.branchOrCommit = match[1];
+              } else if (prebuilds.manifest[name]) {
+                comp.branchOrCommit = prebuilds.manifest[name].sha;
+                comp.usePrebuilds = true;
+              } else {
+                if (name === "web3") {
+                  continue;
+                }
+                comp.branchOrCommit = comp.branch;
+              }
+            }
+            core.info(JSON.stringify(components));
+
+            // Fetch branch/commit sha and html url
+            for (const name in components) {
+              const comp = components[name];
+              core.info(`fetch branch or commit ${name}`);
+
+              if (comp.branchOrCommit === undefined) {
+                core.info(`skip fetch component info ${name}`);
+                continue;
+              }
+
+              try {
+                // Try branch
+                const resp = await github.rest.repos.getBranch({
+                  owner: comp.owner,
+                  repo: comp.repo,
+                  branch: comp.branchOrCommit,
+                });
+                comp.commit = resp.data.commit.sha;
+                comp.htmlUrl = resp.data.commit.html_url;
+              } catch {
+                core.info(`${comp.branchOrCommit} branch not found`);
+              }
+
+              try {
+                if (comp.commit === undefined) {
+                  // Try commit
+                  const resp = await github.rest.git.getCommit({
+                    owner: comp.owner,
+                    repo: comp.repo,
+                    commit_sha: comp.branchOrCommit,
+                  });
+                  comp.commit = resp.data.sha;
+                  comp.htmlUrl = resp.data.html_url;
+                }
+              } catch {
+                core.info(`${comp.branchOrCommit} full commit not found`);
+              }
+
+              try {
+                if (comp.commit === undefined) {
+                  // Try serach commits
+                  const resp = await github.rest.repos.listCommits({
+                    owner: comp.owner,
+                    repo: comp.repo,
+                    sha: comp.branchOrCommit,
+                    per_page: 1,
+                    page: 1,
+                  });
+                  if (resp.data[0].sha.startsWith(comp.branchOrCommit)) {
+                    comp.commit = resp.data[0].sha;
+                    comp.htmlUrl = resp.data[0].html_url;
+                  } else {
+                    throw `${comp.branchOrCommit} short sha commit not found`;
+                  }
+                }
+              } catch {
+                core.error(`${comp.branchOrCommit} short commit not found`);
+              }
+
+              if (comp.commit === undefined) {
+                throw `${comp.branchOrCommit} not found`;
+              }
+            }
+            core.info(JSON.stringify(components));
+            return {prebuilds, components};
+
+      - name: Post a comment about component information to PR
+        id: post_workflow_run_comment
+        uses: actions/github-script@v6
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const components_info = JSON.parse(`${{ steps.get_components.outputs.result }}`);
+            const prebuilds = components_info.prebuilds;
+            const components = components_info.components;
+            const dispatch = JSON.parse(`${{ github.event.inputs.dispatch }}`);
+
+            const workflowRun = (await github.rest.actions.getWorkflowRun({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              run_id: `${{ github.run_id }}`,
+            })).data;
+            core.info(`action html url: ${workflowRun.html_url}`)
+
+            // Post integration test info
+            let integrationTestInfo = `
+            \### Running integration test
+
+            Workflow Run Id: [${workflowRun.id}](${workflowRun.html_url})
+              
+            \### Components:
+
+            - prebuilds: [${prebuilds.tags}](${prebuilds.htmlUrl})`;
+
+            for (const name in components) {
+              const comp = components[name];
+              if (comp.commit === undefined) {
+                continue;
+              }
+              let shortSha = comp.commit.substr(0, 7);
+              if (comp.usePrebuilds) {
+                shortSha = `prebuilds ${shortSha}`;
+              }
+              integrationTestInfo = `${integrationTestInfo}\n- ${name}: [${shortSha}](${comp.htmlUrl})`;
+            }
+
+            // Add manual trigger example
+            integrationTestInfo = `${integrationTestInfo}
+            \### Manually running integration test
+            
+            Post a comment contains
+            \`\`\`
+            /itest
+            [prebuilds: tag]
+            [godwoken: branch/ref]
+            [scripts: branch/ref]
+            [polyjuice: branch/ref]
+            [web3: branch/ref]
+            [kicker: branch/ref]
+            [tests: branch/ref]
+            \`\`\`
+
+            Note: \`\`\`[]\`\`\` means optional, for example
+
+            \`\`\`
+            /itest
+            prebuilds: dev-202203280240
+            godwoken: develop
+            scripts: 81676d9d53ffdf5bbaa60483928d07da16eb4a88
+            polyjuice: e37553b9
+            \`\`\``;
+            core.info(`${integrationTestInfo}`);
+
+            const comment = await github.rest.issues.createComment({
+              issue_number: dispatch.issue.number,
+              owner: dispatch.repo.owner,
+              repo: dispatch.repo.repo,
+              body: integrationTestInfo,
+            });
+            core.info(`comment ${JSON.stringify(comment.data, null, 2)}`);
+
+            return comment.data.id;
+
+      - name: Filter components use prebuilds
+        id: filter_prebuilds_components
+        uses: actions/github-script@v6
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const components_info = JSON.parse(`${{ steps.get_components.outputs.result }}`);
+            const prebuilds = components_info.prebuilds;
+            const components = components_info.components;
+            core.info(`${ JSON.stringify(prebuilds, null, 2) }`)
+            core.info(`${ JSON.stringify(components, null, 2) }`)
+
+            for (const name in components) {
+              const comp = components[name];
+              if (comp.commit === undefined) {
+                continue;
+              }
+              if (comp.usePrebuilds) {
+                comp.commit = undefined;
+              }
+            }
+            core.info(JSON.stringify(components));
+
+            return {prebuilds, components};
+
+  run-integration-test:
+    needs: component-info
+    uses: nervosnetwork/godwoken-tests/.github/workflows/reusable-integration-test-v1.yml@develop
+    with:
+      # github.head_ref: The head_ref or source branch of the pull request in a workflow run. This property is only available when the event that triggers a workflow run is either pull_request or pull_request_target.
+      # github.ref: The branch or tag ref that triggered the workflow run. For branches this is the format refs/heads/<branch_name>, and for tags it is refs/tags/<tag_name>.
+      kicker_ref: ${{ fromJSON(needs.component-info.outputs.components_info).components.kicker.commit }}
+      gw_prebuild_image_tag: ${{ fromJSON(needs.component-info.outputs.components_info).prebuilds.tags[0] }}
+      godwoken_ref: ${{ fromJSON(needs.component-info.outputs.components_info).components.godwoken.commit }}
+      gw_scripts_ref: ${{ fromJSON(needs.component-info.outputs.components_info).components.scripts.commit }}
+      polyjuice_ref: ${{ fromJSON(needs.component-info.outputs.components_info).components.polyjuice.commit }}
+      tests_ref: ${{ fromJSON(needs.component-info.outputs.components_info).components.tests.commit }}
+
+  run-result-feedback:
+    needs: [component-info, run-integration-test]
+    runs-on: ubuntu-latest
+    if: always()
+    steps:
+      - name: Update comment about integration test result
+        uses: actions/github-script@v6
+        with:
+          script: |
+            const dispatch = JSON.parse(`${{ github.event.inputs.dispatch }}`);
+
+            const comment_id = `${{ needs.component-info.outputs.comment_id }}`;
+            core.info(`comment id ${comment_id}`);
+
+            const comment = await github.rest.issues.getComment({
+              owner: dispatch.repo.owner,
+              repo: dispatch.repo.repo,
+              comment_id,
+            });
+
+            const appendConclusion = `${comment.data.body}\n### Run Result\n**${{ needs.run-integration-test.result }}**`;
+            const resp = await github.rest.issues.updateComment({
+              owner: dispatch.repo.owner,
+              repo: dispatch.repo.repo,
+              comment_id,
+              body: appendConclusion,
+            });
+            core.info(`${JSON.stringify(resp, null, 2)}`);
