@@ -374,6 +374,7 @@ jobs:
       godwoken_ref: ${{ fromJSON(needs.component-info.outputs.components_info).components.godwoken.commit }}
       gw_scripts_ref: ${{ fromJSON(needs.component-info.outputs.components_info).components.scripts.commit }}
       polyjuice_ref: ${{ fromJSON(needs.component-info.outputs.components_info).components.polyjuice.commit }}
+      web3_ref: ${{ fromJSON(needs.component-info.outputs.components_info).components.web3.commit }}
       tests_ref: ${{ fromJSON(needs.component-info.outputs.components_info).components.tests.commit }}
 
   run-result-feedback:
