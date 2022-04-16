@@ -1,11 +1,11 @@
 {
   "name": "contracts",
-  "version": "1.0.0",
-  "description": "",
+  "version": "1.0.1",
+  "description": "Some contract test case for Godwoken",
   "scripts": {
     "compile": "hardhat compile",
     "test": "hardhat test --network gw_devnet_v1",
-    "test:gw_testnet_v1": "hardhat test --network gw_testnet_v1"
+    "test:gw_testnet_v1": "hardhat test --bail --network gw_testnet_v1"
   },
   "keywords": [
     "Solidity",

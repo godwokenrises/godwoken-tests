@@ -11,11 +11,13 @@ describe("SisyphusGamble", function () {
     console.log(`Deploying contract SisyphusGambleVenues`);
     const sisyphusGambleVenuesFact = await ethers.getContractFactory("SisyphusGambleVenues");
     const sisyphusGambleVenues = await sisyphusGambleVenuesFact.deploy();
+    await sisyphusGambleVenues.deployed();
     console.log(`  Sisyphus gamble venues deployed on address: ${sisyphusGambleVenues.address}`);
 
     console.log(`Deploying contract testERC20`);
     const erc20Fact = await ethers.getContractFactory("testERC20");
     const erc20 = await erc20Fact.deploy();
+    await erc20.deployed();
     console.log(`  TestERC20 on address: ${erc20.address}`);
     let balanceOfSender = await erc20.balanceOf(sender.address);
     console.log(`  sender's balnace = ${balanceOfSender}`);
