@@ -42,7 +42,7 @@ on:
         default: 'INFO'
   push:
     branches:
-    - 'v1'
+    - 'v1*'
     - 'develop'
   pull_request:
 

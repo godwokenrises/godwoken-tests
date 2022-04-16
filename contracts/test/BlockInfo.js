@@ -5,7 +5,7 @@ describe("BlockInfo Contract", function () {
 
   let contract;
 
-  beforeEach(async function () {
+  before(async function () {
     const blockInfoContract = await ethers.getContractFactory("BlockInfo");
     contract = await blockInfoContract.deploy();
     await contract.deployed();
@@ -75,3 +75,8 @@ describe("BlockInfo Contract", function () {
     // expect(eventBlockHash).to.be.equal(txBlockHash)
   })
 });
+
+/**
+ * How to run this test?
+ * > npx hardhat test test/BlockInfo --network gw_devnet_v1
+ */

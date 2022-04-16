@@ -147,3 +147,8 @@ describe('HeadTail', () => {
         });
     });
 });
+
+/**
+ * How to run this?
+ * > npx hardhat test test/HeadTail --network gw_devnet_v1
+ */
