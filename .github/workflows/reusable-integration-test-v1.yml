@@ -242,7 +242,7 @@ jobs:
       run: |
         ./kicker withdraw-v0-to-v1 0x966B30e576A4d6731996748B48Dd67C94eF29999 1000
         counter=1
-        while [ $counter -le 20 ]
+        while [ $counter -le 50 ]
         do
           balance=$(./kicker get-balance 0x966B30e576A4d6731996748B48Dd67C94eF29999 | grep -oE "Balance:\s.*")
           # deposit 1000 + withdraw from v0 1000
