@@ -203,6 +203,25 @@ jobs:
         ./kicker deposit 0x966B30e576A4d6731996748B48Dd67C94eF29999 1000
         ./kicker deposit-v0 10000 # Use ckb-miner key
 
+    - name: Withdraw from v0 to v1
+      working-directory: kicker
+      run: |
+        ./kicker withdraw-v0-to-v1 0x966B30e576A4d6731996748B48Dd67C94eF29999 1000
+        counter=1
+        while [ $counter -le 60 ]
+        do
+          balance=$(./kicker get-balance 0x966B30e576A4d6731996748B48Dd67C94eF29999 | grep -oE "Balance:\s.*")
+          # deposit 1000 + withdraw from v0 1000
+          if [ "$balance" = "Balance: 200000000000" ]; then
+            echo "withdraw from v0 to v1 success"
+            exit 0
+          fi
+          ((counter++))
+          sleep 10s
+        done
+        echo "withdraw from v0 to v1 fail"
+        exit 1
+
     - uses: actions/setup-node@v2
       with:
         node-version: '16'
