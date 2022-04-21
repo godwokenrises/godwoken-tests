@@ -1,0 +1,20 @@
+{
+  "name": "create-eoa-account",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node --experimental-modules --es-module-specifier-resolution=node index.js"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@ckb-lumos/base": "0.18.0-rc1",
+    "@ckb-lumos/common-scripts": "0.18.0-rc1",
+    "ckb-js-toolkit": "0.10.2",
+    "keccak256": "^1.0.2",
+    "secp256k1": "^4.0.2"
+  }
+}
