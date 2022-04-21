@@ -256,24 +256,9 @@ jobs:
       working-directory: contracts
       run: npm install && npm run test
 
-    - name: Withdraw from v0 to v1
-      working-directory: kicker
-      run: |
-        ./kicker withdraw-v0-to-v1 0x966B30e576A4d6731996748B48Dd67C94eF29999 1000
-        counter=1
-        while [ $counter -le 50 ]
-        do
-          balance=$(./kicker get-balance 0x966B30e576A4d6731996748B48Dd67C94eF29999 | grep -oE "Balance:\s.*")
-          # deposit 1000 + withdraw from v0 1000
-          if [ "$balance" = "Balance: 200000000000" ]; then
-            echo "withdraw from v0 to v1 success"
-            break
-          fi
-          ((counter++))
-          sleep 10s
-        done
-        echo "withdraw from v0 to v1 fail"
-        exit 1
+    - name: Setup tmate session
+      if: ${{ failure() }}
+      uses: mxschmitt/action-tmate@v3
 
     - name: Save logs
       if: always()
