@@ -1,6 +1,9 @@
-name: Test on testnet_v1
+name: Test on betanet_v1.1
 
 on:
+  push:
+    branches:
+    - '*betanet*'
   schedule:
   # You can schedule a workflow to run at specific UTC times using POSIX cron syntax (https://pubs.opengroup.org/onlinepubs/9699919799/utilities/crontab.html#tag_20_25_07).
   # Scheduled workflows run on the latest commit on the default or base branch.
@@ -12,10 +15,6 @@ on:
 
 jobs:
   contract-tests:
-    strategy:
-      fail-fast: false
-      matrix:
-        net: ['testnet_v1']
     runs-on: ubuntu-latest
 
     steps:
@@ -40,4 +39,4 @@ jobs:
 
     - name: Run tests
       working-directory: contracts
-      run: npm install ; npm run test:gw_testnet_v1
+      run: npm install ; npm run test:gw_betanet_v1

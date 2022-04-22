@@ -16,7 +16,13 @@ module.exports = {
       url: `http://localhost:8024`,
       accounts: [`0x${PRIVATE_KEY}`, `0x${PRIVATE_KEY2}`],
     },
-    gw_testnet_v1: {
+    gw_betanet_v1: {
+      url: `https://godwoken-betanet-v1.ckbapp.dev`,
+      accounts: [`0x${PRIVATE_KEY}`, `0x${PRIVATE_KEY2}`],
+      version: "1.1.0",
+      chainId: 71401,
+    },
+    gw_testnet_v1: { // TODO: Deprecate
       url: `https://godwoken-testnet-web3-v1-rpc.ckbapp.dev`,
       accounts: [`0x${PRIVATE_KEY}`, `0x${PRIVATE_KEY2}`],
     },
