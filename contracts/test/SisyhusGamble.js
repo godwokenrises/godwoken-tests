@@ -16,9 +16,13 @@ describe("SisyphusGamble", function () {
     console.log(`Deploying contract testERC20`);
     const erc20Fact = await ethers.getContractFactory("testERC20");
     const erc20 = await erc20Fact.deploy();
+    console.log(`  TestERC20 Deployment Transaction Hash: ${erc20.deployTransaction.hash}`);
+    await erc20.deployed();
     console.log(`  TestERC20 on address: ${erc20.address}`);
+
     let balanceOfSender = await erc20.balanceOf(sender.address);
     console.log(`  sender's balnace = ${balanceOfSender}`);
+    expect(balanceOfSender).equals(10000);
 
     console.log("Start a new sisyphus gamble");
     await erc20.approve(sisyphusGambleVenues.address, 1);
@@ -60,5 +64,5 @@ describe("SisyphusGamble", function () {
 
 /**
  * How to run this?
- * > npx hardhat test test/SisyhusGamble --network gw_devnet_v1
+ * > npx hardhat test test/SisyhusGamble --network gw_betanet_v1
  */
