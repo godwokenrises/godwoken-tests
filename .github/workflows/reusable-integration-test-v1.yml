@@ -66,7 +66,7 @@ jobs:
       with:
         repository: RetricSu/godwoken-kicker
         # If this workflow is not triggered by workflow_call event, inputs.kicker_ref is empty.
-        ref: ${{ inputs.kicker_ref || 'refs/pull/235/head' }} # https://github.com/RetricSu/godwoken-kicker/pull/235
+        ref: ${{ inputs.kicker_ref || 'refs/pull/238/head' }}
         path: kicker
         submodules: 'recursive'
 
@@ -161,6 +161,8 @@ jobs:
     - name: Start Godwoken-Kicker services
       timeout-minutes: 45
       working-directory: kicker
+      env: 
+        START_GODWOKEN_V0: true
       run: |
         set -a && source docker/.build.mode.env
         ./kicker start
@@ -195,6 +197,31 @@ jobs:
         ./kicker deposit 0x966B30e576A4d6731996748B48Dd67C94eF29067 1000
         ./kicker deposit 0x4fef21f1d42e0d23d72100aefe84d555781c31bb 1000
 
+    - name: Deposit for withdraw from v0 to v1 test
+      working-directory: kicker
+      run: |
+        ./kicker deposit 0x966B30e576A4d6731996748B48Dd67C94eF29999 1000
+        ./kicker deposit-v0 10000 # Use ckb-miner key
+
+    - name: Withdraw from v0 to v1
+      working-directory: kicker
+      run: |
+        ./kicker withdraw-v0-to-v1 0x966B30e576A4d6731996748B48Dd67C94eF29999 1000
+        counter=1
+        while [ $counter -le 60 ]
+        do
+          balance=$(./kicker get-balance 0x966B30e576A4d6731996748B48Dd67C94eF29999 | grep -oE "Balance:\s.*")
+          # deposit 1000 + withdraw from v0 1000
+          if [ "$balance" = "Balance: 200000000000" ]; then
+            echo "withdraw from v0 to v1 success"
+            exit 0
+          fi
+          ((counter++))
+          sleep 10s
+        done
+        echo "withdraw from v0 to v1 fail"
+        exit 1
+
     - uses: actions/setup-node@v2
       with:
         node-version: '16'
@@ -228,6 +255,11 @@ jobs:
     - name: Run hardhat test --network gw_devnet_v1
       working-directory: contracts
       run: npm install && npm run test
+
+    - name: Setup tmate session
+      if: ${{ failure() }}
+      uses: mxschmitt/action-tmate@v3
+      timeout-minutes: 30
 
     - name: Save logs
       if: always()
