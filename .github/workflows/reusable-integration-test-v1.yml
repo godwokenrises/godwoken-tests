@@ -66,7 +66,7 @@ jobs:
       with:
         repository: RetricSu/godwoken-kicker
         # If this workflow is not triggered by workflow_call event, inputs.kicker_ref is empty.
-        ref: ${{ inputs.kicker_ref || 'refs/pull/238/head' }}
+        ref: ${{ inputs.kicker_ref || 'refs/pull/239/head' }}
         path: kicker
         submodules: 'recursive'
 
@@ -211,8 +211,8 @@ jobs:
         while [ $counter -le 60 ]
         do
           balance=$(./kicker get-balance 0x966B30e576A4d6731996748B48Dd67C94eF29999 | grep -oE "Balance:\s.*")
-          # deposit 1000 + withdraw from v0 1000
-          if [ "$balance" = "Balance: 200000000000" ]; then
+          # deposit 1000 + withdraw from v0 1000 (NOTE: CKB decimal is 18, aka 2000 * 10^18)
+          if [ "$balance" = "Balance: 2000000000000000000000" ]; then
             echo "withdraw from v0 to v1 success"
             exit 0
           fi
