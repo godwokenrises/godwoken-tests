@@ -40,11 +40,6 @@ on:
         description: 'Log level'
         required: false
         default: 'INFO'
-  push:
-    branches:
-    - 'v1'
-    - 'develop'
-  pull_request:
 
 jobs:
   # Run integration-tests on devnet_v1 deployed by Godowoken-Kicker
