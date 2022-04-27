@@ -209,13 +209,14 @@ jobs:
         while [ $counter -le 60 ]
         do
           balance=$(./kicker get-balance 0x966B30e576A4d6731996748B48Dd67C94eF29999 | grep -oE "Balance:\s.*")
+          echo "current balance: ${balance}=="
           # deposit 1000 + withdraw from v0 1000 (NOTE: CKB decimal is 18, aka 2000 * 10^18)
           if [ "$balance" = "Balance: 2000000000000000000000" ]; then
             echo "withdraw from v0 to v1 success"
             exit 0
           fi
           ((counter++))
-          sleep 10s
+          sleep 20s
         done
         echo "withdraw from v0 to v1 fail"
         exit 1
