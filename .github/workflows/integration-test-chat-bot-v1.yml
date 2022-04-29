@@ -71,7 +71,7 @@ jobs:
               godwoken: {
                 owner: "nervosnetwork",
                 repo: "godwoken",
-                branch: "compatibility-breaking-changes",
+                branch: "develop",
                 pattern: /godwoken: (.*)/,
                 commit: undefined,
                 htmlUrl: undefined,
@@ -81,7 +81,7 @@ jobs:
               scripts: {
                 owner: "nervosnetwork",
                 repo: "godwoken-scripts",
-                branch: "compatibility-breaking-changes",
+                branch: "master",
                 pattern: /scripts: (.*)/,
                 commit: undefined,
                 htmlUrl: undefined,
@@ -91,7 +91,7 @@ jobs:
               polyjuice: {
                 owner: "nervosnetwork",
                 repo: "godwoken-polyjuice",
-                branch: "compatibility-breaking-changes",
+                branch: "main",
                 pattern: /polyjuice: (.*)/,
                 commit: undefined,
                 htmlUrl: undefined,
@@ -101,7 +101,7 @@ jobs:
               web3: {
                 owner: "nervosnetwork",
                 repo: "godwoken-web3",
-                branch: "compatibility-breaking-changes",
+                branch: "main",
                 pattern: /web3: (.*)/,
                 commit: undefined,
                 htmlUrl: undefined,
@@ -110,7 +110,7 @@ jobs:
               kicker: {
                 owner: "RetricSu",
                 repo: "godwoken-kicker",
-                branch: "compatibility-changes",
+                branch: "v1.1",
                 pattern: /kicker: (.*)/,
                 commit: undefined,
                 htmlUrl: undefined,
