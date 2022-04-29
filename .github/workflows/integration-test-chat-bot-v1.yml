@@ -49,7 +49,7 @@ jobs:
               pattern: /prebuilds: (.*)/,
               packageType: "container",
               packageName: "godwoken-prebuilds",
-              tags: undefined,
+              tags: "v1.1",
               sha: undefined,
               htmlUrl: undefined,
               manifest: {
@@ -144,7 +144,7 @@ jobs:
               if (match) {
                 return await getPrebuildsByTag(prebuilds.org, match[1]);
               } else {
-                return (await getPrebuilds(prebuilds.org, 1, 2)).data[0];
+                return await getPrebuildsByTag(prebuilds.org, prebuilds.tags);
               }
             };
             const pkg = await matchPrebuilds();
