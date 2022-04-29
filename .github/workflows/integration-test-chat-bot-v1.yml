@@ -261,11 +261,18 @@ jobs:
             core.info(JSON.stringify(components));
             return {prebuilds, components};
 
+      - name: Generate gw-bot token
+        id: generate_gw_bot_token
+        uses: wow-actions/use-app-token@v1
+        with:
+          app_id: ${{ secrets.GW_BOT_APP_ID }}
+          private_key: ${{ secrets.GW_BOT_PRIVATE_KEY }}
+
       - name: Post a comment about component information to PR
         id: post_workflow_run_comment
         uses: actions/github-script@v6
         with:
-          github-token: ${{ secrets.CHATBOT_POST_COMMENT }}
+          github-token: ${{ steps.generate_gw_bot_token.outputs.token }}
           script: |
             const components_info = JSON.parse(`${{ steps.get_components.outputs.result }}`);
             const prebuilds = components_info.prebuilds;
@@ -382,10 +389,18 @@ jobs:
     runs-on: ubuntu-latest
     if: always()
     steps:
+      # Generate new token in case the tests run over an hour
+      - name: Generate gw-bot token
+        id: generate_gw_bot_token
+        uses: wow-actions/use-app-token@v1
+        with:
+          app_id: ${{ secrets.GW_BOT_APP_ID }}
+          private_key: ${{ secrets.GW_BOT_PRIVATE_KEY }}
+
       - name: Update comment about integration test result
         uses: actions/github-script@v6
         with:
-          github-token: ${{ secrets.CHATBOT_POST_COMMENT }}
+          github-token: ${{ steps.generate_gw_bot_token.outputs.token }}
           script: |
             const dispatch = JSON.parse(`${{ github.event.inputs.dispatch }}`);
 
