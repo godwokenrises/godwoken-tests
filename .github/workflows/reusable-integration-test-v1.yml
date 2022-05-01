@@ -255,10 +255,11 @@ jobs:
       working-directory: contracts
       run: npm install && npm run test
 
-    - name: Setup tmate session
-      if: ${{ failure() }}
-      uses: mxschmitt/action-tmate@v3
-      timeout-minutes: 30
+    # Only enable tmate while debugging
+    # - name: Setup tmate session
+    #   if: ${{ failure() }}
+    #   uses: mxschmitt/action-tmate@v3
+    #   timeout-minutes: 30
 
     - name: Save logs
       if: always()
