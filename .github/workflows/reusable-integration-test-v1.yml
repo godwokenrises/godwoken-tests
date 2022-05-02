@@ -40,6 +40,14 @@ on:
         description: 'Log level'
         required: false
         default: 'INFO'
+  push:
+    branches:
+    - 'v1*'
+    - 'develop'
+  pull_request_target:
+    branches:
+    - 'v1*'
+    - 'develop'
 
 jobs:
   # Run integration-tests on devnet_v1 deployed by Godowoken-Kicker
@@ -61,7 +69,7 @@ jobs:
       with:
         repository: RetricSu/godwoken-kicker
         # If this workflow is not triggered by workflow_call event, inputs.kicker_ref is empty.
-        ref: ${{ inputs.kicker_ref || 'refs/pull/239/head' }}
+        ref: ${{ inputs.kicker_ref || 'compatibility-changes' }}
         path: kicker
         submodules: 'recursive'
 
