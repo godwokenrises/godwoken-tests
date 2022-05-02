@@ -2,22 +2,30 @@ const { expect } = require("chai");
 const { ethers, web3 } = require("hardhat");
 
 describe("BlockInfo Contract", function () {
+  let contract = {
+    address: "" // You could fill the deployed address here
+  };
 
-  let contract;
+  before(async function () {
+    if (contract.address) {
+      contract = await ethers.getContractAt("BlockInfo", contract.address);
+      return;
+    }
 
-  beforeEach(async function () {
-    const blockInfoContract = await ethers.getContractFactory("BlockInfo");
-    contract = await blockInfoContract.deploy();
+    const blockInfoContractFact = await ethers.getContractFactory("BlockInfo");
+    contract = await blockInfoContractFact.deploy();
     await contract.deployed();
+    console.log("Deployed contract address:", contract.address);
   });
 
   it("should compare web3 chain id and EVM with same results", async () => {
     // check if chain id from web3 is same as chainId opcode
     const { chainId } = await ethers.provider.getNetwork()
-    const contractChainId = await contract.getChainId()
-    
     console.log('chainId', chainId.toString())
+
+    const contractChainId = await contract.getChainId()
     console.log('contractChainId', contractChainId.toString())
+
     expect(contractChainId.toString()).to.be.equal(chainId.toString())
   })
 
@@ -75,3 +83,8 @@ describe("BlockInfo Contract", function () {
     // expect(eventBlockHash).to.be.equal(txBlockHash)
   })
 });
+
+/**
+ * How to run this test?
+ * > npx hardhat test test/BlockInfo --network gw_devnet_v1
+ */

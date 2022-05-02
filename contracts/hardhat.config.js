@@ -25,6 +25,8 @@ module.exports = {
     gw_testnet_v1: { // TODO: Deprecate
       url: `https://godwoken-testnet-web3-v1-rpc.ckbapp.dev`,
       accounts: [`0x${PRIVATE_KEY}`, `0x${PRIVATE_KEY2}`],
+      version: "1.0.0",
+      chainId: 868455272153094
     },
     rinkeby: {
       url: `https://rinkeby.infura.io/v3/${INFURA_PROJECT_ID}`,
