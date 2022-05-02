@@ -11,6 +11,7 @@ describe("SisyphusGamble", function () {
     console.log(`Deploying contract SisyphusGambleVenues`);
     const sisyphusGambleVenuesFact = await ethers.getContractFactory("SisyphusGambleVenues");
     const sisyphusGambleVenues = await sisyphusGambleVenuesFact.deploy();
+    await sisyphusGambleVenues.deployed();
     console.log(`  Sisyphus gamble venues deployed on address: ${sisyphusGambleVenues.address}`);
 
     console.log(`Deploying contract testERC20`);
