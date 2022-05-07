@@ -3,9 +3,27 @@ name: Integration Test v1
 on:
   workflow_call:
     inputs:
-      kicker_ref:
+      # If `extra_github_env` is set, it will be put into GITHUB_ENV at the beginning of each job
+      #
+      # ```
+      # - name: Update GITHUB_ENV if inputs.extra_github_env set
+      #   if: "${{ inputs.extra_github_env != '' }}"
+      #   run: echo ${{ inputs.extra_github_env }} >> $GITHUB_ENV
+      # ```
+      #
+      # ## Examples
+      #
+      # * Specify the kicker version
+      #
+      #   ```yaml
+      #   extra_github_env: |
+      #     KICKER_REPO=keroro520/godwoken-kicker
+      #     KICKER_REF=helloworld
+      #   ```
+      #
+      extra_github_env:
         type: string
-        description: 'The reference of https://github.com/RetricSu/godwoken-kicker.git'
+        description: 'Append write into GITHUB_ENV at the begining of every job'
         required: false
       gw_prebuild_image_name:
         description: 'The prebuild image name, e.g. nervos/godwoken-prebuilds or ghcr.io/flouse/godwoken-prebuilds'
@@ -48,6 +66,11 @@ jobs:
       FINALITY_BLOCKS_NUM: 3
     runs-on: ubuntu-latest
     steps:
+    - name: Update GITHUB_ENV if inputs.extra_github_env set
+      if: "${{ inputs.extra_github_env != '' }}"
+      run: |
+        echo "${{ inputs.extra_github_env }}" >> $GITHUB_ENV
+
     # Check multiple repos (nested)
     # see: https://github.com/actions/checkout#checkout-multiple-repos-nested
     - name: Checkout godwoken-tests
@@ -59,9 +82,8 @@ jobs:
     - name: Checkout Kicker # multiple repos (nested)
       uses: actions/checkout@v3
       with:
-        repository: RetricSu/godwoken-kicker
-        # If this workflow is not triggered by workflow_call event, inputs.kicker_ref is empty.
-        ref: ${{ inputs.kicker_ref || 'compatibility-changes' }}
+        repository: ${{ env.KICKER_REPO || 'RetricSu/godwoken-kicker' }}
+        ref: ${{ env.KICKER_REF || 'compatibility-changes' }}
         path: kicker
         submodules: 'recursive'
 
