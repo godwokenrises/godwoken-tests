@@ -109,7 +109,7 @@ describe("Multicall2", function () {
         { target: constants.AddressZero, callData: revertTestCallData },
       ]);
 
-      assert.isFalse(
+      assert.isTrue(
         isGetEthBalanceSuccess,
         "    [Incompatibility] Failed to get native balance"
       );
@@ -164,9 +164,11 @@ describe("Multicall2", function () {
 });
 
 function handleExpectedRevert(err) {
-  const data = err?.error?.data || err?.data;
-  const statusType = data?.failed_reason?.status_type;
+  const error = err?.error ?? err;
+  const statusType = err?.data?.failed_reason?.status_type;
   if (statusType === "REVERT") {
+    console.log("    Reverted as expected");
+  } else if (error?.message?.toLowerCase()?.includes("revert")) {
     console.log("    Reverted as expected");
   } else {
     throw err;
