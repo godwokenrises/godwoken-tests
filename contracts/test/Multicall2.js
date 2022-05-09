@@ -102,7 +102,7 @@ describe("Multicall2", function () {
       const [
         [shouldBeFalse],
         [isGetEthBalanceSuccess, balance],
-        [shouldBeFalseToo],
+        [shouldBeTrue],
       ] = await multicall2.callStatic.tryAggregate(false, [
         { target: revertTest.address, callData: revertTestCallData },
         { target: multicall2.address, callData: getEthBalanceCallData },
@@ -122,9 +122,9 @@ describe("Multicall2", function () {
         shouldBeFalse,
         "[Incompatibility] Expected shouldBeFalse to return: false, got: true"
       );
-      assert.isFalse(
-        shouldBeFalseToo,
-        "[Incompatibility] Expected shouldBeFalseToo to return: false, got: true"
+      assert.isTrue(
+        shouldBeTrue,
+        "[Incompatibility] Expected shouldBeTrue to return: true, got: false"
       );
     } catch (err) {
       console.log("    [Incompatibility] Should not revert");
