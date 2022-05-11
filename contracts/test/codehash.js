@@ -84,6 +84,16 @@ describe("CodeHash test cases", function () {
     expect(result.events[0].args[1].latestCodeHash).to.equal(CODEHASH);
   });
 
+  // unregistered ETH Address
+  const unregEthAddr = "0x666c3Be470198290d21f5C86327a556d58446678";
+  it("Interact with an unregistered address", async () => {
+    let result = await contract1.getOtherAddr(unregEthAddr);
+    expect(result).equals(unregEthAddr);
+
+    result = await contract1.getOtherAddressBalance(unregEthAddr);
+    expect(result).to.equal(0n)
+  });
+
   // One must create an account on a Godwoken chain in order to use Polyjuice on
   // that Godwoken chain.
   // see: https://github.com/nervosnetwork/godwoken/blob/compatibility-breaking-changes/docs/known_caveats_of_polyjuice.md#account-creation
@@ -93,8 +103,6 @@ describe("CodeHash test cases", function () {
   //
   // see: Godwoken v1.1 Milestone
   it.skip("Interact with an eth_address that hasn't been registered", async () => {
-    // unregistered ETH Address
-    const unregEthAddr = "0x7D360edE258e475c0737FB169f40Ed85dfaf8Fb5";
     let result = await contract1.getOtherAddress(unregEthAddr);
     // unregEthAddr
     expect(result[0]).to.equal(unregEthAddr);
@@ -113,16 +121,6 @@ describe("CodeHash test cases", function () {
       "0x0000000000000000000000000000000000000000000000000000000000000000")
      */
   });
-
-  it("Interact with an unregistered address", async () => {
-    const unregEthAddr = "0x7D360edE258e475c0737FB169f40Ed85dfaf8Fb5";
-
-    let result = await contract1.getOtherAddr(unregEthAddr);
-    expect(result).equals(unregEthAddr);
-
-    result = await contract1.getOtherAddressBalance(unregEthAddr);
-    expect(result).to.equal(0n)
-  });
 })
 
 /**
@@ -130,5 +128,4 @@ describe("CodeHash test cases", function () {
 
 > npx hardhat --network gw_betanet_v1 test test/codehash.js && \
   npx hardhat --network hardhat test test/codehash.js
-
  */
