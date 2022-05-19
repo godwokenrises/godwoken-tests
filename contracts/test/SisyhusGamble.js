@@ -27,7 +27,7 @@ describe("SisyphusGamble", function () {
 
     console.log("Start a new sisyphus gamble");
     const tx = await erc20.approve(sisyphusGambleVenues.address, 1);
-    tx.wait();
+    await tx.wait();
     const tx1 = await sisyphusGambleVenues.newSisyphusGamble(erc20.address,
       1, // startingPrize
       1, // minGamble
