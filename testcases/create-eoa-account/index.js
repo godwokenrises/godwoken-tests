@@ -2,10 +2,11 @@
 import { GodwokenClient } from "./godwoken";
 import { Reader } from "ckb-js-toolkit";
 import { signTypedData, SignTypedDataVersion } from "@metamask/eth-sig-util";
-import pkg from '@ckb-lumos/base';
-const { utils } = pkg;
+import lumos from '@ckb-lumos/base';
+const { utils } = lumos;
 import keccak256 from "keccak256";
 import crypto from "crypto";
+import { expect } from 'chai';
 import {
 	SerializeMetaContractArgs,
 	SerializeRawL2Transaction,
@@ -267,6 +268,7 @@ async function createEoaAccount(rpc, privateKey, ethAddr, nodeInfo) {
 	const newScriptHash = ethAddrToScriptHash(ethAccountTypeHash, rollupTypeHash, ethAddr);
 	const newAccountId = await rpc.getAccountIdByScriptHash(newScriptHash);
 	console.log(`newAccountId: ${newAccountId}`);
+	return newAccountId;
 }
 
 //2. Set mapping between ethAddr and godwoken script hash with Eth Addr Registry contract.
@@ -358,13 +360,28 @@ async function main() {
 	let rpc = new GodwokenClient("http://localhost:8024");
 	//This private key is used in kicker.
 	//We need to deposit some CKB first.
-	const privateKey = "0xbf254a55fa62f956ace5bc2a3f78c488b716c5daa1978626daeace3833691ca9";
+	const privateKey = process.env.PRIVATE_KEY;
+	console.log("private key:", privateKey);
+	expect(privateKey).to.exist;
 	//The EOA account we are going to create.
-	const ethAddr = "0xd1bbb255403c5dc6f6e44375fcf367131785aee4";
+	const ethAddress = process.env.ETH_ADDRESS || '0x8fa599f36278e337db301ecf292ff1c5e3cfda84';
+	console.log(`Use meta-contract to create account: ${ethAddress}`);
+
 	const res = await rpc.getNodeInfo();
 	const nodeInfo = new NodeInfo(res);
-	await createEoaAccount(rpc, privateKey, ethAddr, nodeInfo);
-	await setMapping(rpc, privateKey, ethAddr, nodeInfo);
+	const newAccountId = await createEoaAccount(rpc, privateKey, ethAddress, nodeInfo);
+	expect(newAccountId).to.exist;
+	const scriptHash = await rpc.getScriptHashByAccountId(newAccountId);
+	expect(scriptHash).to.exist;
+	console.log(`Script hash: ${scriptHash}`);
+
+	await setMapping(rpc, privateKey, ethAddress, nodeInfo);
+	const registryAddress = await rpc.getRegistryAddressByScriptHash(scriptHash, '0x2');
+	const actualRegistryAddress = {
+		registry_id: '0x2',
+		address: ethAddress
+	};
+	expect(registryAddress).to.deep.equal(actualRegistryAddress);
 }
 
 main();
