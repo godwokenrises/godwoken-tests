@@ -46,6 +46,9 @@ module.exports = {
       hardfork: "berlin"
     }
   },
+  mocha: {
+    timeout: 1800000 // 30 minutes
+  },
   solidity: {
     compilers: [
       { // for polyjuice contracts

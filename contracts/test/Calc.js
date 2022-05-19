@@ -8,7 +8,8 @@ describe("Calc contract", function () {
         await contract.deployed()
 
         //Set data
-        await contract.store(256);
+        const i = await contract.store(256);
+        await i.wait();
 
         //Read data
         const number = await contract.retrieve();
