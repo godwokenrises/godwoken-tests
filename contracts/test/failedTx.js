@@ -3,7 +3,7 @@ const { ethers, waffle } = require("hardhat");
 
 let contract;
 
-describe('Revertable transaction', () => {
+describe.only('Revertable transaction', () => {
     let provider = waffle.provider;
 
     beforeEach(async function () {
@@ -29,6 +29,7 @@ describe('Revertable transaction', () => {
             // receipt
             const receipt = await tx.wait();
             const gasUsed = receipt.gasUsed;
+            expect(receipt.status).to.be.equal(1);
 
             // check message is set
             expect(await contract.getMsg()).to.be.equal("Hello");
@@ -58,8 +59,10 @@ describe('Revertable transaction', () => {
             // receipt
             const receipt = await tx.wait();
             const gasUsed = receipt.gasUsed;
+            expect(receipt.logs.length).to.be.equal(0);
+            expect(receipt.status).to.be.equal(0);
 
-            // check message is set
+            // check message is unchanged
             expect(await contract.getMsg()).to.be.equal("");
 
             // check balance is expected
