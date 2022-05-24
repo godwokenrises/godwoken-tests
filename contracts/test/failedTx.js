@@ -3,7 +3,7 @@ const { ethers, waffle } = require("hardhat");
 
 let contract;
 
-describe.only('Revertable transaction', () => {
+describe('Revertable transaction', () => {
     let provider = waffle.provider;
 
     beforeEach(async function () {
