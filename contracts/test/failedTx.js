@@ -57,7 +57,7 @@ describe('Revertable transaction', () => {
             const tx = await contract.setMsg(0, "Hello", { value: value, gasPrice: gasPrice, gasLimit: 30000 });
 
             // receipt
-            const receipt = await tx.wait();
+            const receipt = await provider.getTransactionReceipt(tx.hash);
             const gasUsed = receipt.gasUsed;
             expect(receipt.logs.length).to.be.equal(0);
             expect(receipt.status).to.be.equal(0);
