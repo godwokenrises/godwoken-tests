@@ -26,13 +26,15 @@ describe("SisyphusGamble", function () {
     expect(balanceOfSender).equals(10000);
 
     console.log("Start a new sisyphus gamble");
-    await erc20.approve(sisyphusGambleVenues.address, 1);
-    await sisyphusGambleVenues.newSisyphusGamble(erc20.address,
+    const tx = await erc20.approve(sisyphusGambleVenues.address, 1);
+    await tx.wait();
+    const tx1 = await sisyphusGambleVenues.newSisyphusGamble(erc20.address,
       1, // startingPrize
       1, // minGamble
       1, // weight
-      2, // gamblingBlocks
+      4, // gamblingBlocks
     );
+    await tx1.wait();
     expect(await erc20.balanceOf(sender.address)).to.equal(balanceOfSender - 1);
     console.log(`  Getting Sisyphus Gamble Venues...`);
     let gameList = await sisyphusGambleVenues.getSisyphusGambleVenues();
@@ -42,12 +44,17 @@ describe("SisyphusGamble", function () {
 
     console.log("SisyphusGambling...");
     let gambleContract = await ethers.getContractAt("SisyphusGamble", sisyphusGambleAddress);
-    await erc20.approve(sisyphusGambleAddress, 3);
-    await gambleContract.gamble(1);
+    const tx2 = await erc20.approve(sisyphusGambleAddress, 3);
+    await tx2.wait();
+    const tx3 = await gambleContract.gamble(1);
+    await tx3.wait();
+    
     expect(await gambleContract.totalPrize()).eq(2);
-    await gambleContract.gamble(1);
+    const tx4 = await gambleContract.gamble(1);
+    await tx4.wait();
     expect(await gambleContract.totalPrize()).eq(3);
-    await gambleContract.gamble(1);
+    const tx5 = await gambleContract.gamble(1);
+    await tx5.wait();
     expect(await gambleContract.totalPrize()).eq(4);
 
     console.log(">> Claim Prize");

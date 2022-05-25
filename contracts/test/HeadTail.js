@@ -99,9 +99,10 @@ describe('HeadTail', () => {
 
             expect(await contract.userOneAddress()).to.be.equal(userOne.address);
 
-            await contract.connect(userTwo).depositUserTwo(true, {
+            const tx = await contract.connect(userTwo).depositUserTwo(true, {
                 value: BET_VALUE
             });
+            await tx.wait();
 
             expect(await contract.userTwoAddress()).to.be.equal(userTwo.address);
         });
@@ -125,15 +126,17 @@ describe('HeadTail', () => {
 
             expect(await contract.userOneAddress()).to.be.equal(userOne.address);
 
-            await contract.connect(userTwo).depositUserTwo(true, {
+            const tx = await contract.connect(userTwo).depositUserTwo(true, {
                 gasPrice: 0,
                 value: BET_VALUE
             });
+            await tx.wait();
 
-            await contract.revealUserOneChoice(userOneChoice, userOneChoiceSecret, {
+            const tx1 = await contract.revealUserOneChoice(userOneChoice, userOneChoiceSecret, {
                 gasPrice: 0,
                 gasLimit: 10000000
             });
+            await tx1.wait();
 
             expect(await getBalanceAsString(userOne.address)).to.be.equal(
                 startingUserOneBalance.sub(BET_VALUE).toString(),
