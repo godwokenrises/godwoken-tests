@@ -25,35 +25,6 @@ on:
         type: string
         description: 'Append write into GITHUB_ENV at the begining of every job'
         required: false
-      gw_prebuild_image_name:
-        description: 'The prebuild image name, e.g. nervos/godwoken-prebuilds or ghcr.io/flouse/godwoken-prebuilds'
-        required: false
-        type: string
-      gw_prebuild_image_tag:
-        description: 'The prebuilt image tag'
-        required: false
-        type: string
-      godwoken_ref:
-        description: 'The reference of https://github.com/nervosnetwork/godwoken.git'
-        required: false
-        type: string
-      gw_scripts_ref:
-        description: 'The reference of https://github.com/nervosnetwork/godwoken-scripts.git'
-        required: false
-        type: string
-      polyjuice_ref:
-        description: 'The reference of https://github.com/nervosnetwork/godwoken-polyjuice.git'
-        required: false
-        type: string
-      web3_ref:
-        description: 'The reference of https://github.com/nervosnetwork/godwoken-web3.git'
-        required: false
-        type: string
-      log-level:
-        type: string
-        description: 'Log level'
-        required: false
-        default: 'INFO'
   push:
     branches:
     - 'v1*'
@@ -110,42 +81,6 @@ jobs:
         && tar xf capsule_${CAPSULE_VERSION}_x86_64-linux.tar.gz \
         && mv capsule_${CAPSULE_VERSION}_x86_64-linux/capsule ~/.cargo/bin/)
 
-    - name: Edit kicker/docker/.build.mode.env
-      working-directory: kicker/docker/
-      run: |
-        if [[ -n "${{ inputs.gw_prebuild_image_name }}" \
-           && -n "${{ inputs.gw_prebuild_image_tag }}" ]]; then
-          NEW_IMAGE=${{ inputs.gw_prebuild_image_name }}:${{ inputs.gw_prebuild_image_tag }}
-          sed -i "s|image:.*godwoken-prebuilds.*|image: $NEW_IMAGE|g" docker-compose.yml
-        fi
-        if [ -n "${{ inputs.godwoken_ref }}" ]; then
-          sed -i \
-            -e "s|MANUAL_BUILD_GODWOKEN=false|MANUAL_BUILD_GODWOKEN=true|g" \
-            -e "s|GODWOKEN_GIT_CHECKOUT=.*|GODWOKEN_GIT_CHECKOUT=${{ inputs.godwoken_ref }}|g" \
-            .build.mode.env
-        fi
-        if [ -n "${{ inputs.gw_scripts_ref }}" ]; then
-          sed -i \
-            -e "s|MANUAL_BUILD_SCRIPTS=false|MANUAL_BUILD_SCRIPTS=true|g" \
-            -e "s|SCRIPTS_GIT_CHECKOUT=.*|SCRIPTS_GIT_CHECKOUT=${{ inputs.gw_scripts_ref }}|g" \
-            .build.mode.env
-        fi
-        if [ -n "${{ inputs.polyjuice_ref }}" ]; then
-          sed -i \
-            -e "s|MANUAL_BUILD_POLYJUICE=false|MANUAL_BUILD_POLYJUICE=true|g" \
-            -e "s|POLYJUICE_GIT_CHECKOUT=.*|POLYJUICE_GIT_CHECKOUT=${{ inputs.polyjuice_ref }}|g" \
-            .build.mode.env
-        fi
-        if [ -n "${{ inputs.web3_ref }}" ]; then
-          sed -i \
-            -e "s|MANUAL_BUILD_WEB3=false|MANUAL_BUILD_WEB3=true|g" \
-            -e "s|MANUAL_BUILD_WEB3_INDEXER=false|MANUAL_BUILD_WEB3_INDEXER=true|g" \
-            -e "s|WEB3_GIT_CHECKOUT=.*|WEB3_GIT_CHECKOUT=${{ inputs.web3_ref }}|g" \
-            .build.mode.env
-        fi
-        echo "This .build.mode.env will be used:"
-        cat .build.mode.env
-
     - name: Tune rollupConfig.finality_blocks to ${{ env.FINALITY_BLOCKS_NUM }}
       working-directory: kicker
       run: |
@@ -172,7 +107,6 @@ jobs:
       run: |
         docker system df -v
         docker-compose --version
-        set -a && source docker/.build.mode.env
         ./kicker init
 
     - name: Start Godwoken-Kicker services
@@ -182,7 +116,6 @@ jobs:
         START_GODWOKEN_V0: true
       run: |
         # Temporary workaround unreliable web3 health check
-        set -a && source docker/.build.mode.env
         (echo " == kicker start attempt: 1 == " && ./kicker start) || \
         (echo " == kicker start attempt: 2 == " && ./kicker stop && ./kicker start) || \
         (echo " == kicker start failed == " && exit 1)
