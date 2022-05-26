@@ -29,10 +29,7 @@ on:
     branches:
     - 'v1*'
     - 'develop'
-  pull_request_target:
-    branches:
-    - 'v1*'
-    - 'develop'
+  pull_request:
 
 jobs:
   # Run integration-tests on devnet_v1 deployed by Godowoken-Kicker
