@@ -43,15 +43,19 @@ jobs:
       run: |
         echo "${{ inputs.extra_github_env }}" >> $GITHUB_ENV
 
-    - name: Checkout godwoken-test if github.event_name is workflow_call
-      if: ${{ github.event_name == 'workflow_call' }}
+    - name: Checkout if triggered by workflow_call
+      # When this workflow is triggered by workflow_call, the github.event_name
+      # is not "workflow_call" but the original github event.
+      # Here is a workaround to determine the github event by using the
+      # `github.event.repository.name`.
+      if: ${{ github.event.repository.name != 'godwoken-tests' }}
       uses: actions/checkout@v3
       with:
         repository: ${{ github.action_repository }}
         ref: ${{ github.action_ref }}
 
-    - name: Checkout godwoken-test if github.event_name is not workflow_call
-      if: ${{ github.event_name != 'workflow_call' }}
+    - name: Checkout if not triggered by workflow_call
+      if: ${{ github.event.repository.name == 'godwoken-tests' }}
       uses: actions/checkout@v3
 
     - name: Checkout Kicker # multiple repos (nested)
