@@ -17,8 +17,10 @@ on:
       #
       #   ```yaml
       #   extra_github_env: |
-      #     KICKER_REPO=keroro520/godwoken-kicker
-      #     KICKER_REF=helloworld
+      #     GODWOKEN_TESTS_REPO=keroro520/godwoken-tests # default is nervosnetwork/godwoken-tests
+      #     GODWOKEN_TESTS_REF=helloworld # default is develop
+      #     GODWOKEN_KICKER_REPO=keroro520/godwoken-kicker # default is RetricSu/godwoken-kicker
+      #     GODWOKEN_KICKER_REF=helloworld # default is compatibility-changes
       #   ```
       #
       extra_github_env:
@@ -43,26 +45,18 @@ jobs:
       run: |
         echo "${{ inputs.extra_github_env }}" >> $GITHUB_ENV
 
-    - name: Checkout if triggered by workflow_call
-      # When this workflow is triggered by workflow_call, the github.event_name
-      # is not "workflow_call" but the original github event.
-      # Here is a workaround to determine the github event by using the
-      # `github.event.repository.name`.
-      if: ${{ github.event.repository.name != 'godwoken-tests' }}
+    - name: Checkout godwoken-tests
       uses: actions/checkout@v3
       with:
-        repository: ${{ github.action_repository }}
-        ref: ${{ github.action_ref }}
+        repository: ${{ env.GODWOKEN_TESTS_REPO || 'nervosnetwork/godwoken-tests' }}
+        ref: ${{ env.GODWOKEN_TESTS_REPO || 'develop' }}
+        submodules: 'recursive'
 
-    - name: Checkout if not triggered by workflow_call
-      if: ${{ github.event.repository.name == 'godwoken-tests' }}
-      uses: actions/checkout@v3
-
-    - name: Checkout Kicker # multiple repos (nested)
+    - name: Checkout godwoken-kicker
       uses: actions/checkout@v3
       with:
-        repository: ${{ env.KICKER_REPO || 'RetricSu/godwoken-kicker' }}
-        ref: ${{ env.KICKER_REF || 'compatibility-changes' }}
+        repository: ${{ env.GODWOKEN_KICKER_REPO || 'RetricSu/godwoken-kicker' }}
+        ref: ${{ env.GODWOKEN_KICKER_REF || 'compatibility-changes' }}
         path: kicker
         submodules: 'recursive'
 
