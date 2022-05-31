@@ -3,7 +3,7 @@ name: Run Integration Test v1
 on:
   push:
     branches:
-    - 'v1'
+    - 'v1*'
     - 'develop'
   pull_request:
 
