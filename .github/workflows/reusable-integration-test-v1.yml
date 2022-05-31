@@ -273,6 +273,7 @@ jobs:
       if: always()
       working-directory: kicker/docker
       run: |
+        docker-compose ps
         docker-compose logs --tail 66
         docker-compose logs > /tmp/kicker.log
     - name: Archive logs
