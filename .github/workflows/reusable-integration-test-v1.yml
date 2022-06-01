@@ -40,14 +40,6 @@ on:
         description: 'Log level'
         required: false
         default: 'INFO'
-  push:
-    branches:
-    - 'v1*'
-    - 'develop'
-  pull_request_target:
-    branches:
-    - 'v1*'
-    - 'develop'
 
 jobs:
   # Run integration-tests on devnet_v1 deployed by Godowoken-Kicker
@@ -273,6 +265,7 @@ jobs:
       if: always()
       working-directory: kicker/docker
       run: |
+        docker-compose ps
         docker-compose logs --tail 66
         docker-compose logs > /tmp/kicker.log
     - name: Archive logs
