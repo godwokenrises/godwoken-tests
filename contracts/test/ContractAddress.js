@@ -9,22 +9,8 @@ describe("ContractAddress", function () {
 
         //Set data
         const tx = await contract.store(256);
-        await tx.wait();
-        let receipt = await web3.eth.getTransactionReceipt(tx.hash);
-        assert.isNull(receipt.contractAddress);
-
-        // wait for block commit to ignore instant finality, until test timeout
-        while (true) {
-            const tipNumber = ethers.provider.blockNumber;
-            receipt = await web3.eth.getTransactionReceipt(tx.hash);
-            if (tipNumber >= receipt.blockNumber) {
-                break;
-            }
-            await asyncSleep(1000);
-        }
+        await tx.wait(2);
+        const receipt = await web3.eth.getTransactionReceipt(tx.hash);
         assert.isNull(receipt.contractAddress);
     });
 });
-
-const asyncSleep = async (ms = 0) =>
-    new Promise((r) => setTimeout(() => r("ok"), ms));
