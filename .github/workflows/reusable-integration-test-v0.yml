@@ -7,7 +7,7 @@ on:
         type: string
         description: 'The reference of https://github.com/RetricSu/godwoken-kicker.git'
         required: false
-        default: 'develop'
+        default: 'rc-0.10.0'
       gw_prebuild_image_name:
         description: 'The prebuild image name, e.g. nervos/godwoken-prebuilds or ghcr.io/flouse/godwoken-prebuilds'
         required: false
@@ -66,7 +66,7 @@ jobs:
       uses: actions/checkout@v3
       with:
         repository: RetricSu/godwoken-kicker
-        ref: ${{ inputs.kicker_ref }}
+        ref: ${{ inputs.kicker_ref || 'rc-0.10.0' }}
         path: kicker
         submodules: 'recursive'
     - name: Checkout godwoken-examples (tools) to ${{ env.TOOL_REF }}
