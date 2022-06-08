@@ -158,14 +158,16 @@ jobs:
             const packagePage = JSON.stringify(
               await github.request(`GET ${prebuilds.htmlUrl}`)
             );
-            const manifestContesnt = packagePage.substring(packagePage.indexOf("Manifest"));
+            const manifestLabelsStart = packagePage.indexOf("&quot;labels&quot;:");
+            const manifestLabelsEnd = packagePage.lastIndexOf("</pre>");
+            const manifestLabelsContent = packagePage.substring(manifestLabelsStart, manifestLabelsEnd);
             for (const name in prebuilds.manifest) {
               const label = prebuilds.manifest[name];
-              const match = label.pattern.exec(manifestContesnt);
+              const match = label.pattern.exec(manifestLabelsContent);
               if (match) {
                 label.sha = match[1];
               } else {
-                console.log(`${manifestContesnt}`);
+                console.log(`${manifestLabelsContent}`);
                 throw `${name}-sha1 not found`;
               }
             }
