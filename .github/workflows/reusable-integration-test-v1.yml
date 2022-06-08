@@ -21,6 +21,8 @@ on:
       #     GODWOKEN_TESTS_REF=helloworld # default is develop
       #     GODWOKEN_KICKER_REPO=keroro520/godwoken-kicker # default is RetricSu/godwoken-kicker
       #     GODWOKEN_KICKER_REF=helloworld # default is compatibility-changes
+      #
+      #     GODWOKEN_PREBUILD_IMAGE_NAME=ghcr.io/keroro520/godwoken-prebuilds:v1-godwoken-d3eb41a-202205310512 # default is ""
       #   ```
       #
       extra_github_env:
@@ -59,6 +61,15 @@ jobs:
         ref: ${{ env.GODWOKEN_KICKER_REF || 'compatibility-changes' }}
         path: kicker
         submodules: 'recursive'
+
+    - name: Modify kicker image if GODWOKEN_PREBUILD_IMAGE_NAME is set
+      working-directory: kicker/docker/
+      run: |
+        echo "GODWOKEN_PREBUILD_IMAGE_NAME=$GODWOKEN_PREBUILD_IMAGE_NAME"
+        if [[ -n "$GODWOKEN_PREBUILD_IMAGE_NAME" ]]; then
+          sed -i "s|image:.*godwoken-prebuilds.*|image: $GODWOKEN_PREBUILD_IMAGE_NAME |g" docker-compose.yml
+          cat docker-compose.yml
+        fi
 
     - name: Rust Cache
       uses: actions/cache@v2
