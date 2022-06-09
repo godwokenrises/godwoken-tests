@@ -54,15 +54,15 @@ jobs:
               htmlUrl: undefined,
               manifest: {
                 godwoken: {
-                  pattern: /&quot;ref.component.godwoken-sha1&quot;: &quot;(.{40})&quot;,/,
+                  pattern: /&quot;ref.component.godwoken-sha1&quot;: &quot;(.{40})&quot;/,
                   sha: undefined,
                 },
                 scripts: {
-                  pattern: /&quot;ref.component.godwoken-scripts-sha1&quot;: &quot;(.{40})&quot;,/,
+                  pattern: /&quot;ref.component.godwoken-scripts-sha1&quot;: &quot;(.{40})&quot;/,
                   sha: undefined,
                 },
                 polyjuice: {
-                  pattern: /&quot;ref.component.godwoken-polyjuice-sha1&quot;: &quot;(.{40})&quot;,/,
+                  pattern: /&quot;ref.component.godwoken-polyjuice-sha1&quot;: &quot;(.{40})&quot;/,
                   sha: undefined,
                 },
               },
