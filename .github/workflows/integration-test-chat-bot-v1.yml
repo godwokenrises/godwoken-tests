@@ -403,6 +403,8 @@ jobs:
                 extraGithubENV = `${extraGithubENV}\nMANUAL_BUILD_SCRIPTS=true`
                 extraGithubENV = `${extraGithubENV}\nSCRIPTS_GIT_URL=${gitUrl}`
                 extraGithubENV = `${extraGithubENV}\nSCRIPTS_GIT_CHECKOUT=${components.scripts.commit}`
+                extraGithubENV = `${extraGithubENV}\nOMNI_LOCK_GIT_URL=https://github.com/nervosnetwork/ckb-production-scripts`
+                extraGithubENV = `${extraGithubENV}\nOMNI_LOCK_GIT_CHECKOUT=rc_lock`
             }
             if (components.polyjuice.commit) {
                 const gitUrl = componentGitUrl(components.polyjuice);
