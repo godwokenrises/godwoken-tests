@@ -112,7 +112,7 @@ jobs:
               kicker: {
                 owner: "RetricSu",
                 repo: "godwoken-kicker",
-                branch: "compatibility-changes",
+                branch: "master",
                 pattern: /kicker: (.*)/,
                 commit: undefined,
                 htmlUrl: undefined,
