@@ -15,6 +15,7 @@ jobs:
     outputs:
       components_info: ${{ steps.filter_prebuilds_components.outputs.result }}
       comment_id: ${{ steps.post_workflow_run_comment.outputs.result }}
+      extra_github_env: ${{ steps.escape_multiple_lines_test_inputs.outputs.result }}
     steps:
       - uses: actions/github-script@v6
         id: get_components
@@ -49,6 +50,7 @@ jobs:
               pattern: /prebuilds: (.*)/,
               packageType: "container",
               packageName: "godwoken-prebuilds",
+              image: "ghcr.io/nervosnetwork/godwoken-prebuilds",
               tags: "v1.1",
               sha: undefined,
               htmlUrl: undefined,
@@ -370,19 +372,71 @@ jobs:
 
             return {prebuilds, components};
 
+      - name: Generate integration test inputs
+        id: generate_integration_test_inputs
+        uses: actions/github-script@v6
+        with:
+          script: |
+            const components_info = JSON.parse(`${{ steps.filter_prebuilds_components.outputs.result }}`);
+            const prebuilds = components_info.prebuilds;
+            const components = components_info.components;
+
+            const componentGitUrl = (comp) => {
+              return `https://github.com/${comp.owner}/${comp.repo}`
+            };
+
+            let extraGithubENV = `\nGODWOKEN_PREBUILD_IMAGE_NAME=${prebuilds.image}:${prebuilds.tags[0]}`;
+            if (components.kicker.commit) {
+                extraGithubENV = `${extraGithubENV}\nGODWOKEN_KICKER_REF=${components.kicker.commit}`
+            }
+            if (components.tests.commit) {
+                extraGithubENV = `${extraGithubENV}\nGODWOKEN_TESTS_REF=${components.tests.commit}`
+            }
+            if (components.godwoken.commit) {
+                const gitUrl = componentGitUrl(components.godwoken);
+                extraGithubENV = `${extraGithubENV}\nMANUAL_BUILD_GODWOKEN=true`
+                extraGithubENV = `${extraGithubENV}\nGODWOKEN_GIT_URL=${gitUrl}`
+                extraGithubENV = `${extraGithubENV}\nGODWOKEN_GIT_CHECKOUT=${components.godwoken.commit}`
+            }
+            if (components.scripts.commit) {
+                const gitUrl = componentGitUrl(components.scripts);
+                extraGithubENV = `${extraGithubENV}\nMANUAL_BUILD_SCRIPTS=true`
+                extraGithubENV = `${extraGithubENV}\nSCRIPTS_GIT_URL=${gitUrl}`
+                extraGithubENV = `${extraGithubENV}\nSCRIPTS_GIT_CHECKOUT=${components.scripts.commit}`
+            }
+            if (components.polyjuice.commit) {
+                const gitUrl = componentGitUrl(components.polyjuice);
+                extraGithubENV = `${extraGithubENV}\nMANUAL_BUILD_POLYJUICE=true`
+                extraGithubENV = `${extraGithubENV}\nPOLYJUICE_GIT_URL=${gitUrl}`
+                extraGithubENV = `${extraGithubENV}\nPOLYJUICE_GIT_CHECKOUT=${components.polyjuice.commit}`
+            }
+            if (components.web3.commit) {
+                const gitUrl = componentGitUrl(components.web3);
+                extraGithubENV = `${extraGithubENV}\nMANUAL_BUILD_WEB3=true`
+                extraGithubENV = `${extraGithubENV}\nMANUAL_BUILD_WEB3_INDEXER=true`
+                extraGithubENV = `${extraGithubENV}\nWEB3_GIT_URL=${gitUrl}`
+                extraGithubENV = `${extraGithubENV}\nWEB3_GIT_CHECKOUT=${components.web3.commit}`
+            }
+            core.info(`${extraGithubENV}`)
+
+            return extraGithubENV;
+
+      # Ref: https://github.community/t/set-output-truncates-multiline-strings/16852/9
+      - name: Escape multiple lines test inputs
+        id: escape_multiple_lines_test_inputs
+        run: |
+          inputs=${{ steps.generate_integration_test_inputs.outputs.result }}
+          inputs="${inputs//'%'/'%25'}"
+          inputs="${inputs//'\n'/'%0A'}"
+          inputs="${inputs//'\r'/'%0D'}"
+          echo "::set-output name=result::$inputs"
+
   run-integration-test:
     needs: component-info
     uses: nervosnetwork/godwoken-tests/.github/workflows/reusable-integration-test-v1.yml@develop
     with:
-      # github.head_ref: The head_ref or source branch of the pull request in a workflow run. This property is only available when the event that triggers a workflow run is either pull_request or pull_request_target.
-      # github.ref: The branch or tag ref that triggered the workflow run. For branches this is the format refs/heads/<branch_name>, and for tags it is refs/tags/<tag_name>.
-      kicker_ref: ${{ fromJSON(needs.component-info.outputs.components_info).components.kicker.commit }}
-      gw_prebuild_image_tag: ${{ fromJSON(needs.component-info.outputs.components_info).prebuilds.tags[0] }}
-      godwoken_ref: ${{ fromJSON(needs.component-info.outputs.components_info).components.godwoken.commit }}
-      gw_scripts_ref: ${{ fromJSON(needs.component-info.outputs.components_info).components.scripts.commit }}
-      polyjuice_ref: ${{ fromJSON(needs.component-info.outputs.components_info).components.polyjuice.commit }}
-      web3_ref: ${{ fromJSON(needs.component-info.outputs.components_info).components.web3.commit }}
-      tests_ref: ${{ fromJSON(needs.component-info.outputs.components_info).components.tests.commit }}
+      extra_github_env: |
+        ${{ needs.component-info.outputs.extra_github_env }}
 
   run-result-feedback:
     needs: [component-info, run-integration-test]
