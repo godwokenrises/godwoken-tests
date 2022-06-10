@@ -3,43 +3,37 @@ name: Integration Test v1
 on:
   workflow_call:
     inputs:
-      kicker_ref:
+      # If `extra_github_env` is set, it will be put into GITHUB_ENV at the beginning of each job
+      #
+      # ```
+      # - name: Update GITHUB_ENV if inputs.extra_github_env set
+      #   if: "${{ inputs.extra_github_env != '' }}"
+      #   run: echo ${{ inputs.extra_github_env }} >> $GITHUB_ENV
+      # ```
+      #
+      # ## Examples
+      #
+      # * Specify the kicker version
+      #
+      #   ```yaml
+      #   extra_github_env: |
+      #     GODWOKEN_TESTS_REPO=keroro520/godwoken-tests # default is nervosnetwork/godwoken-tests
+      #     GODWOKEN_TESTS_REF=helloworld # default is develop
+      #     GODWOKEN_KICKER_REPO=keroro520/godwoken-kicker # default is RetricSu/godwoken-kicker
+      #     GODWOKEN_KICKER_REF=helloworld # default is compatibility-changes
+      #
+      #     GODWOKEN_PREBUILD_IMAGE_NAME=ghcr.io/keroro520/godwoken-prebuilds:v1-godwoken-d3eb41a-202205310512 # default is ""
+      #   ```
+      #
+      extra_github_env:
         type: string
-        description: 'The reference of https://github.com/RetricSu/godwoken-kicker.git'
+        description: 'Append write into GITHUB_ENV at the begining of every job'
         required: false
-      gw_prebuild_image_name:
-        description: 'The prebuild image name, e.g. nervos/godwoken-prebuilds or ghcr.io/flouse/godwoken-prebuilds'
-        required: false
-        type: string
-      gw_prebuild_image_tag:
-        description: 'The prebuilt image tag'
-        required: false
-        type: string
-      godwoken_ref:
-        description: 'The reference of https://github.com/nervosnetwork/godwoken.git'
-        required: false
-        type: string
-      gw_scripts_ref:
-        description: 'The reference of https://github.com/nervosnetwork/godwoken-scripts.git'
-        required: false
-        type: string
-      polyjuice_ref:
-        description: 'The reference of https://github.com/nervosnetwork/godwoken-polyjuice.git'
-        required: false
-        type: string
-      web3_ref:
-        description: 'The reference of https://github.com/nervosnetwork/godwoken-web3.git'
-        required: false
-        type: string
-      tests_ref:
-        description: 'The reference of https://github.com/nervosnetwork/godwoken-tests.git'
-        required: false
-        type: string
-      log-level:
-        type: string
-        description: 'Log level'
-        required: false
-        default: 'INFO'
+  push:
+    branches:
+    - 'v1*'
+    - 'develop'
+  pull_request:
 
 jobs:
   # Run integration-tests on devnet_v1 deployed by Godowoken-Kicker
@@ -48,22 +42,34 @@ jobs:
       FINALITY_BLOCKS_NUM: 3
     runs-on: ubuntu-latest
     steps:
-    # Check multiple repos (nested)
-    # see: https://github.com/actions/checkout#checkout-multiple-repos-nested
+    - name: Update GITHUB_ENV if inputs.extra_github_env set
+      if: "${{ inputs.extra_github_env != '' }}"
+      run: |
+        echo "${{ inputs.extra_github_env }}" >> $GITHUB_ENV
+
     - name: Checkout godwoken-tests
       uses: actions/checkout@v3
       with:
-        repository: nervosnetwork/godwoken-tests
-        ref: ${{ inputs.tests_ref || 'v1' }}
+        repository: ${{ env.GODWOKEN_TESTS_REPO || 'nervosnetwork/godwoken-tests' }}
+        ref: ${{ env.GODWOKEN_TESTS_REF || 'develop' }}
         submodules: 'recursive'
-    - name: Checkout Kicker # multiple repos (nested)
+
+    - name: Checkout godwoken-kicker
       uses: actions/checkout@v3
       with:
-        repository: RetricSu/godwoken-kicker
-        # If this workflow is not triggered by workflow_call event, inputs.kicker_ref is empty.
-        ref: ${{ inputs.kicker_ref || 'compatibility-changes' }}
+        repository: ${{ env.GODWOKEN_KICKER_REPO || 'RetricSu/godwoken-kicker' }}
+        ref: ${{ env.GODWOKEN_KICKER_REF || 'compatibility-changes' }}
         path: kicker
         submodules: 'recursive'
+
+    - name: Modify kicker image if GODWOKEN_PREBUILD_IMAGE_NAME is set
+      working-directory: kicker/docker/
+      run: |
+        echo "GODWOKEN_PREBUILD_IMAGE_NAME=$GODWOKEN_PREBUILD_IMAGE_NAME"
+        if [[ -n "$GODWOKEN_PREBUILD_IMAGE_NAME" ]]; then
+          sed -i "s|image:.*godwoken-prebuilds.*|image: $GODWOKEN_PREBUILD_IMAGE_NAME |g" docker-compose.yml
+          cat docker-compose.yml
+        fi
 
     - name: Rust Cache
       uses: actions/cache@v2
@@ -87,42 +93,6 @@ jobs:
         || (curl -OL https://github.com/nervosnetwork/capsule/releases/download/${CAPSULE_VERSION}/capsule_${CAPSULE_VERSION}_x86_64-linux.tar.gz \
         && tar xf capsule_${CAPSULE_VERSION}_x86_64-linux.tar.gz \
         && mv capsule_${CAPSULE_VERSION}_x86_64-linux/capsule ~/.cargo/bin/)
-
-    - name: Edit kicker/docker/.build.mode.env
-      working-directory: kicker/docker/
-      run: |
-        if [[ -n "${{ inputs.gw_prebuild_image_name }}" \
-           && -n "${{ inputs.gw_prebuild_image_tag }}" ]]; then
-          NEW_IMAGE=${{ inputs.gw_prebuild_image_name }}:${{ inputs.gw_prebuild_image_tag }}
-          sed -i "s|image:.*godwoken-prebuilds.*|image: $NEW_IMAGE|g" docker-compose.yml
-        fi
-        if [ -n "${{ inputs.godwoken_ref }}" ]; then
-          sed -i \
-            -e "s|MANUAL_BUILD_GODWOKEN=false|MANUAL_BUILD_GODWOKEN=true|g" \
-            -e "s|GODWOKEN_GIT_CHECKOUT=.*|GODWOKEN_GIT_CHECKOUT=${{ inputs.godwoken_ref }}|g" \
-            .build.mode.env
-        fi
-        if [ -n "${{ inputs.gw_scripts_ref }}" ]; then
-          sed -i \
-            -e "s|MANUAL_BUILD_SCRIPTS=false|MANUAL_BUILD_SCRIPTS=true|g" \
-            -e "s|SCRIPTS_GIT_CHECKOUT=.*|SCRIPTS_GIT_CHECKOUT=${{ inputs.gw_scripts_ref }}|g" \
-            .build.mode.env
-        fi
-        if [ -n "${{ inputs.polyjuice_ref }}" ]; then
-          sed -i \
-            -e "s|MANUAL_BUILD_POLYJUICE=false|MANUAL_BUILD_POLYJUICE=true|g" \
-            -e "s|POLYJUICE_GIT_CHECKOUT=.*|POLYJUICE_GIT_CHECKOUT=${{ inputs.polyjuice_ref }}|g" \
-            .build.mode.env
-        fi
-        if [ -n "${{ inputs.web3_ref }}" ]; then
-          sed -i \
-            -e "s|MANUAL_BUILD_WEB3=false|MANUAL_BUILD_WEB3=true|g" \
-            -e "s|MANUAL_BUILD_WEB3_INDEXER=false|MANUAL_BUILD_WEB3_INDEXER=true|g" \
-            -e "s|WEB3_GIT_CHECKOUT=.*|WEB3_GIT_CHECKOUT=${{ inputs.web3_ref }}|g" \
-            .build.mode.env
-        fi
-        echo "This .build.mode.env will be used:"
-        cat .build.mode.env
 
     - name: Tune rollupConfig.finality_blocks to ${{ env.FINALITY_BLOCKS_NUM }}
       working-directory: kicker
@@ -150,7 +120,6 @@ jobs:
       run: |
         docker system df -v
         docker-compose --version
-        set -a && source docker/.build.mode.env
         ./kicker init
 
     - name: Start Godwoken-Kicker services
@@ -160,7 +129,6 @@ jobs:
         START_GODWOKEN_V0: true
       run: |
         # Temporary workaround unreliable web3 health check
-        set -a && source docker/.build.mode.env
         (echo " == kicker start attempt: 1 == " && ./kicker start) || \
         (echo " == kicker start attempt: 2 == " && ./kicker stop && ./kicker start) || \
         (echo " == kicker start failed == " && exit 1)
