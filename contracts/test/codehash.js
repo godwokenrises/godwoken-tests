@@ -126,6 +126,6 @@ describe("CodeHash test cases", function () {
 /**
  * How to run this test?
 
-> npx hardhat --network gw_betanet_v1 test test/codehash.js && \
+> npx hardhat --network gw_testnet_v1 test test/codehash.js && \
   npx hardhat --network hardhat test test/codehash.js
  */

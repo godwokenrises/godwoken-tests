@@ -72,5 +72,5 @@ describe("SisyphusGamble", function () {
 
 /**
  * How to run this?
- * > npx hardhat test test/SisyhusGamble --network gw_betanet_v1
+ * > npx hardhat test test/SisyhusGamble --network gw_testnet_v1
  */
