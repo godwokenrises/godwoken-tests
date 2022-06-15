@@ -41,4 +41,6 @@ jobs:
 
     - name: Run tests
       working-directory: contracts
-      run: npm install ; npm run test:gw_betanet_v1
+      run: |
+        npm install; 
+        PRIVATE_KEY=${{ secrets.GODWOKEN_PRIVATE_KEY }} PRIVATE_KEY2=${{ secrets.GODWOKEN_PRIVATE_KEY2 }} npm run test:gw_betanet_v1
