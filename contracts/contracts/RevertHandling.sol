@@ -7,8 +7,8 @@ contract RevertHandling {
         return message;
     }
 
-    function setMsg(uint success, string memory msg) public payable {
+    function setMsg(uint success, string memory _message) public payable {
         require(success == 1, "failed to set message");
-        message = msg;
+        message = _message;
     }
 }
