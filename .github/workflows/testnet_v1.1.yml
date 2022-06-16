@@ -1,4 +1,4 @@
-name: Test on betanet_v1.1
+name: Test on testnet_v1.1
 
 on:
   push:
@@ -17,11 +17,11 @@ on:
 
 jobs:
   contract-tests:
+    if: ${{ secrets.GODWOKEN_TESTNET_PRIVATE_KEY != '' }} && ${{ secrets.GODWOKEN_TESTNET_PRIVATE_KEY2 != '' }}
     runs-on: ubuntu-latest
 
     steps:
     - uses: actions/checkout@v3
-
     - uses: actions/setup-node@v3
       with:
         node-version: '16'
@@ -39,6 +39,12 @@ jobs:
         restore-keys: |
           ${{ runner.os }}-node_modules-
 
-    - name: Run tests on gw_testnet_v1
+    - name: Install dependencies
       working-directory: contracts
-      run: npm install ; npm run test:gw_testnet_v1
+      run: npm install
+    - name: Run tests
+      working-directory: contracts
+      run: npm run test:gw_testnet_v1
+      env:
+        PRIVATE_KEY: ${{ secrets.GODWOKEN_TESTNET_PRIVATE_KEY }}
+        PRIVATE_KEY2: ${{ secrets.GODWOKEN_TESTNET_PRIVATE_KEY2 }}
