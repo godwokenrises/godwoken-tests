@@ -37,7 +37,7 @@ jobs:
             const getPrebuildsByTag = async (org, tag) => {
               const pkgs = await getPrebuilds(org, 1, 100);
               for (const pkg of pkgs.data) {
-                if (pkg.metadata.container.tags.includes(tag)) {
+                if (pkg.metadata.container.tags.find(pTag => pTag === tag || pTag.match(tag))) {
                   return pkg;
                 }
               }
@@ -51,7 +51,7 @@ jobs:
               packageType: "container",
               packageName: "godwoken-prebuilds",
               image: "ghcr.io/nervosnetwork/godwoken-prebuilds",
-              tags: "v1.1",
+              tags: ["^[v]?1"],
               sha: undefined,
               htmlUrl: undefined,
               manifest: {
@@ -146,7 +146,7 @@ jobs:
               if (match) {
                 return await getPrebuildsByTag(prebuilds.org, match[1]);
               } else {
-                return await getPrebuildsByTag(prebuilds.org, prebuilds.tags);
+                return await getPrebuildsByTag(prebuilds.org, prebuilds.tags[0]);
               }
             };
             const pkg = await matchPrebuilds();
@@ -315,7 +315,7 @@ jobs:
             // Add manual trigger example
             integrationTestInfo = `${integrationTestInfo}
             \### Manually running integration test
-            
+
             Post a comment contains
             \`\`\`
             /itest
