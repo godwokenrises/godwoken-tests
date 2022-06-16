@@ -26,7 +26,8 @@ jobs:
         env:
           KEY1: '${{ secrets.GODWOKEN_TEST_PRIVATE_KEY }}'
           KEY2: '${{ secrets.GODWOKEN_TEST_PRIVATE_KEY2 }}'
-        if: ${{ env.KEY1 != '' && env.KEY2 != '' }}
+          KEY3: '${{ secrets.GW_TESTNET_V1_TEST_PK }}'
+        if: ${{ env.KEY1 != '' && env.KEY2 != '' && env.KEY3 != '' }}
         run: echo "::set-output name=available::true"
 
   contract-tests:
@@ -66,3 +67,4 @@ jobs:
       env:
         PRIVATE_KEY: ${{ secrets.GODWOKEN_TEST_PRIVATE_KEY }}
         PRIVATE_KEY2: ${{ secrets.GODWOKEN_TEST_PRIVATE_KEY2 }}
+        PRIVATE_KEY3: ${{ secrets.GW_TESTNET_V1_TEST_PK }}
