@@ -14,30 +14,24 @@ describe('Revertable transaction', () => {
 
     describe('Success', () => {
         it('transferred value and fee', async () => {
-            const accounts = await ethers.getSigners();
-
-            // get starting balance
-            const startingBalance = await provider.getBalance(accounts[0].address);
-
             // set gas price
             const gasPrice = 3;
             const value = 10;
 
             // set message
-            const tx = await contract.setMsg(1, "Hello", { value: value, gasPrice: gasPrice });
+            const tx = await contract.setMsg(1, "Hello", { value, gasPrice });
 
             // receipt
             const receipt = await tx.wait();
-            const gasUsed = receipt.gasUsed;
             expect(receipt.status).to.be.equal(1);
 
             // check message is set
             expect(await contract.getMsg()).to.be.equal("Hello");
 
-            // check balance is expected
-            const expectedCost = gasUsed.mul(gasPrice).add(value);
-            let balance = await provider.getBalance(accounts[0].address);
-            assert(balance.eq(startingBalance.sub(expectedCost)), "balance");
+            // check total cost is expected
+            const expectedCost = receipt.gasUsed.mul(gasPrice).add(value);
+            const eventuallyCost = receipt.gasUsed.mul(tx.gasPrice).add(tx.value);
+            assert(expectedCost.eq(eventuallyCost), "expected cost");
         });
     });
 
@@ -45,8 +39,7 @@ describe('Revertable transaction', () => {
         it('revert transferred value', async () => {
             const accounts = await ethers.getSigners();
 
-            // get starting balance
-            const startingBalance = await provider.getBalance(accounts[0].address);
+            // get starting nonce
             const startingNonce = await provider.getTransactionCount(accounts[0].address);
 
             // set gas price
@@ -58,17 +51,16 @@ describe('Revertable transaction', () => {
 
             // receipt
             const receipt = await provider.getTransactionReceipt(tx.hash);
-            const gasUsed = receipt.gasUsed;
-            expect(receipt.logs.length).to.be.equal(0);
             expect(receipt.status).to.be.equal(0);
+            expect(receipt.logs.length).to.be.equal(0);
 
             // check message is unchanged
             expect(await contract.getMsg()).to.be.equal("");
 
             // check balance is expected
-            const expectedCost = gasUsed.mul(gasPrice);
-            let balance = await provider.getBalance(accounts[0].address);
-            assert(balance.eq(startingBalance.sub(expectedCost)), "balance");
+            const expectedCost = receipt.gasUsed.mul(gasPrice);
+            const eventuallyCost = receipt.gasUsed.mul(tx.gasPrice);
+            assert(expectedCost.eq(eventuallyCost), "expected cost");
 
             // check nonce
             const nonce = await provider.getTransactionCount(accounts[0].address);

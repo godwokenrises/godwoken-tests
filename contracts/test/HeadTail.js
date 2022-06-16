@@ -45,7 +45,6 @@ describe('HeadTail', () => {
             gasLimit: 10000000
         });
         await contract.deployed();
-
         return contract;
     }
  
@@ -67,13 +66,13 @@ describe('HeadTail', () => {
 
     describe('Stage 1', () => {
         it('allows to deposit BET_VALUE', async () => {
-            const startingBalance = await getBalance(userOne.address);
+            const contarct = await deployHeadTailContract('0x', BET_VALUE);
 
-            await deployHeadTailContract('0x', BET_VALUE);
+            const tx = contarct.deployTransaction;
+            const receipt = await provider.getTransactionReceipt(tx.hash);
 
-            expect(await getBalanceAsString(userOne.address)).to.be.equal(
-                startingBalance.sub(BET_VALUE).toString()
-            );
+            expect(receipt.status === 1, 'deposit successful');
+            expect(tx.value.eq(BET_VALUE), 'deposit amount correct');
         });
 
         it('saves address of user', async () => {
@@ -83,13 +82,13 @@ describe('HeadTail', () => {
         });
 
         it('allows depositing 777 wei', async () => {
-            const startingBalance = await getBalance(userOne.address);
+            const contarct = await deployHeadTailContract('0x', BigInt(777));
 
-            await deployHeadTailContract('0x', BigInt(777));
+            const tx = contarct.deployTransaction;
+            const receipt = await provider.getTransactionReceipt(tx.hash);
 
-            expect(await getBalanceAsString(userOne.address)).to.be.equal(
-                startingBalance.sub(777).toString()
-            );
+            expect(receipt.status === 1, 'deposit successful');
+            expect(tx.value.eq(BET_VALUE), 'deposit amount correct');
         });
     });
 
@@ -122,7 +121,7 @@ describe('HeadTail', () => {
                 userOneChoiceSecret
             );
 
-            contract = await deployHeadTailContract(signature, BET_VALUE);
+            const contract = await deployHeadTailContract(signature, BET_VALUE);
 
             expect(await contract.userOneAddress()).to.be.equal(userOne.address);
 
