@@ -39,8 +39,6 @@ jobs:
         restore-keys: |
           ${{ runner.os }}-node_modules-
 
-    - name: Run tests
+    - name: Run tests on gw_testnet_v1
       working-directory: contracts
-      run: |
-        npm install; 
-        PRIVATE_KEY=${{ secrets.GODWOKEN_PRIVATE_KEY }} PRIVATE_KEY2=${{ secrets.GODWOKEN_PRIVATE_KEY2 }} npm run test:gw_betanet_v1
+      run: npm install ; npm run test:gw_testnet_v1

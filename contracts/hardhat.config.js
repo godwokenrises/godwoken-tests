@@ -18,17 +18,24 @@ module.exports = {
       url: `http://localhost:8024`,
       accounts: [`0x${PRIVATE_KEY}`, `0x${PRIVATE_KEY2}`],
     },
+    gw_testnet_v1: {
+      url: `https://godwoken-testnet-v1.ckbapp.dev`,
+      accounts: [`0x${PRIVATE_KEY}`, `0x${PRIVATE_KEY2}`],
+      version: "1.2.0",
+      chainId: 71401,
+    },
+    // TODO: It is the same as gw_testnet_v1 and this name will be deprecated.
     gw_betanet_v1: {
       url: `https://godwoken-betanet-v1.ckbapp.dev`,
       accounts: [`0x${PRIVATE_KEY}`, `0x${PRIVATE_KEY2}`],
-      version: "1.1.0",
+      version: "1.2.0",
       chainId: 71401,
     },
-    gw_testnet_v1: { // TODO: Deprecate
-      url: `https://godwoken-testnet-web3-v1-rpc.ckbapp.dev`,
+    gw_alphanet_v1: { // for internal testing
+      url: `https://godwoken-alphanet-v1.ckbapp.dev`,
       accounts: [`0x${PRIVATE_KEY}`, `0x${PRIVATE_KEY2}`],
-      version: "1.0.0",
-      chainId: 868455272153094
+      version: "1.2.0",
+      chainId: 202206,
     },
     rinkeby: {
       url: `https://rinkeby.infura.io/v3/${INFURA_PROJECT_ID}`,
