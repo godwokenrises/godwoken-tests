@@ -15,6 +15,7 @@ const expectThrowsAsync = async (method, errorMessage) => {
   expect(error).to.be.an("Error");
   console.log(error.message);
   if (errorMessage) {
+    console.log(error.message);
     expect(error.message).to.include(errorMessage);
   }
 };
