@@ -133,5 +133,5 @@ describe("gw_execute_raw_l2transaction Cache Test", function () {
 
 /**
  * How to run this?
- * > npx hardhat test test/EthEstimateGas --network gw_devnet_v1
+ * > npx hardhat test test/GwExecuteRawL2Tx --network gw_devnet_v1
  */
