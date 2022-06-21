@@ -13,8 +13,8 @@ const expectThrowsAsync = async (method, errorMessage) => {
     error = err;
   }
   expect(error).to.be.an("Error");
+  console.log(error.message);
   if (errorMessage) {
-    console.log(error.message);
     expect(error.message).to.include(errorMessage);
   }
 };
@@ -24,7 +24,8 @@ describe("Eth_Call Cache Test", function () {
     const contractFact = await ethers.getContractFactory("CallTest");
     ethCallContract = await contractFact.deploy();
     await ethCallContract.deployed();
-    await ethCallContract.set(expectedValue);
+    const tx = await ethCallContract.set(expectedValue);
+    await tx.wait();
   });
 
   it("batch call", async () => {

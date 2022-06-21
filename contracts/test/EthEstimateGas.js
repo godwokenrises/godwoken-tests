@@ -15,10 +15,10 @@ const expectThrowsAsync = async (method, errMsgKeyWords) => {
     error = err;
   }
   expect(error).to.be.an("Error");
+  console.log(error.message);
   if (errMsgKeyWords) {
-    for(keyWord of errMsgKeyWords){
-	console.log(error.message);
-	expect(error.message).to.include(keyWord);
+    for (keyWord of errMsgKeyWords) {
+      expect(error.message).to.include(keyWord);
     }
   }
 };
@@ -28,7 +28,8 @@ describe("Eth_estimateGas Cache Test", function () {
     const contractFact = await ethers.getContractFactory("CallTest");
     ethCallContract = await contractFact.deploy();
     await ethCallContract.deployed();
-    await ethCallContract.set(expectedValue);
+    const tx = await ethCallContract.set(expectedValue);
+    await tx.wait();
   });
 
   it("batch call", async () => {
@@ -50,7 +51,10 @@ describe("Eth_estimateGas Cache Test", function () {
     const triggerValue = 444;
 
     const p = new Array(count).fill(1).map(async () => {
-      const errMsgKeyWords = ["UNPREDICTABLE_GAS_LIMIT: ", "revert: Error(you trigger death value!)"]
+      const errMsgKeyWords = [
+        "UNPREDICTABLE_GAS_LIMIT: ",
+        "revert: Error(you trigger death value!)",
+      ];
       const method = async () => {
         await ethCallContract.estimateGas.getRevertMsg(triggerValue);
       };
@@ -78,9 +82,7 @@ describe("Eth_estimateGas Cache Test", function () {
       method: "POST",
     });
     const value = await response.json();
-    expect(BigInt(value.result).toString(10)).to.equal(
-      expectedGas
-    );
+    expect(BigInt(value.result).toString(10)).to.equal(expectedGas);
   });
 });
 

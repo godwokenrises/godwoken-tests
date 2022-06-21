@@ -1,7 +1,5 @@
 const { expect } = require("chai");
 const { ethers, network } = require("hardhat");
-const crypto = require("crypto");
-const fetch = require("node-fetch");
 const toolkit = require("@ckb-lumos/toolkit");
 const { utils } = require("@ckb-lumos/base");
 const schemas = require("../../schemas");
@@ -21,9 +19,9 @@ const expectThrowsAsync = async (method, errMsgKeyWords) => {
     error = err;
   }
   expect(error).to.be.an("Error");
+  console.log(error.message);
   if (errMsgKeyWords) {
     for (keyWord of errMsgKeyWords) {
-      console.log(error.message);
       expect(error.message).to.include(keyWord);
     }
   }
@@ -51,14 +49,6 @@ const getAccountIdByContractAddress = async (contractAddress) => {
       contractAddress.slice(2),
   };
   const scriptHash = utils.computeScriptHash(script);
-  // console.log(
-  //   "script",
-  //   script,
-  //   "contractAddress",
-  //   contractAddress,
-  //   "scriptHash: ",
-  //   scriptHash
-  // );
   const id = await rpc.gw_get_account_id_by_script_hash(scriptHash);
   if (id == null) {
     throw new Error("toId is null!");
@@ -91,7 +81,8 @@ describe("gw_execute_raw_l2transaction Cache Test", function () {
     const contractFact = await ethers.getContractFactory("CallTest");
     ethCallContract = await contractFact.deploy();
     await ethCallContract.deployed();
-    await ethCallContract.set(expectedValue);
+    const tx = await ethCallContract.set(expectedValue);
+    await tx.wait();
   });
 
   it("batch call", async () => {
