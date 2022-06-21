@@ -24,5 +24,10 @@
     "ethers": "^5.4.1",
     "hardhat": "^2.9.1",
     "web3": "^1.7.1"
+  },
+  "dependencies": {
+    "@ckb-lumos/base": "^0.17.0",
+    "@ckb-lumos/toolkit": "^0.17.0",
+    "rlp": "^3.0.0"
   }
 }
