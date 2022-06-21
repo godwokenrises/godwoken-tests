@@ -27,7 +27,7 @@ describe("Eth_Call Cache Test", function () {
   });
 
   it("batch call", async () => {
-    const count = 100;
+    const count = 200;
     const p = new Array(count).fill(1).map(async () => {
       const value = await ethCallContract.get();
       return value;
@@ -41,11 +41,11 @@ describe("Eth_Call Cache Test", function () {
   });
 
   it("batch call revert", async () => {
-    const count = 100;
+    const count = 200;
     const triggerValue = 444;
 
     const p = new Array(count).fill(1).map(async () => {
-      const errMsg = "revert: you trigger death value!";
+      const errMsg = "revert: Error(you trigger death value!)";
       const method = async () => {
         await ethCallContract.getRevertMsg(triggerValue);
       };
