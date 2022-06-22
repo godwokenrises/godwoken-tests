@@ -7,9 +7,9 @@ describe("ContractAddress", function () {
         const contract = await Storage.deploy();
         await contract.deployed();
 
-        //Set data
+        // Set data
         const tx = await contract.store(256);
-        await tx.wait(2);
+        await tx.wait();
         const receipt = await web3.eth.getTransactionReceipt(tx.hash);
         assert.isNull(receipt.contractAddress);
     });
