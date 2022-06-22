@@ -24,8 +24,8 @@ jobs:
     steps:
       - id: check
         env:
-          KEY1: '${{ secrets.GODWOKEN_TESTNET_PRIVATE_KEY }}'
-          KEY2: '${{ secrets.GODWOKEN_TESTNET_PRIVATE_KEY2 }}'
+          KEY1: '${{ secrets.GODWOKEN_TEST_PRIVATE_KEY }}'
+          KEY2: '${{ secrets.GODWOKEN_TEST_PRIVATE_KEY2 }}'
         if: ${{ env.KEY1 != '' && env.KEY2 != '' }}
         run: echo "::set-output name=available::true"
 
@@ -64,5 +64,5 @@ jobs:
       working-directory: contracts
       run: npm run test:${{ matrix.network }}
       env:
-        PRIVATE_KEY: ${{ secrets.GODWOKEN_TESTNET_PRIVATE_KEY }}
-        PRIVATE_KEY2: ${{ secrets.GODWOKEN_TESTNET_PRIVATE_KEY2 }}
+        PRIVATE_KEY: ${{ secrets.GODWOKEN_TEST_PRIVATE_KEY }}
+        PRIVATE_KEY2: ${{ secrets.GODWOKEN_TEST_PRIVATE_KEY2 }}
