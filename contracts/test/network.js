@@ -1,17 +1,16 @@
 const { config, network, ethers } = require("hardhat");
-const assert = require("assert");
+const { expect } = require("chai");
 
 describe("Check the Godwoken network version", () => {
-  assert.notEqual(config, undefined, 'should have a config field');
+  expect(config).to.not.equal(undefined, 'should have config');
+  expect(network.config).to.not.equal(undefined, 'should have network config');
 
   const data = JSON.parse(JSON.stringify(network.config));
-  assert(data.accounts.length >= 2, 'should have set 2 accounts');
+  expect(data.accounts.length).to.greaterThanOrEqual(2, 'should have set at least 2 accounts');
 
-  const [userOne, userTwo] = data.accounts;
-  assert(userOne !== userTwo, "accounts shouldn't be repeated");
-      
-  // Compute accounts and display network config
-  data.accounts[0] = ethers.utils.computeAddress(data.accounts[0]);
-  data.accounts[1] = ethers.utils.computeAddress(data.accounts[1]);
+  const uniques = [...(new Set(data.accounts))];
+  expect(data.accounts.length).to.equal(uniques.length, 'accounts should not be repeated');
+
+  data.accounts = data.accounts.map((account) => ethers.utils.computeAddress(account));
   console.log(data);
 });
