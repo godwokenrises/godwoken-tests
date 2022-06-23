@@ -123,8 +123,8 @@ describe('HeadTail', () => {
             expect(event).to.not.equal(void 0, 'should have a Result event');
 
             const { userOneBalanceDiff, userTwoBalanceDiff } = event.args;
-            expect(userOneBalanceDiff).to.be.equal(0, 'user one loses the bet');
-            expect(userTwoBalanceDiff).to.be.equal(BET_VALUE * 2n, 'user two won and gets double the BET_VALUE');
+            expect(userOneBalanceDiff).to.be.equal(0, 'user one loses and gets 0 reward');
+            expect(userTwoBalanceDiff).to.be.equal(BET_VALUE * 2n, 'user two wins and gets double the BET_VALUE as reward');
         });
     });
 });
