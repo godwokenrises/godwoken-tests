@@ -16,4 +16,6 @@ error.log
 .vscode/targets.log
 .vscode/settings.json
 
+.idea/
+
 contracts/node_modules/
