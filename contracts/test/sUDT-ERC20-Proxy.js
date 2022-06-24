@@ -120,31 +120,25 @@ describe("sUDT-ERC20 Proxy Contract", () => {
   });
 
   it("Transfer GWK", async function() {
-    /**
-     * The issuer of GWK
-     * - CKB address: ckt1qyq9u5vzgtklnqrr6cevra7w2utrsxmjgefs72sfju
-     * - ETH address: 0x8291507afda0bba820efb6dfa339f09c9465215c
-     */
-    const signerAddr = "0x8291507afda0bba820efb6dfa339f09c9465215c";
-    const signer = await ethers.getSigners().then(signers => signers.find(
-      s => s.address.toLowerCase() == signerAddr
-    ));
-    if (signer == null) throw new Error("Signer not found");
+    // should be an EOA containing some GWK
+    const sender = (await ethers.getSigners())[2];
+
+    const receiver = await ethers.getSigner();
 
     // GWK sUDT_ERC20_Proxy contract
     let gwkContract = await ethers.getContractAt(abi, proxyContracts["6571"].address);
-    gwkContract = gwkContract.connect(signer);
+    gwkContract = gwkContract.connect(sender);
 
     const amount = 1n;
-    const receiver = await ethers.getSigner();
     let receiverBalance = await gwkContract.callStatic.balanceOf(receiver.address);
-    let senderBalance = await gwkContract.callStatic.balanceOf(signerAddr);
+    let senderBalance = await gwkContract.callStatic.balanceOf(sender.address);
+    console.debug(`GWK Balance of ${sender.address}:`, senderBalance);
+    console.debug(`GWK Balance of ${receiver.address}:`, receiverBalance);
 
     await gwkContract.transfer(receiver.address, amount);
     expect(await gwkContract.callStatic.balanceOf(receiver.address))
       .equals(BigInt(receiverBalance) + amount);
-    expect(await gwkContract.callStatic.balanceOf(signerAddr))
+    expect(await gwkContract.callStatic.balanceOf(sender.address))
       .equals(BigInt(senderBalance) - amount);
-    console.debug("receiverBalance", receiverBalance);    
   });
 });

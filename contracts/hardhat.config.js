@@ -3,14 +3,18 @@ require("@nomiclabs/hardhat-web3");
 
 const INFURA_PROJECT_ID = "719d739434254b88ac95d53e2b6ac997";
 
-// eth_address: 0x966b30e576a4d6731996748b48dd67c94ef29067
-const TEST_PK1 = process.env.PRIVATE_KEY ?? "1390c30e5d5867ee7246619173b5922d3b04009cab9e9d91e14506231281a997";
-
-// eth_address: 0x4fef21f1d42e0d23d72100aefe84d555781c31bb
-const TEST_PK2 = process.env.PRIVATE_KEY2 ?? "2dc6374a2238e414e51874f514b0fa871f8ce0eb1e7ecaa0aed229312ffc91b0";
-
-// The issuer of GWK, eth_address: 0x8291507afda0bba820efb6dfa339f09c9465215c
-const TEST_PK3 = process.env.PRIVATE_KEY3;
+const TEST_PK1 = process.env.PRIVATE_KEY ??
+  // eth_address: 0x966b30e576a4d6731996748b48dd67c94ef29067
+  "1390c30e5d5867ee7246619173b5922d3b04009cab9e9d91e14506231281a997";
+const TEST_PK2 = process.env.PRIVATE_KEY2 ??
+  // eth_address: 0x4fef21f1d42e0d23d72100aefe84d555781c31bb 
+  "2dc6374a2238e414e51874f514b0fa871f8ce0eb1e7ecaa0aed229312ffc91b0";
+/**
+ * TEST_PK3 should be an EOA containing some GWK.
+ */
+const TEST_PK3 = process.env.PRIVATE_KEY3 ??
+  // eth_address: 0x0c1efcca2bcb65a532274f3ef24c044ef4ab6d73
+  "dd50cac37ec6dd12539a968c1a2cbedda75bd8724f7bcad486548eaabb87fc8b";
 
 /**
  * @type import('hardhat/config').HardhatUserConfig
