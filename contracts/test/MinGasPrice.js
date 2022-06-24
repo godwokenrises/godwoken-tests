@@ -28,7 +28,7 @@ const expectThrowsAsync = async (method, errMsgKeyWords, noErrMsgKeyWord) => {
   }
 };
 
-describe("Eth_Call Cache Test", function () {
+describe("MIN GAS PRICE Test", function () {
   before("Deploy and Set", async () => {
     const contractFact = await ethers.getContractFactory("CallTest");
     ethCallContract = await contractFact.deploy();
