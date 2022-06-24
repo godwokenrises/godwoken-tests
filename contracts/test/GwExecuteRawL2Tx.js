@@ -1,9 +1,9 @@
 const { expect } = require("chai");
 const { ethers, network } = require("hardhat");
 const toolkit = require("@ckb-lumos/toolkit");
-const { utils } = require("@ckb-lumos/base");
 const schemas = require("../../schemas");
 const normalizers = require("../lib/normalizer");
+const { getAccountIdByContractAddress } = require("../lib/helper");
 
 const expectedValue = 10;
 
@@ -27,37 +27,7 @@ const expectThrowsAsync = async (method, errMsgKeyWords) => {
   }
 };
 
-const u32ToLittleEnd = (value) => {
-  const buf = Buffer.alloc(4);
-  buf.writeUInt32LE(value);
-  return `0x${buf.toString("hex")}`;
-};
-
-const getAccountIdByContractAddress = async (contractAddress) => {
-  const nodeInfo = (await rpc.poly_version()).nodeInfo;
-  const polyjuiceValidatorCodeHash =
-    nodeInfo.backends.polyjuice.validatorScriptTypeHash;
-  const rollupTypeHash = nodeInfo.rollupCell.typeHash;
-  const creator_account_id = nodeInfo.accounts.polyjuiceCreator.id;
-
-  const script = {
-    code_hash: polyjuiceValidatorCodeHash,
-    hash_type: "type",
-    args:
-      rollupTypeHash +
-      u32ToLittleEnd(+creator_account_id).slice(2) +
-      contractAddress.slice(2),
-  };
-  const scriptHash = utils.computeScriptHash(script);
-  const id = await rpc.gw_get_account_id_by_script_hash(scriptHash);
-  if (id == null) {
-    throw new Error("toId is null!");
-  }
-  return id;
-};
-
-const callGwRpc = async (ethCallContract, toId, polyArgs) => {
-  const chainId = (await ethCallContract.provider.getNetwork()).chainId;
+const executeGwRawTx = async (chainId, toId, polyArgs) => {
   const rawL2Tx = {
     chain_id: chainId,
     from_id: "0x3",
@@ -87,12 +57,16 @@ describe("gw_execute_raw_l2transaction Cache Test", function () {
 
   it("batch call", async () => {
     const count = 100;
-    const toId = await getAccountIdByContractAddress(ethCallContract.address);
+    const toId = await getAccountIdByContractAddress(
+      rpc,
+      ethCallContract.address
+    );
+    const chainId = (await ethCallContract.provider.getNetwork()).chainId;
     const args =
       "0xffffff504f4c590020bcbe00000000000000000000000000000000000000000000000000000000000000000000000000040000006d4ce63c";
 
     const p = new Array(count).fill(1).map(async () => {
-      const value = await callGwRpc(ethCallContract, toId, args);
+      const value = await executeGwRawTx(chainId, toId, args);
       return value;
     });
     const ps = Promise.all(p);
@@ -106,14 +80,18 @@ describe("gw_execute_raw_l2transaction Cache Test", function () {
 
   it("batch call revert", async () => {
     const count = 100;
-    const toId = await getAccountIdByContractAddress(ethCallContract.address);
+    const toId = await getAccountIdByContractAddress(
+      rpc,
+      ethCallContract.address
+    );
+    const chainId = (await ethCallContract.provider.getNetwork()).chainId;
     const args =
       "0xffffff504f4c590020bcbe0000000000000000000000000000000000000000000000000000000000000000000000000024000000df57407800000000000000000000000000000000000000000000000000000000000001bc";
 
     const p = new Array(count).fill(1).map(async () => {
       const errMsgKeyWords = ["revert: Error(you trigger death value!)"];
       const method = async () => {
-        await callGwRpc(ethCallContract, toId, args);
+        await executeGwRawTx(chainId, toId, args);
       };
       await expectThrowsAsync(method, errMsgKeyWords);
     });
