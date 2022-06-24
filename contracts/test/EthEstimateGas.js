@@ -42,7 +42,7 @@ describe("Eth_estimateGas Cache Test", function () {
     const values = await ps;
     expect(values.length).to.equal(count);
     for (let i = 0; i < values.length; i++) {
-      expect(values[i]).to.equal(expectedGas);
+      expect(+values[i]).to.greaterThanOrEqual(+expectedGas);
     }
   });
 
@@ -82,7 +82,7 @@ describe("Eth_estimateGas Cache Test", function () {
       method: "POST",
     });
     const value = await response.json();
-    expect(BigInt(value.result).toString(10)).to.equal(expectedGas);
+    expect(+BigInt(value.result).toString(10)).to.greaterThanOrEqual(+expectedGas);
   });
 });
 
