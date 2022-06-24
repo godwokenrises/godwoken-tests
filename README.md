@@ -44,7 +44,7 @@ After deposited, you can follow these command-lines to install Godwoken-Tests in
 
 ## Use your preferred accounts in the tests
 
-Testing accounts are defined in `godwoken-tests/contracts/hardhat.config.js`[https://github.com/nervosnetwork/godwoken-tests/blob/develop/contracts/hardhat.config.js](https://github.com/nervosnetwork/godwoken-tests/blob/develop/contracts/hardhat.config.js).
+Testing accounts are defined in [contracts/hardhat.config.js](https://github.com/nervosnetwork/godwoken-tests/blob/develop/contracts/hardhat.config.js).
 
 If you prefer using your own accounts for testing, you can replace them in the source code, or run test commands with environment variables, for example:
 
