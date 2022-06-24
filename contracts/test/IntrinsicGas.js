@@ -67,7 +67,11 @@ describe("MIN GAS PRICE Test", function () {
       const gas = await ethCallContract.provider.estimateGas(tx);
       const balance = await ethCallContract.provider.getBalance(address);
       const enoughGasPrice = BigInt(balance) / BigInt(gas);
-      const insufficientGasPrice = enoughGasPrice + 1n;
+      const insufficientGasPrice = enoughGasPrice + 100n;
+
+      console.log(
+        `gas ${gas}, balance ${balance}, enoughGasPrice ${enoughGasPrice}, insufficientGasPrice ${insufficientGasPrice}`
+      );
 
       const gasPrice = "0x" + insufficientGasPrice.toString(16);
       const gasLimit = gas;
