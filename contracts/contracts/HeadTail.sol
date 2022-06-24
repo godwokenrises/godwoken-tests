@@ -14,6 +14,8 @@ contract HeadTail {
 
     uint128 public stake;
 
+    event Result(uint256 userOneBalanceDiff, uint256 userTwoBalanceDiff);
+
     constructor(bytes memory _signedChoiceHash, uint128 _stake) payable {
         require(msg.value == _stake, "user has to pass asset value equal to second parameter of the constructor (stake)");
 
@@ -32,14 +34,12 @@ contract HeadTail {
         userTwoChoiceSubmittedTime = block.timestamp;
     }
 
-    function revealUserOneChoice(bool choice, string memory secret) public returns (bool) {
+    function revealUserOneChoice(bool choice, string memory secret) public {
         require(userTwoAddress != address(0), "user two address has to be set before distributing prize");
         require(verify(createChoiceHash(choice, secret), userOneSignedChoiceHash) == userOneAddress, "choice signature has to be correct");
         require(address(this).balance == 2 * stake, "prize has to be not been distributed yet");
 
         distributePrize(choice);
-
-        return true;
     }
 
     function timeout() public returns (bool) {
@@ -60,13 +60,18 @@ contract HeadTail {
         return keccak256(abi.encodePacked(choice, secret));
     }
 
-    function distributePrize(bool userOneChoice) private returns (bool) {
+    function distributePrize(bool userOneChoice) private {
+        uint256 startingUserOneBalance = userOneAddress.balance;
+        uint256 startingUserTwoBalance = userTwoAddress.balance;
+
         if (userTwoChoice == userOneChoice) {
             userTwoAddress.transfer(2 * stake);
         } else {
             userOneAddress.transfer(2 * stake);
         }
 
-        return true;
+        uint256 userOneBalanceDiff = userOneAddress.balance - startingUserOneBalance;
+        uint256 userTwoBalanceDiff = userTwoAddress.balance - startingUserTwoBalance;
+        emit Result(userOneBalanceDiff, userTwoBalanceDiff);
     }
 }

@@ -10,9 +10,6 @@ describe('HeadTail', () => {
     let userOne;
     let userTwo;
 
-    const getBalance = async (address) => provider.getBalance(address);
-    const getBalanceAsString = async (address) => (await getBalance(address)).toString();
-
     function createChoiceHash(choice, secret) {
         return ethers.utils.solidityKeccak256(['bool', 'string'], [choice, secret]);
     }
@@ -41,8 +38,7 @@ describe('HeadTail', () => {
         const contractFact = await ethers.getContractFactory("HeadTail");
         const contract = await contractFact.deploy(signedChoiceHash, stake, {
             value: stake,
-            gasPrice: 0,
-            gasLimit: 10000000
+            gasLimit: 10000000,
         });
         await contract.deployed();
         return contract;
@@ -109,43 +105,26 @@ describe('HeadTail', () => {
 
     describe('Stage 5', () => {
         it('sends ether to a second user after a correct guess', async () => {
-            const startingUserOneBalance = await getBalance(userOne.address);
-            const startingUserTwoBalance = await getBalance(userTwo.address);
-
             const userOneChoice = true;
             const userOneChoiceSecret = '312d35asd454asddasddd2344124444444fyguijkfdr4';
 
-            const { signature } = await createChoiceSignature(
-                userOne,
-                userOneChoice,
-                userOneChoiceSecret
-            );
+            const { signature } = await createChoiceSignature(userOne, userOneChoice, userOneChoiceSecret);
 
             const contract = await deployHeadTailContract(signature, BET_VALUE);
-
             expect(await contract.userOneAddress()).to.be.equal(userOne.address);
 
-            const tx = await contract.connect(userTwo).depositUserTwo(true, {
-                gasPrice: 0,
-                value: BET_VALUE
-            });
+            const tx = await contract.connect(userTwo).depositUserTwo(true, { value: BET_VALUE });
             await tx.wait();
 
-            const tx1 = await contract.revealUserOneChoice(userOneChoice, userOneChoiceSecret, {
-                gasPrice: 0,
-                gasLimit: 10000000
-            });
-            await tx1.wait();
+            const tx1 = await contract.revealUserOneChoice(userOneChoice, userOneChoiceSecret, { gasLimit: 10000000 });
+            const receipt = await tx1.wait();
 
-            expect(await getBalanceAsString(userOne.address)).to.be.equal(
-                startingUserOneBalance.sub(BET_VALUE).toString(),
-                'user one lost BET_VALUE in a bet'
-            );
+            const event = receipt.events.find(event => event.event === 'Result');
+            expect(event).to.not.equal(void 0, 'should have a Result event');
 
-            expect(await getBalanceAsString(userTwo.address)).to.be.equal(
-                startingUserTwoBalance.add(BET_VALUE).toString(),
-                'user two won BET_VALUE in a bet'
-            );
+            const { userOneBalanceDiff, userTwoBalanceDiff } = event.args;
+            expect(userOneBalanceDiff).to.be.equal(0, 'user one loses and gets 0 reward');
+            expect(userTwoBalanceDiff).to.be.equal(BET_VALUE * 2n, 'user two wins and gets double the BET_VALUE as reward');
         });
     });
 });
