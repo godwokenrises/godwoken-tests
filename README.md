@@ -1,21 +1,17 @@
-# ****How to test your Solidity contracts on Godwoken v1****
+# How to test your Solidity contracts on Godwoken v1
 
-## Test on testnet/alphanet
+## Test on testnet
 
-You can follow these command-lines to install Godwoken-Tests in your local environment:
+You can follow the command-lines below to install Godwoken-Tests in your local environment, and run contract tests on testnet_v1:
 
 1. `git clone https://github.com/nervosnetwork/godwoken-tests` - Clone Godwoken-Tests
 2. `cd godwoken-tests/contracts` - Go to contracts folder
 3. `npm install` - Install dependencies
-
-After the test tool is installed, you can run it on testnet/alphanet:
-
-- `npm run test:gw_testnet_v1` - Run tests on testnet_v1
-- `npm run test:gw_alphanet_v1` - Run tests on alphanet_v1
+4. `npm run test:gw_testnet_v1` - Run tests on testnet_v1
 
 ## Deploy and test on devnet
 
-If you wish to run tests on devnet instead of testnet/alphanet, please read the current section.
+If you wish to run tests on devnet instead of testnet, please read the current section.
 
 First, you need to install [Godwoken-Kicker](https://github.com/RetricSu/godwoken-kicker), and then deploy a local devnet_v1 running in the localhost network:
 
@@ -35,7 +31,7 @@ After the devnet started, you should deposit some testing capacity of testing ac
 > NOTE: After the deposit commands have been completed, **please wait 15 seconds before moving forward**. Godwoken needs some time to consume and confirm deposit requests.
 >
 
-After deposited, you can follow these command-lines to install Godwoken-Tests in your local environment, and run tests on devnet_v1:
+After deposited, you can follow command-lines below to install Godwoken-Tests in your local environment, and run contract tests on devnet_v1:
 
 1. `git clone https://github.com/nervosnetwork/godwoken-tests` - Clone Godwoken-Tests
 2. `cd godwoken-tests/contracts` - Go to contracts folder
@@ -49,5 +45,5 @@ Testing accounts are defined in [contracts/hardhat.config.js](https://github.com
 If you prefer using your own accounts for testing, you can replace them in the source code, or run test commands with environment variables, for example:
 
 ```bash
-PRIVATE_KEY=<YOUR_KEY1> npm run test
+PRIVATE_KEY=<YOUR_KEY> npm run test
 ```
