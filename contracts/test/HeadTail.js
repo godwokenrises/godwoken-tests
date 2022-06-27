@@ -38,7 +38,6 @@ describe('HeadTail', () => {
         const contractFact = await ethers.getContractFactory("HeadTail");
         const contract = await contractFact.deploy(signedChoiceHash, stake, {
             value: stake,
-            gasLimit: 10000000,
         });
         await contract.deployed();
         return contract;
@@ -116,7 +115,7 @@ describe('HeadTail', () => {
             const tx = await contract.connect(userTwo).depositUserTwo(true, { value: BET_VALUE });
             await tx.wait();
 
-            const tx1 = await contract.revealUserOneChoice(userOneChoice, userOneChoiceSecret, { gasLimit: 10000000 });
+            const tx1 = await contract.revealUserOneChoice(userOneChoice, userOneChoiceSecret);
             const receipt = await tx1.wait();
 
             const event = receipt.events.find(event => event.event === 'Result');
