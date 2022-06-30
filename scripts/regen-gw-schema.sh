@@ -45,4 +45,4 @@ mv schemas ../schemas
 
 rm -rf tmp
 rm -rf $DIR
-      
+
