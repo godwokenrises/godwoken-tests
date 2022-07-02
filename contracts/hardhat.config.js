@@ -43,6 +43,7 @@ module.exports = {
       accounts: [`0x${TEST_PK1}`, `0x${TEST_PK2}`],
       version: "1.2.0",
       chainId: 202206,
+      gasPrice: 1,
     },
     rinkeby: {
       url: `https://rinkeby.infura.io/v3/${INFURA_PROJECT_ID}`,

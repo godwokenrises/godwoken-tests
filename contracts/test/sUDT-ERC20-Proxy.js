@@ -17,7 +17,7 @@ const { expect } = require("chai");
 describe("sUDT-ERC20 Proxy Contract", () => {
   // only test for testnet_v1
   if (71401 !== network.config.chainId) {
-    console.debug('only test for testnet_v1, NOT', network.config);
+    console.debug('only test for testnet_v1, NOT', network.name);
     return;
   }
 
