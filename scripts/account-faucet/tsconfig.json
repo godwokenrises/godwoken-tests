@@ -1,0 +1,15 @@
+{
+  "compilerOptions": {
+    "strict": true,
+    "target": "es2020",
+    "module": "commonjs",
+    "esModuleInterop": true,
+    "moduleResolution": "node",
+    "sourceMap": true,
+    "types": ["node"],
+    "outDir": "dist",
+    "allowJs": true,
+    "skipLibCheck": true
+  },
+  "exclude": ["**/node_modules", "**/dist"]
+}
