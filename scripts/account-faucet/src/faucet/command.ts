@@ -3,12 +3,12 @@ import { Command } from 'commander';
 import { Address, HexString } from '@ckb-lumos/base';
 import { GodwokenWeb3 } from '../godwoken/web3';
 import { claimFaucetForCkbAddress } from './faucet';
-import { encodeLayer2DepositAddress, privateKeyToLayer2DepositAddress } from './address';
+import { encodeLayer2DepositAddress, privateKeyToLayer2DepositAddress, toHexString } from './address';
 
 export interface FaucetCommand {
-  privateKey?: HexString;
-  ckbAddress?: HexString;
-  ethAddress?: HexString;
+  privateKey?: HexString | string;
+  ckbAddress?: HexString | string;
+  ethAddress?: HexString | string;
   rpc?: string;
 }
 
@@ -33,9 +33,9 @@ export async function runFaucet(params: FaucetCommand) {
 
   let depositAddress: Address;
   if (privateKey) {
-    depositAddress = await privateKeyToLayer2DepositAddress(gw, privateKey);
+    depositAddress = await privateKeyToLayer2DepositAddress(gw, toHexString(privateKey));
   } else {
-    depositAddress = await encodeLayer2DepositAddress(gw, ckbAddress!, ethAddress!);
+    depositAddress = await encodeLayer2DepositAddress(gw, toHexString(ckbAddress!), toHexString(ethAddress!));
   }
 
   await claimFaucetForCkbAddress(depositAddress);

@@ -65,3 +65,7 @@ export function privateKeyToEthAddress(privateKey: HexString): HexString {
   const address = keccak256(Buffer.from(publicKey.slice(4), 'hex')).slice(12).toString('hex');
   return `0x${address}`;
 }
+
+export function toHexString(target: string): HexString {
+  return target.startsWith('0x') ? target : `0x${target}`;
+}
