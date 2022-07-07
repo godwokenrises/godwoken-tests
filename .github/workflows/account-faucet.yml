@@ -1,9 +1,6 @@
-name: Account Faucet every 24 hours
+name: Account Faucet
 
 on:
-  push:
-    branches:
-      - '*faucet*'
   schedule:
   - cron: '0 0 * * *' # every 24 hours
 
