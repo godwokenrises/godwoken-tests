@@ -1,8 +1,8 @@
 import { Hash, HexNumber, HexString, Script } from '@ckb-lumos/base';
-import * as normalizers from './normalizers';
 import { Reader } from '@ckb-lumos/toolkit';
+import { ETH_REGISTRY_ID } from '../faucet/address';
+import * as normalizers from './normalizers';
 import * as molecule from './molecule';
-import { ETH_REGISTRY_ID } from '../address';
 
 export interface DepositLockArgs {
   owner_lock_hash: Hash;

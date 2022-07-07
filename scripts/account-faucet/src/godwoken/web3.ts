@@ -6,7 +6,7 @@ export class GodwokenWeb3 {
   private nodeInfo: any;
 
   constructor(url: string) {
-    if (!url) throw new Error('url cannot be empty');
+    if (!url) throw new Error('RPC url cannot be empty');
     this.rpc = new RPC(url);
   }
 
