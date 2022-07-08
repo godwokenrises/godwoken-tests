@@ -5,7 +5,8 @@
   "main": "dist/index.js",
   "scripts": {
     "build": "tsc",
-    "faucet": "ts-node src/index.ts"
+    "faucet": "ts-node src/index.ts",
+    "faucet:build": "node dist/index.js"
   },
   "keywords": [
     "godwoken",

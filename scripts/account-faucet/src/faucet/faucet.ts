@@ -1,8 +1,29 @@
+import https from 'https';
 import puppeteer from 'puppeteer';
-import { Address } from "@ckb-lumos/base";
+import { Address, HexString } from "@ckb-lumos/base";
 
 // Faucet url
 const url = 'https://faucet.nervos.org';
+
+export interface FaucetEvent<T> {
+  id: number;
+  type: string;
+  attributes: T;
+}
+export interface ClaimEvent {
+  id: number;
+  timestamp: number;
+  addressHash: Address;
+  txHash: HexString;
+  txStatus: string;
+  capacity: string;
+  fee: string;
+  status: ClaimStatus;
+}
+export enum ClaimStatus {
+  Pending = 'pending',
+  Processed = 'processed'
+}
 
 export async function claimFaucetForCkbAddress(ckbAddress: Address) {
   const browser = await puppeteer.launch({ headless: true });
@@ -41,10 +62,39 @@ export async function claimFaucetForCkbAddress(ckbAddress: Address) {
       console.error(`[claim-error] Encountered error but cannot find feedback message`);
     }
   } else {
-    console.log(`[claim-success] Claimed 10000 CKB on testnet`);
+    const events = await getAddressClaimEvents(ckbAddress);
+    const event = events.length ? events[0] : null;
+    if (event?.status === ClaimStatus.Pending) {
+      console.log(`[claim-submitted] Claim submitted: tx: ${event.txHash}, capacity: ${event.capacity} CKB`);
+    } else {
+      console.log(`[claim-submitted] Claim submitted, but no logs found`);
+    }
   }
 
   await browser.close();
+}
+
+export async function getAddressClaimEvents(depositAddress: Address, parentBrowser?: puppeteer.Browser) {
+  const browser = parentBrowser ?? await puppeteer.launch({ headless: true });
+
+  const page = await browser.newPage();
+  await page.goto(`https://faucet.nervos.org/claim_events/${depositAddress}`, { waitUntil: 'networkidle2' });
+
+  const body = await page.$('pre');
+  let result: ClaimEvent[] = [];
+  if (body) {
+    const content = JSON.parse(await getElementHandleProperty(body!, 'textContent'));
+    const data: FaucetEvent<ClaimEvent>[] = content.data;
+    result = data.map((row) => row.attributes);
+  }
+  
+  if (parentBrowser) {
+    await page.close();
+  } else {
+    await browser.close();
+  }
+
+  return result;
 }
 
 async function retryIfFailed<T = any>(action: () => T, maxRetry = 3, interval = 1000) {

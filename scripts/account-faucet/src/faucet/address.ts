@@ -16,7 +16,7 @@ export const lumosOptions = {
   config: config.lumosConfig,
 };
 
-export async function encodeLayer2DepositAddress(gw: GodwokenWeb3, ckbAddress: HexString, ethAddress: HexString): Promise<Address> {
+export async function encodeLayer2DepositAddress(gw: GodwokenWeb3, ckbAddress: Address, ethAddress: HexString): Promise<Address> {
   const { nodeInfo } = await gw.getNodeInfo();
   const gwRollupTypeHash: Hash = await gw.getRollupTypeHash();
 
@@ -68,4 +68,8 @@ export function privateKeyToEthAddress(privateKey: HexString): HexString {
 
 export function toHexString(target: string): HexString {
   return target.startsWith('0x') ? target : `0x${target}`;
+}
+
+export function toAddress(target: string): Address {
+  return target.startsWith('0x') ? target.slice(2) : target;
 }

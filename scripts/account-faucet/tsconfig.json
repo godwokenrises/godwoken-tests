@@ -9,7 +9,8 @@
     "types": ["node"],
     "outDir": "dist",
     "allowJs": true,
-    "skipLibCheck": true
+    "skipLibCheck": true,
+    "lib": ["esnext", "dom"],
   },
   "exclude": ["**/node_modules", "**/dist"]
 }

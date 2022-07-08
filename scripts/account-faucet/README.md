@@ -14,9 +14,13 @@ Claim faucet, using your `CKB Layer 1 Private Key`
 ```bash
 $ npm run faucet -- -p <CKB_PRIVATE_KEY>
 ```
-Claim faucet, using your `CKB Layer 1 Address` and `ETH Address`
+Claim faucet, using your `ETH Address`
 ```bash
-$ npm run faucet -- -c <CKB_ADDRESS> -e <ETH_ADDRESS>
+$ npm run faucet -- -e <ETH_ADDRESS>
+```
+When Claiming with `ETH Address`, you can also pass your `CKB Address`
+```bash
+$ npm run faucet -- -e <ETH_ADDRESS> - c <CKB_ADDRESS>
 ```
 For more options, you can check for help
 ```bash
