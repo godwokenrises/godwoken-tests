@@ -3,7 +3,6 @@ import { GodwokenWeb3 } from '../godwoken/web3';
 import { generateDepositLock } from '../godwoken/deposit';
 import { utils, Hash, Script, HexString, Address } from '@ckb-lumos/base';
 import { parseAddress, encodeToAddress } from '@ckb-lumos/helpers';
-import { predefined } from '@ckb-lumos/config-manager';
 import { key } from '@ckb-lumos/hd';
 import keccak256 from 'keccak256';
 import crypto from 'crypto';

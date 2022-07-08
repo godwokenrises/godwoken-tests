@@ -2,7 +2,7 @@ import config from '../config';
 import { Command } from 'commander';
 import { Address, HexString } from '@ckb-lumos/base';
 import { GodwokenWeb3 } from '../godwoken/web3';
-import { claimFaucetForCkbAddress, getAddressClaimEvents } from './faucet';
+import { claimFaucetForCkbAddress } from './faucet';
 import { encodeLayer2DepositAddress, privateKeyToLayer2DepositAddress, toAddress, toHexString } from './address';
 
 const defaultCkbAddress = '0xckt1qzda0cr08m85hc8jlnfp3zer7xulejywt49kt2rr0vthywaa50xwsqflz4emgssc6nqj4yv3nfv2sca7g9dzhscgmg28x';
@@ -40,6 +40,5 @@ export async function runFaucet(params: FaucetCommand) {
     depositAddress = await encodeLayer2DepositAddress(gw, toAddress(ckbAddress!), toHexString(ethAddress!));
   }
 
-  // await getAddressClaimEvents(depositAddress);
   await claimFaucetForCkbAddress(depositAddress);
 }

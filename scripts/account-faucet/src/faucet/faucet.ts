@@ -1,4 +1,3 @@
-import https from 'https';
 import puppeteer from 'puppeteer';
 import { Address, HexString } from "@ckb-lumos/base";
 
