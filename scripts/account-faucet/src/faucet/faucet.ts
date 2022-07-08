@@ -64,7 +64,7 @@ export async function claimFaucetForCkbAddress(ckbAddress: Address) {
     const events = await getAddressClaimEvents(ckbAddress);
     const event = events.length ? events[0] : null;
     if (event?.status === ClaimStatus.Pending) {
-      console.log(`[claim-submitted] Claim submitted: tx: ${event.txHash}, capacity: ${event.capacity} CKB`);
+      console.log(`[claim-submitted] Claim submitted: capacity: ${event.capacity} CKB`);
     } else {
       console.log(`[claim-submitted] Claim submitted, but no logs found`);
     }
