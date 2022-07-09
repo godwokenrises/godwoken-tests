@@ -32,7 +32,7 @@ export async function claimFaucetForCkbAddress(ckbAddress: Address) {
   
   const input = await retryIfFailed(async () => {
     const input = await page.$('.container-fluid input[name=address_hash]');
-    if (!input) throw new Error(`deposit inputnot exists in: "${url}"`);
+    if (!input) throw new Error(`deposit input not exists in: "${url}"`);
 
     return input;
   });

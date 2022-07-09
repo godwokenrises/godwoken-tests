@@ -5,7 +5,7 @@ import { GodwokenWeb3 } from '../godwoken/web3';
 import { claimFaucetForCkbAddress } from './faucet';
 import { encodeLayer2DepositAddress, privateKeyToLayer2DepositAddress, toAddress, toHexString } from './address';
 
-const defaultCkbAddress = '0xckt1qzda0cr08m85hc8jlnfp3zer7xulejywt49kt2rr0vthywaa50xwsqflz4emgssc6nqj4yv3nfv2sca7g9dzhscgmg28x';
+const defaultCkbAddress = 'ckt1qzda0cr08m85hc8jlnfp3zer7xulejywt49kt2rr0vthywaa50xwsqflz4emgssc6nqj4yv3nfv2sca7g9dzhscgmg28x';
 
 export interface FaucetCommand {
   privateKey?: HexString | string;
