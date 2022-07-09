@@ -1,0 +1,64 @@
+name: Account Faucet
+
+on:
+  schedule:
+  - cron: '0 0 * * *' # every 24 hours
+
+jobs:
+  check-secrets:
+    runs-on: ubuntu-latest
+    outputs:
+      available: ${{ steps.check.outputs.available }}
+    steps:
+      - id: check
+        env:
+          KEY1: '${{ secrets.GODWOKEN_TEST_PRIVATE_KEY }}'
+          KEY2: '${{ secrets.GODWOKEN_TEST_PRIVATE_KEY2 }}'
+          KEY3: '${{ secrets.GW_TESTNET_V1_TEST_PK }}'
+        if: ${{ env.KEY1 != '' && env.KEY2 != '' && env.KEY3 != '' }}
+        run: echo "::set-output name=available::true"
+
+  account-faucet:
+    runs-on: ubuntu-latest
+    needs: check-secrets
+    if: needs.check-secrets.outputs.available
+
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
+        with:
+          node-version: '16'
+
+      - name: Get yarn cache directory path
+        id: yarn-cache-dir-path
+        run: echo "::set-output name=dir::$(yarn cache dir)"
+      - name: Node Cache
+        uses: actions/cache@v2
+        id: npm-and-yarn-cache # use this to check for `cache-hit` (`steps.yarn-cache.outputs.cache-hit != 'true'`)
+        with:
+          path: |
+            ${{ steps.yarn-cache-dir-path.outputs.dir }}
+            ~/.npm
+          key: ${{ runner.os }}-node_modules-${{ hashFiles('/home/runner/work/**/package-lock.json', '/home/runner/work/**/yarn.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-node_modules-
+
+      - name: Install dependencies
+        working-directory: scripts/account-faucet
+        run: npm install
+      - name: Claim faucet for open accounts
+        working-directory: scripts/account-faucet
+        run: |
+          npm run faucet -- claim -p 1390c30e5d5867ee7246619173b5922d3b04009cab9e9d91e14506231281a997
+          npm run faucet -- claim -p 2dc6374a2238e414e51874f514b0fa871f8ce0eb1e7ecaa0aed229312ffc91b0
+          npm run faucet -- claim -p dd50cac37ec6dd12539a968c1a2cbedda75bd8724f7bcad486548eaabb87fc8b
+      - name: Claim faucet for testnet/alphanet accounts
+        working-directory: scripts/account-faucet
+        env:
+          KEY1: ${{ secrets.GODWOKEN_TEST_PRIVATE_KEY }}
+          KEY2: ${{ secrets.GODWOKEN_TEST_PRIVATE_KEY2 }}
+          KEY3: ${{ secrets.GW_TESTNET_V1_TEST_PK }}
+        run: |
+          npm run faucet -- claim -p $KEY1
+          npm run faucet -- claim -p $KEY2
+          npm run faucet -- claim -p $KEY3
