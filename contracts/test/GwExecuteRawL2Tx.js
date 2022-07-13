@@ -89,7 +89,7 @@ describe("gw_execute_raw_l2transaction Cache Test", function () {
       "0xffffff504f4c590020bcbe0000000000000000000000000000000000000000000000000000000000000000000000000024000000df57407800000000000000000000000000000000000000000000000000000000000001bc";
 
     const p = new Array(count).fill(1).map(async () => {
-      const errMsgKeyWords = ["revert: Error(you trigger death value!)"];
+      const errMsgKeyWords = ["revert: Error: VM Exception while processing transaction: reverted with reason string 'you trigger death value!'"];
       const method = async () => {
         await executeGwRawTx(chainId, toId, args);
       };
