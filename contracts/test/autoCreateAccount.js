@@ -1,10 +1,3 @@
-// const { assert } = require("chai");
-// const { ethers, web3 } = require("hardhat");
-// import { RPC } from "@ckb-lumos/toolkit";
-// import { assert } from "chai"
-// import hardhat, { ethers } from "hardhat"
-// import { ERC20_HEX, ERC20_HEX_ABI } from "../scripts/erc20_hex";
-
 const hardhat = require("hardhat")
 const { assert } = require("chai")
 const { RPC } = require("@ckb-lumos/toolkit")
@@ -50,15 +43,10 @@ describe("AutoCreateAccount", function () {
     const storage = await Storage.connect(randomUser).deploy();
     console.log("Storage deployed tx hash:", storage.deployTransaction.hash)
   
-    // const tx2 = await rpc.eth_getTransactionByHash(greeter.deployTransaction.hash);
-    // console.log("tx2:", tx2)
-  
     const tx = await ethers.provider.getTransaction(storage.deployTransaction.hash);
-    // console.log("tx:", tx)
     assert.isDefined(tx)
     assert.isNotNull(tx)
     const receipt = await ethers.provider.getTransactionReceipt(storage.deployTransaction.hash);
-    // console.log("receipt:", receipt)
     assert.isNull(receipt)
   
     await storage.deployed();
@@ -84,7 +72,7 @@ function u32ToLE(num) {
 
 async function ethAddressToAccountId(ethAddress, rpc) {
   if (ethAddress === "0x" || ethAddress === "0x" + "00".repeat(20)) {
-    throw new Error("");
+    throw new Error("Eth address should not be empty or zero address");
   }
 
   if (!ethAddress.startsWith("0x") || ethAddress.length != 42) {
