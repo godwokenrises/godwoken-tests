@@ -47,7 +47,7 @@ describe("Eth_Call Cache Test", function () {
     const triggerValue = 444;
 
     const p = new Array(count).fill(1).map(async () => {
-      const errMsg = "revert: Error(you trigger death value!)";
+      const errMsg = "you trigger death value!";
       const method = async () => {
         await ethCallContract.getRevertMsg(triggerValue);
       };
