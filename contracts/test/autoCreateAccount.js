@@ -32,7 +32,7 @@ describe("AutoCreateAccount", function () {
     console.log("random user id:", randomUserId)
     assert.isUndefined(randomUserId)
   
-    await token.transfer(randomUser.address, 50000);
+    await token.transfer(randomUser.address, (2000n * 10n**18n).toString());
     const nextFromBalance = await ethers.provider.getBalance(randomUser.address)
     console.log("random user balance after transfer:", nextFromBalance)
     const randomUserIdAfterTransfer = await ethAddressToAccountId(randomUser.address, rpc);
