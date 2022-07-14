@@ -1,0 +1,15 @@
+name: Godwoken Tests
+
+on:
+  push:
+    branches: [develop, master, ci, 'v1*']
+    tags: ["v*.*.*"]
+  pull_request:
+
+jobs:
+  godwoken-tests:
+    uses: nervosnetwork/godwoken-tests/.github/workflows/reusable-integration-test-v1.yml@develop
+    with:
+      extra_github_env: |
+        GODWOKEN_TESTS_REPO=${{ github.repository }}
+        GODWOKEN_TESTS_REF=${{ github.ref }}
