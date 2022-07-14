@@ -53,7 +53,7 @@ describe("Eth_estimateGas Cache Test", function () {
     const p = new Array(count).fill(1).map(async () => {
       const errMsgKeyWords = [
         "UNPREDICTABLE_GAS_LIMIT: ",
-        "revert: Error(you trigger death value!)",
+        "you trigger death value!",
       ];
       const method = async () => {
         await ethCallContract.estimateGas.getRevertMsg(triggerValue);
