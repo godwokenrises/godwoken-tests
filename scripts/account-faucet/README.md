@@ -42,3 +42,26 @@ For more options, you can check with the `--help` command:
 ```bash
 $ npm run faucet -- claim -h
 ```
+
+## Get Layer2 Deposit Address
+
+### Calculate with ETH Address or CKB Private Key
+This is an util command to calculate the Layer2 Deposit Address.   
+It's a very similar command to the `claim` command, you can pass a ETH address:
+```bash
+$ npm run faucet -- get-l2-address -e <ETH_ADDRESS>
+```
+Or pass a CKB Private Key:
+```bash
+$ npm run faucet -- get-l2-address -p <CKB_PRIVATE_KEY>
+```
+
+### Address on different network
+You can use `-n` or `--network` option to calculate the Layer2 Deposit Address on different network:
+```bash
+$ npm run faucet -- get-l2-address -e <ETH_ADDRESS> -n <NETWORK>
+```
+
+Right now the supported networks are:
+- mainnet_v1
+- testnet_v1
