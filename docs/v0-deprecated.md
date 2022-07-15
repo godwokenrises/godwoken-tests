@@ -1,4 +1,4 @@
-# Godwoken Tests
+# Godwoken v0 Tests (deprecated)
 
 This repository contains integration tests that test [Godwoken](https://github.com/nervosnetwork/godwoken). You can trigger a test workflow [here](https://github.com/nervosnetwork/godwoken-tests/actions/workflows/test.yml) or run tests locally.
 
