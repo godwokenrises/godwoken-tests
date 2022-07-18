@@ -147,8 +147,8 @@ describe("sUDT-ERC20 Proxy Contract", () => {
     const sudt = await ethers.getContractAt(abi, transferSudt.address);
 
     const [senderBalance, receiverBalance] = await Promise.all([
-      await sudt.callStatic.balanceOf(sender.address, { gasPrice: 0 }),
-      await sudt.callStatic.balanceOf(receiver.address, { gasPrice: 0 }),
+      sudt.callStatic.balanceOf(sender.address),
+      sudt.callStatic.balanceOf(receiver.address),
     ]);
     console.debug(`${transferSudt.name} Balance of ${sender.address}:`, senderBalance);
     console.debug(`${transferSudt.name} Balance of ${receiver.address}:`, receiverBalance);

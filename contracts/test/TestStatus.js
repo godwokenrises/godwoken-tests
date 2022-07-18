@@ -41,6 +41,6 @@ after(async () => {
 
   console.log('Total capacity changed in the test run:');
   finalBalances.forEach((row) => {
-    console.log(`${row.address} spent ${row.mark}${row.spentEther} pCKB (${row.spent} shannon)`);
+    console.log(`${row.address} spent ${row.mark}${row.spentEther} pCKB (${row.spent} capacity)`);
   });
 });
