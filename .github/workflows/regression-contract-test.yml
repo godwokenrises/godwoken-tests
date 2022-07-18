@@ -1,0 +1,51 @@
+name: Regression Contract Tests
+
+on:
+  workflow_dispatch
+
+jobs:
+  check-secrets:
+    runs-on: ubuntu-latest
+    outputs:
+      available: ${{ steps.check.outputs.available }}
+    steps:
+      - id: check
+        env:
+          KEY1: '${{ secrets.GW_MAINNET_V1_PK1 }}'
+          KEY2: '${{ secrets.GW_MAINNET_V1_PK2 }}'
+        if: ${{ env.KEY1 != '' && env.KEY2 != '' }}
+        run: echo "::set-output name=available::true"
+
+  contract-tests:
+    runs-on: ubuntu-latest
+    needs: check-secrets
+    if: needs.check-secrets.outputs.available
+
+    steps:
+    - uses: actions/checkout@v3
+    - uses: actions/setup-node@v3
+      with:
+        node-version: '16'
+    - name: Get yarn cache directory path
+      id: yarn-cache-dir-path
+      run: echo "::set-output name=dir::$(yarn cache dir)"
+    - name: Node Cache
+      uses: actions/cache@v2
+      id: npm-and-yarn-cache # use this to check for `cache-hit` (`steps.yarn-cache.outputs.cache-hit != 'true'`)
+      with:
+        path: |
+          ${{ steps.yarn-cache-dir-path.outputs.dir }}
+          ~/.npm
+        key: ${{ runner.os }}-node_modules-${{ hashFiles('/home/runner/work/**/package-lock.json', '/home/runner/work/**/yarn.lock') }}
+        restore-keys: |
+          ${{ runner.os }}-node_modules-
+
+    - name: Install dependencies
+      working-directory: contracts
+      run: npm install
+    - name: Run tests
+      working-directory: contracts
+      run: npm run test:gw_mainnet_v1
+      env:
+        PRIVATE_KEY: ${{ secrets.GW_MAINNET_V1_PK1 }}
+        PRIVATE_KEY2: ${{ secrets.GW_MAINNET_V1_PK2 }}

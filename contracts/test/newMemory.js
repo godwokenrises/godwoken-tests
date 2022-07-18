@@ -1,7 +1,12 @@
 const { expect } = require("chai");
 const { ethers } = require("hardhat");
+const { isGwMainnetV1 } = require('../utils/network');
 
 describe("Memory Contract", function () {
+  if (isGwMainnetV1()) {
+    return;
+  }
+
   it("Deploy and new some memory", async () => {
     const contractFact = await ethers.getContractFactory("Memory");
     const contract = await contractFact.deploy();

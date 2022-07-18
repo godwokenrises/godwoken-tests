@@ -5,6 +5,7 @@ const {
   u32ToLittleEnd,
   getAccountIdByContractAddress,
 } = require("../lib/helper");
+const { isGwMainnetV1 } = require('../utils/network');
 
 const expectedValue = 10;
 let ethCallContract;
@@ -33,6 +34,10 @@ const expectThrowsAsync = async (method, errMsgKeyWords, noErrMsgKeyWord) => {
 };
 
 describe("MIN GAS PRICE Test", function () {
+  if (isGwMainnetV1()) {
+    return;
+  }
+
   before("Deploy and Set", async () => {
     const contractFact = await ethers.getContractFactory("CallTest");
     ethCallContract = await contractFact.deploy();

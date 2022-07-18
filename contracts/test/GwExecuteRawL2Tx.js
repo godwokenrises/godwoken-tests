@@ -4,6 +4,7 @@ const toolkit = require("@ckb-lumos/toolkit");
 const schemas = require("../../schemas");
 const normalizers = require("../lib/normalizer");
 const { getAccountIdByContractAddress } = require("../lib/helper");
+const { isGwMainnetV1 } = require('../utils/network');
 
 const expectedValue = 10;
 
@@ -47,6 +48,10 @@ const executeGwRawTx = async (chainId, toId, polyArgs) => {
 };
 
 describe("gw_execute_raw_l2transaction Cache Test", function () {
+  if (isGwMainnetV1()) {
+    return;
+  }
+
   before("Deploy and Set", async () => {
     const contractFact = await ethers.getContractFactory("CallTest");
     ethCallContract = await contractFact.deploy();

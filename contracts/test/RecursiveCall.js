@@ -1,7 +1,12 @@
 const { expect } = require("chai");
 const { ethers } = require("hardhat");
+const { isGwMainnetV1 } = require('../utils/network');
 
 describe("Recursion Contract", function () {
+  if (isGwMainnetV1()) {
+    return;
+  }
+
   this.timeout(100 * 1000);
   it("Deploy and call recursive functions", async () => {
     const contractFact = await ethers.getContractFactory("RecursionContract");

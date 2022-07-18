@@ -1,6 +1,7 @@
+const fetch = require("node-fetch");
 const { expect } = require("chai");
 const { ethers, network } = require("hardhat");
-const fetch = require("node-fetch");
+const { isGwMainnetV1 } = require('../utils/network');
 
 const expectedValue = 10;
 const expectedGas = "21000";
@@ -24,6 +25,10 @@ const expectThrowsAsync = async (method, errMsgKeyWords) => {
 };
 
 describe("Eth_estimateGas Cache Test", function () {
+  if (isGwMainnetV1()) {
+    return;
+  }
+
   before("Deploy and Set", async () => {
     const contractFact = await ethers.getContractFactory("CallTest");
     ethCallContract = await contractFact.deploy();

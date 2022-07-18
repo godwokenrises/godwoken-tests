@@ -1,8 +1,13 @@
 const { assert } = require("chai");
 const { ethers } = require("hardhat");
+const { isGwMainnetV1 } = require('../utils/network');
 const { BigNumber, constants } = ethers;
 
 describe("Multicall", () => {
+  if (isGwMainnetV1()) {
+    return;
+  }
+
   let deployerAddress = "";
   let multicall;
   let callData;

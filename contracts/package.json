@@ -6,7 +6,8 @@
     "compile": "hardhat compile",
     "test": "hardhat test --network gw_devnet_v1",
     "test:gw_testnet_v1": "hardhat test --bail --network gw_testnet_v1",
-    "test:gw_alphanet_v1": "hardhat test --bail --network gw_alphanet_v1"
+    "test:gw_alphanet_v1": "hardhat test --bail --network gw_alphanet_v1",
+    "test:gw_mainnet_v1": "hardhat test --bail --network gw_mainnet_v1"
   },
   "keywords": [
     "Solidity",

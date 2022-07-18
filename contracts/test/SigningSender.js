@@ -1,7 +1,11 @@
 const { expect } = require("chai");
 const { ethers, web3 } = require("hardhat");
+const { isGwMainnetV1 } = require('../utils/network');
 
 describe("Signing Contract", function () {
+  if (isGwMainnetV1()) {
+    return;
+  }
 
   let contract;
 
