@@ -28,20 +28,11 @@ module.exports = {
     gw_testnet_v1: {
       url: `https://godwoken-testnet-v1.ckbapp.dev`,
       accounts: [`0x${TEST_PK1}`, `0x${TEST_PK2}`, `0x${TEST_PK3}`],
-      version: "1.2.0",
-      chainId: 71401,
-    },
-    // TODO: It is the same as gw_testnet_v1 and this name will be deprecated.
-    gw_betanet_v1: {
-      url: `https://godwoken-betanet-v1.ckbapp.dev`,
-      accounts: [`0x${TEST_PK1}`, `0x${TEST_PK2}`],
-      version: "1.2.0",
       chainId: 71401,
     },
     gw_alphanet_v1: { // for internal testing
       url: `https://godwoken-alphanet-v1.ckbapp.dev`,
       accounts: [`0x${TEST_PK1}`, `0x${TEST_PK2}`],
-      version: "1.2.0",
       chainId: 202206,
       gasPrice: 1,
     },
