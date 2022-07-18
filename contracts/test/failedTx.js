@@ -1,9 +1,14 @@
 const { expect } = require("chai");
 const { ethers, waffle } = require("hardhat");
+const { isGwMainnetV1 } = require('../utils/network');
 
 let contract;
 
 describe('Revertable transaction', () => {
+    if (isGwMainnetV1()) {
+        return;
+    }
+
     let provider = waffle.provider;
 
     beforeEach(async function () {

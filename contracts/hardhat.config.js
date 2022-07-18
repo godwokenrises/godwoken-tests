@@ -45,6 +45,11 @@ module.exports = {
       chainId: 202206,
       gasPrice: 1,
     },
+    gw_mainnet_v1: { // for regression testing
+      url: `https://v1.mainnet.godwoken.io/rpc`,
+      accounts: [`0x${TEST_PK1}`, `0x${TEST_PK2}`],
+      chainId: 71402,
+    },
     rinkeby: {
       url: `https://rinkeby.infura.io/v3/${INFURA_PROJECT_ID}`,
       accounts: [`0x${TEST_PK1}`],

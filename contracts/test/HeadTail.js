@@ -1,10 +1,15 @@
 const { expect } = require("chai");
 const { ethers, waffle } = require("hardhat");
+const { isGwMainnetV1 } = require('../utils/network');
 
 const BET_VALUE = BigInt(1 * 10 ** 3);
 const MINIMUM_USER_BALANCE_FOR_TESTING = BET_VALUE * BigInt(10);
 
 describe('HeadTail', () => {
+    if (isGwMainnetV1()) {
+        return;
+    }
+
     let provider = waffle.provider;
 
     let userOne;

@@ -2,8 +2,13 @@
 
 const { expect } = require("chai");
 const { ethers } = require("hardhat");
+const { isGwMainnetV1 } = require('../utils/network');
 
 describe("SisyphusGamble", function () {
+  if (isGwMainnetV1()) {
+    return;
+  }
+
   it("Start a new sisyphus gamble -> gamble -> claimPrize", async () => {
     const [sender] = await ethers.getSigners();
     console.log(`sender's address: ${sender.address}`);

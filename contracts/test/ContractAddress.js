@@ -1,7 +1,12 @@
 const { assert } = require("chai");
 const { ethers, web3 } = require("hardhat");
+const { isGwMainnetV1 } = require('../utils/network');
 
 describe("ContractAddress", function () {
+    if (isGwMainnetV1()) {
+        return;
+    }
+
     it("Contract address should be null when not deploy contract", async function () {
         const Storage = await ethers.getContractFactory("Calc");
         const contract = await Storage.deploy();
@@ -12,5 +17,6 @@ describe("ContractAddress", function () {
         await tx.wait();
         const receipt = await web3.eth.getTransactionReceipt(tx.hash);
         assert.isNull(receipt.contractAddress);
+        console.log(receipt);
     });
 });
