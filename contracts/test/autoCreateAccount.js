@@ -40,7 +40,23 @@ describe("AutoCreateAccount", function () {
     assert.isUndefined(randomUserIdAfterTransfer)
   
     const Storage = await ethers.getContractFactory("Storage");
-    const storage = await Storage.connect(randomUser).deploy();
+    let storage;
+    try {
+      storage = await Storage.connect(randomUser).deploy();
+    } catch (err) {
+      if (err.message.includes("cannot estimate gas")) {
+        const txRequest = Storage.connect(randomUser).getDeployTransaction();
+        const gasPrice = await ethers.provider.getGasPrice();
+        const args = {
+          ...txRequest,
+          gasPrice: gasPrice.toHexString(),
+          from: randomUser.address,
+        }
+        const estimateResult = await ethers.provider.estimateGas(args);
+        console.log("estimate gas result:", estimateResult)
+      }
+      throw err;
+    }
     console.log("Storage deployed tx hash:", storage.deployTransaction.hash)
   
     const tx = await ethers.provider.getTransaction(storage.deployTransaction.hash);
