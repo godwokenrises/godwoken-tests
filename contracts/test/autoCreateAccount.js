@@ -52,6 +52,7 @@ describe("AutoCreateAccount", function () {
           gasPrice: gasPrice.toHexString(),
           from: randomUser.address,
         }
+        console.log("estimate gas args:", args)
         const estimateResult = await ethers.provider.estimateGas(args);
         console.log("estimate gas result:", estimateResult)
       }
