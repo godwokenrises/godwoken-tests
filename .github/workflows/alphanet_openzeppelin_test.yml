@@ -1,0 +1,48 @@
+name: gw_alphanet_v1_openzeppelin_test
+
+
+on:
+  schedule:
+  - cron:  '50 20/24 * * *' # every day
+
+jobs:
+  contract-tests:
+    strategy:
+      fail-fast: false
+      matrix:
+        net: ['testnet_v1']
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          repository: gpBlockchain/openzeppelin-contracts
+      - uses: actions/setup-node@v3
+        with:
+          node-version: '16'
+      - name: Get yarn cache directory path
+        id: yarn-cache-dir-path
+        run: echo "::set-output name=dir::$(yarn cache dir)"
+      - name: Node Cache
+        uses: actions/cache@v2
+        id: npm-and-yarn-cache # use this to check for `cache-hit` (`steps.yarn-cache.outputs.cache-hit != 'true'`)
+        with:
+          path: |
+            ${{ steps.yarn-cache-dir-path.outputs.dir }}
+            ~/.npm
+          key: ${{ runner.os }}-node_modules-${{ hashFiles('/home/runner/work/**/package-lock.json', '/home/runner/work/**/yarn.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-node_modules-
+            
+      - name: Run tests
+        id: runtest
+        run: |
+          npm install
+          npm run test:gwAlphanetTestnetV1
+          
+      - name: Publish reports
+        if: always()
+        uses: actions/upload-artifact@v2
+        with:
+          name: jfoa-build-reports-${{ runner.os }}
+          path: mochawesome-report/
