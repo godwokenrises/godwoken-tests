@@ -1,16 +1,16 @@
-name: gw_alphanet_v1_openzeppelin_test
+name: gw_alphanet_openzeppelin_test
 
 
 on:
   schedule:
-  - cron:  '50 20/24 * * *' # every day
+  - cron:  '50 20 * * *' # every day
 
 jobs:
   contract-tests:
     strategy:
       fail-fast: false
       matrix:
-        net: ['testnet_v1']
+        net: ['alphanet']
     runs-on: ubuntu-latest
 
     steps:
