@@ -110,6 +110,12 @@ jobs:
     - name: Set up Docker Buildx
       uses: docker/setup-buildx-action@v1
 
+    # Ensure clean state
+    - name: Run Godwoken-Kicker clean
+      working-directory: kicker
+      run: |
+        ./kicker clean
+
     - name: Init Godwoken-Kicker services
       working-directory: kicker
       run: |
