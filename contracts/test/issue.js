@@ -68,54 +68,54 @@ describe('issue', function () {
 
             });
 
-            describe('topic', function () {
 
-                let contractAddress;
+        });
 
-                let topic0 = "0x0000000000000000000000000000000000000000000000000000000000000001";
-                let topic1 = "0x0000000000000000000000000000000000000000000000000000000000000002";
-                let topic2 = "0x0000000000000000000000000000000000000000000000000000000000000003";
-                let topic3 = "0x0000000000000000000000000000000000000000000000000000000000000004";
-                let filterMsgMap;
-                let logContract;
-                let blockHeight;
+        describe('filter topic', function () {
 
-                before(async function () {
+            let contractAddress;
 
-                    blockHeight = await ethers.provider.getBlockNumber()
-                    //deploy contract
-                    let logContractInfo = await ethers.getContractFactory("logContract");
-                    logContract = await logContractInfo.deploy()
-                    await logContract.deployed()
-                    contractAddress = logContract.address
-                    let topicsMap = {
+            let topic0 = "0x0000000000000000000000000000000000000000000000000000000000000001";
+            let topic1 = "0x0000000000000000000000000000000000000000000000000000000000000002";
+            let topic2 = "0x0000000000000000000000000000000000000000000000000000000000000003";
+            let topic3 = "0x0000000000000000000000000000000000000000000000000000000000000004";
+            let filterMsgMap;
+            let logContract;
+            let blockHeight;
 
-                        "topic.[[A, B],[A, B]].yes": {
-                            "topics": [[topic3, topic0], [null, null, topic2]]
-                        },
-                        "topic.[[A, B],[A, B]].no": {
-                            "topics": [[topic0, topic2, topic3], [null, topic2], [topic1]]
-                        },
-                    }
+            before(async function () {
 
-                    filterMsgMap = await getTopicFilter(topicsMap, logContract, 10)
-                })
+                blockHeight = await ethers.provider.getBlockNumber()
+                //deploy contract
+                let logContractInfo = await ethers.getContractFactory("logContract");
+                logContract = await logContractInfo.deploy()
+                await logContract.deployed()
+                contractAddress = logContract.address
+                let topicsMap = {
 
-                it.skip("[[A, B], [A, B]].yes", async () => {
-                    //check get filed id success
-                    expect(filterMsgMap["topic.[[A, B],[A, B]].yes"].error).to.be.equal(undefined)
-                    expect(filterMsgMap["topic.[[A, B],[A, B]].yes"].logs.length).to.be.not.equal(0)
-                    await checkLogsGteHeight(filterMsgMap["topic.[[A, B],[A, B]].yes"].logs, blockHeight)
-                    await checkLogsIsSort(filterMsgMap["topic.[[A, B],[A, B]].yes"].logs)
-                })
+                    "topic.[[A, B],[A, B]].yes": {
+                        "topics": [[topic3, topic0], [null, null, topic2]]
+                    },
+                    "topic.[[A, B],[A, B]].no": {
+                        "topics": [[topic0, topic2, topic3], [null, topic2], [topic1]]
+                    },
+                }
 
-                it.skip("[[A, B], [A, B]].no", async () => {
-                    expect(filterMsgMap["topic.[[A, B],[A, B]].no"].error).to.be.equal(undefined)
-                    expect(filterMsgMap["topic.[[A, B],[A, B]].no"].logs.length).to.be.equal(0)
-                })
+                filterMsgMap = await getTopicFilter(topicsMap, logContract, 10)
+            })
 
-            });
+            it.skip("[[A, B], [A, B]].yes,should return logs", async () => {
+                //check get filed id success
+                expect(filterMsgMap["topic.[[A, B],[A, B]].yes"].error).to.be.equal(undefined)
+                expect(filterMsgMap["topic.[[A, B],[A, B]].yes"].logs.length).to.be.not.equal(0)
+                await checkLogsGteHeight(filterMsgMap["topic.[[A, B],[A, B]].yes"].logs, blockHeight)
+                await checkLogsIsSort(filterMsgMap["topic.[[A, B],[A, B]].yes"].logs)
+            })
 
+            it.skip("[[A, B], [A, B]].no,should return empty", async () => {
+                expect(filterMsgMap["topic.[[A, B],[A, B]].no"].error).to.be.equal(undefined)
+                expect(filterMsgMap["topic.[[A, B],[A, B]].no"].logs.length).to.be.equal(0)
+            })
 
         });
 
