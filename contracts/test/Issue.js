@@ -12,7 +12,7 @@ describe('issue', function () {
 
     describe('newFilter', function () {
 
-        it("invoke eth_getFilterChanges 2 times, second logs length must be 0 ", async () => {
+        it.skip("invoke eth_getFilterChanges 2 times, second logs length must be 0 ", async () => {
             const filterId = await ethers.provider.send("eth_newFilter", [{}]);
 
             await sendTxToAddBlockNum(3)
@@ -49,14 +49,14 @@ describe('issue', function () {
             describe("fromBlock", function () {
 
 
-                it("pending,should return error msg", async () => {
+                it.skip("pending,should return error msg", async () => {
                     //invalid from and to block combination: from > to
                     expect(filterMsg["fromBlock.pending"].error).to.be.not.equal(undefined)
 
                 })
 
 
-                it("blockNumber(blockHeight+1000),should return 0 log", async () => {
+                it.skip("blockNumber(blockHeight+1000),should return 0 log", async () => {
 
                     expect(filterMsg["fromBlock.blockHeight+1000"].logs.length).to.be.equal(0)
                 })
@@ -65,7 +65,7 @@ describe('issue', function () {
 
             describe('toBlock', function () {
 
-                it("earliest,should return error msg", async () => {
+                it.skip("earliest,should return error msg", async () => {
                     //invalid from and to block combination: from > to
                     expect(filterMsg["toBlock.earliest"].error).to.be.not.equal(undefined)
                 })
@@ -108,7 +108,7 @@ describe('issue', function () {
                 filterMsgMap = await getTopicFilterAfterSendTx(topicsMap, logContract, 10)
             })
 
-            it("[[A, B], [A, B]].yes,should return logs", async () => {
+            it.skip("[[A, B], [A, B]].yes,should return logs", async () => {
                 //check get filed id success
                 expect(filterMsgMap["topic.[[A, B],[A, B]].yes"].error).to.be.equal(undefined)
                 expect(filterMsgMap["topic.[[A, B],[A, B]].yes"].logs.length).to.be.not.equal(0)
@@ -116,7 +116,7 @@ describe('issue', function () {
                 await checkLogsIsSort(filterMsgMap["topic.[[A, B],[A, B]].yes"].logs)
             })
 
-            it("[[A, B], [A, B]].no,should return empty", async () => {
+            it.skip("[[A, B], [A, B]].no,should return empty", async () => {
                 expect(filterMsgMap["topic.[[A, B],[A, B]].no"].error).to.be.equal(undefined)
                 expect(filterMsgMap["topic.[[A, B],[A, B]].no"].logs.length).to.be.equal(0)
             })
