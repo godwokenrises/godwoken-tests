@@ -37,11 +37,13 @@ If you prefer to claim faucet with your `CKB Layer 1 Private Key`:
 $ npm run faucet -- claim -p <CKB_PRIVATE_KEY>
 ```
 
-### Other command options
-For more options, you can check with the `--help` command:
+### Claim faucet on different networks
+You can use `-n` or `--network` option to claim faucet on different network:
 ```bash
-$ npm run faucet -- claim -h
+$ $ npm run faucet -- claim -p <CKB_PRIVATE_KEY> -n <NETWORK>
 ```
+
+One thing to be noted, `mainnet_v1` is not available for the `--network` option.
 
 ## Get Layer2 Deposit Address
 
@@ -56,7 +58,7 @@ Or pass a CKB Private Key:
 $ npm run faucet -- get-l2-address -p <CKB_PRIVATE_KEY>
 ```
 
-### Address on different network
+### Address on different networks
 You can use `-n` or `--network` option to calculate the Layer2 Deposit Address on different network:
 ```bash
 $ npm run faucet -- get-l2-address -e <ETH_ADDRESS> -n <NETWORK>
@@ -65,3 +67,4 @@ $ npm run faucet -- get-l2-address -e <ETH_ADDRESS> -n <NETWORK>
 Right now the supported networks are:
 - mainnet_v1
 - testnet_v1
+- alphanet_v1
