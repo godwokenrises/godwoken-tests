@@ -1,10 +1,14 @@
 const {expect} = require("chai");
 const {ethers} = require("hardhat");
 const {BigNumber} = require("ethers");
+const { isGwMainnetV1 } = require('../utils/network');
 
 
 describe('issue', function () {
     this.timeout(600000)
+    if (isGwMainnetV1()) {
+        return;
+    }
 
     describe('newFilter', function () {
 
@@ -25,7 +29,7 @@ describe('issue', function () {
             before(async function () {
                 blockHeight = await ethers.provider.getBlockNumber()
 
-                filterMsg = await getFilterMsgByFilter(
+                filterMsg = await getFilterMsgAfterSendTx(
                     {
 
                         "fromBlock.pending": {
@@ -61,7 +65,7 @@ describe('issue', function () {
 
             describe('toBlock', function () {
 
-                it.skip("earliest,should return error msg", async () => {
+                it("earliest,should return error msg", async () => {
                     //invalid from and to block combination: from > to
                     expect(filterMsg["toBlock.earliest"].error).to.be.not.equal(undefined)
                 })
@@ -101,7 +105,7 @@ describe('issue', function () {
                     },
                 }
 
-                filterMsgMap = await getTopicFilter(topicsMap, logContract, 10)
+                filterMsgMap = await getTopicFilterAfterSendTx(topicsMap, logContract, 10)
             })
 
             it("[[A, B], [A, B]].yes,should return logs", async () => {
@@ -134,7 +138,7 @@ describe('issue', function () {
  * @param sendCount
  * @returns filterMsgMap: filter change log msg
  */
-async function getTopicFilter(topicFilterMap, logContract, sendCount) {
+async function getTopicFilterAfterSendTx(topicFilterMap, logContract, sendCount) {
 
     let filterMsgMap = {}
 
@@ -187,7 +191,7 @@ async function getTopicFilter(topicFilterMap, logContract, sendCount) {
  * @param sendBlkNum
  * @returns FilterMsg:  filter change log
  */
-async function getFilterMsgByFilter(filterMap, sendBlkNum) {
+async function getFilterMsgAfterSendTx(filterMap, sendBlkNum) {
     let FilterMsg = {}
     for (let key in filterMap) {
         FilterMsg[key] = {}
@@ -233,7 +237,7 @@ async function sendTxToAddBlockNum(blockNumber) {
  */
 async function sendTxContainsLog() {
     let from = (await ethers.getSigners())[1].address
-    let logContract = await ethers.getContractFactory("logContract");
+    let logContract = await ethers.getContractFactory("LogContract");
     try {
         await ethers.provider.send("eth_sendTransaction", [{
             "from": from,
