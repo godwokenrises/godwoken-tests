@@ -13,7 +13,7 @@ export interface FaucetCommand {
   privateKey?: HexString | string;
   ckbAddress?: HexString | string;
   ethAddress?: HexString | string;
-  rpc?: string;
+  network: Network;
 }
 
 export function setupFaucetCommand(program: Command) {
@@ -23,18 +23,21 @@ export function setupFaucetCommand(program: Command) {
     .option('-p, --private-key <privateKey>', '[HexString] ckb private key')
     .option('-e --eth-address <ethAddress>', '[HexString] eth address (optional)')
     .option('-c --ckb-address <ckbAddress>', '[Address] ckb address (optional)', defaultCkbAddress)
-    .option('-r, --rpc <rpc>', '[string] godwoken rpc url')
+    .option('-n, --network <network>', '[string] network name', Network.TestnetV1)
     .action(runFaucet);
 }
 
 export async function runFaucet(params: FaucetCommand) {
-  const { privateKey, ckbAddress, ethAddress, rpc } = params;
+  const { privateKey, ckbAddress, ethAddress, network } = params;
   if (!privateKey && !ethAddress) {
     throw new Error('provide either `privateKey` or `ethAddress`');
   }
+  if (network === Network.MainnetV1) {
+    throw new Error('cannot claim faucet on mainnet');
+  }
 
-  const config = networks[Network.TestnetV1];
-  const gw = new GodwokenWeb3(rpc || config.rpc);
+  const config = networks[network];
+  const gw = new GodwokenWeb3(config.rpc);
 
   let depositAddress: Address;
   if (privateKey) {
