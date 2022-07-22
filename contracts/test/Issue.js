@@ -5,7 +5,7 @@ const { isGwMainnetV1 } = require('../utils/network');
 
 
 describe('issue', function () {
-    this.timeout(600000)
+    // this.timeout(600000)
     if (isGwMainnetV1()) {
         return;
     }
