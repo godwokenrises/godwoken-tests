@@ -29,6 +29,7 @@ describe("AutoCreateAccount", function () {
 
   it("Auto create account if ckb balance > 0", async () => {
     const randomUser = new ethers.Wallet(ethers.Wallet.createRandom().privateKey, ethers.provider);
+    console.log("random user private key:", randomUser.privateKey);
     console.log("random user address:", randomUser.address)
     const randomUserBalance = await ethers.provider.getBalance(randomUser.address);
     console.log("random user balance:", randomUserBalance)
