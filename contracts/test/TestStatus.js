@@ -1,7 +1,7 @@
 const { ethers, config, network } = require("hardhat");
 const { expect } = require("chai");
 
-let startingBalances = [];
+const startingBalances = {};
 
 before("Before testing",() => {
   it("Check the Godwoken network version", () => {
@@ -20,27 +20,26 @@ before("Before testing",() => {
 
   it("Record signers' starting balance", async () => {
     const signers = await ethers.getSigners();
-    startingBalances = await Promise.all(signers.map(signer => signer.getBalance()));
+    for (let i = 0; i < signers.length; i++) {
+      const signer = signers[i];
+      startingBalances[signer.address] = await signer.getBalance();
+    }
   });
 });
 
 after(async () => {
   const signers = await ethers.getSigners();
   const signersBalances = await Promise.all(signers.map(signer => signer.getBalance()));
-  const finalBalances = signers.map((signer, index) => {
-    const spent = signersBalances[index].sub(startingBalances[index]);
+
+  console.log('Total capacity spent in the test run:');
+  signers.forEach((signer, index) => {
+    const balance = signersBalances[index];
+    const balanceEther = ethers.utils.formatEther(balance);
+    const startingBalance = startingBalances[signer.address] || balance;
+    const spent = balance.sub(startingBalance);
     const spentEther = ethers.utils.formatEther(spent);
     const mark = spent.gte(0) ? '+' : '';
-    return {
-      address: signer.address,
-      spentEther,
-      spent,
-      mark,
-    };
-  });
 
-  console.log('Total capacity changed in the test run:');
-  finalBalances.forEach((row) => {
-    console.log(`${row.address} spent ${row.mark}${row.spentEther} pCKB (${row.spent} capacity)`);
+    console.log(`${signer.address} spent: ${mark}${spentEther} pCKB (${spent}), balance: ${balanceEther} pCKB`);
   });
 });
