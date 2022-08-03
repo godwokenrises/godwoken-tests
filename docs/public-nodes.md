@@ -1,9 +1,9 @@
 # Public Nodes
 
-## Godwoken
+## Godwoken Public Networks
 
-### [Testnet Web3 RPC](https://github.com/nervosnetwork/godwoken-testnet#web3-rpc)
-- http://godwoken-testnet-web3-rpc.ckbapp.dev
+- https://github.com/nervosnetwork/godwoken-info
+- https://docs.godwoken.io/connectionInfo
 
 
 ## CKB Mainnet Lina
