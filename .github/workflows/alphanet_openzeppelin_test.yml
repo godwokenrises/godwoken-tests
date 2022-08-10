@@ -12,6 +12,7 @@ jobs:
     steps:
       - uses: actions/checkout@v3
         with:
+          ref: compatibility-godwoken
           repository: gpBlockchain/openzeppelin-contracts
       - uses: actions/setup-node@v3
         with:
@@ -30,12 +31,87 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-node_modules-
 
-      - name: Run tests
+      - name: Run Prepare Account
         id: runtest
         run: |
           npm install
-          npm run test:gwAlphanetTestnetV1
-
+          bash try.sh npm run test:init
+      - name: Run Pipeline 5-2
+        if: success() || failure()
+        run: |
+          bash try.sh npm run test:pipeline5-2
+      - name: Run Pipeline 5-1
+        if: success() || failure()
+        run: |
+          bash try.sh npm run test:pipeline5-1
+      - name: Run Pipeline 5-3
+        if: success() || failure()
+        run: |
+          bash try.sh npm run test:pipeline5-3
+      - name: Run Pipeline 5-4
+        if: success() || failure()
+        run: |
+          bash try.sh npm run test:pipeline5-4
+      - name: Run Pipeline 5-5
+        if: success() || failure()
+        run: |
+          bash try.sh npm run test:pipeline5-5
+      - name: Run Pipeline 5-6
+        if: success() || failure()
+        run: |
+          bash try.sh npm run test:pipeline5-6
+      - name: Run Pipeline 5-7
+        if: success() || failure()
+        run: |
+          bash try.sh npm run test:pipeline5-7
+      - name: Run Pipeline 5-8
+        if: success() || failure()
+        run: |
+          bash try.sh npm run test:pipeline5-8
+      - name: Run Pipeline 5-9
+        if: success() || failure()
+        run: |
+          bash try.sh npm run test:pipeline5-9
+      - name: Run Pipeline 5-10
+        if: success() || failure()
+        run: |
+          bash try.sh npm run test:pipeline5-10
+      - name: Run Pipeline 5-11
+        if: success() || failure()
+        run: |
+          bash try.sh npm run test:pipeline5-11
+      - name: Run Pipeline 5-12
+        if: success() || failure()
+        run: |
+          bash try.sh npm run test:pipeline5-12
+      - name: Run Pipeline 5-13
+        if: success() || failure()
+        run: |
+          bash try.sh npm run test:pipeline5-13
+      - name: Run Pipeline 5-14
+        if: success() || failure()
+        run: |
+          bash try.sh npm run test:pipeline5-14
+      - name: Run Pipeline 5-15
+        if: success() || failure()
+        run: |
+          bash try.sh npm run test:pipeline5-15
+      - name: Run Pipeline 5-16
+        if: success() || failure()
+        run: |
+          bash try.sh npm run test:pipeline5-16
+      - name: Run Pipeline 5-17
+        if: success() || failure()
+        run: |
+          bash try.sh npm run test:pipeline5-17
+      - name: Run Pipeline 5-18
+        if: success() || failure()
+        run: |
+          bash try.sh npm run test:pipeline5-18
+      - name: Run Pipeline 5-19
+        if: success() || failure()
+        run: |
+          bash try.sh npm run test:pipeline5-19
       - name: Publish reports
         if: always()
         uses: actions/upload-artifact@v2
