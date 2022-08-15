@@ -7,7 +7,7 @@ A CLI tool to interact with LightGodwoken.
 ### Setup light-godwoken submodule
 ```shell
 # position: godwoken-tests/
-$ git submodule update --init
+$ git submodule update --init --recursive --depth=1
 $ cd light-godwoken
 $ yarn && yarn lerna run build --scope=light-godwoken 
 ```
