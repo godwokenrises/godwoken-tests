@@ -8,7 +8,7 @@ export GODWOKEN_CONFIG_PATH=${PWD}/configs/godwoken-config.toml
 [[ -n "$KEEP_INDEXER" ]] || rm -r indexer-data
 
 # use godwoken-examples submodule as tools
-git submodule update --init
+git submodule update --init --recursive --depth=1
 
 cd tools
 yarn                # please use node@14
