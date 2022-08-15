@@ -1,0 +1,29 @@
+{
+  "compilerOptions": {
+    "strict": true,
+    "target": "es2020",
+    "module": "commonjs",
+    "esModuleInterop": true,
+    "moduleResolution": "node",
+    "sourceMap": true,
+    "types": ["node"],
+    "outDir": "dist",
+    "rootDir": "src",
+    "allowJs": true,
+    "skipLibCheck": true,
+    "lib": ["esnext", "dom"],
+    "paths": {
+      "light-godwoken": [
+        "../../light-godwoken/packages/light-godwoken/dist/index.d.js"
+      ]
+    }
+  },
+  "include": [
+    "src/**/*",
+    "../../light-godwoken/packages/light-godwoken/dist/*"
+  ],
+  "exclude": [
+    "**/node_modules",
+    "dist"
+  ]
+}
