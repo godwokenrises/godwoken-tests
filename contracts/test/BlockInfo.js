@@ -1,6 +1,7 @@
 const { expect } = require("chai");
 const { ethers, web3 } = require("hardhat");
 const { isGwMainnetV1 } = require("../utils/network");
+const { BlockInfo: mainnetContractAddr } = require("../config/mainnet-contracts.json");
 
 describe("BlockInfo Contract", function () {
   let contract = {
@@ -8,7 +9,7 @@ describe("BlockInfo Contract", function () {
   };
 
   if (isGwMainnetV1()) {
-    contract.address = "0xfB243051AE5cB157240a3bA79678e1DF8e6EFDb7";
+    contract.address = mainnetContractAddr;
   }
 
   before(async function () {
