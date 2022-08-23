@@ -1,7 +1,8 @@
-const { expect, assert } = require("chai");
+const { expect } = require("chai");
 
 const { ethers, waffle } = require("hardhat");
 const { isGwMainnetV1 } = require('../utils/network');
+const { ERC20_BYTECODE, ERC20_ABI } = require("../lib/sudtErc20Proxy")
 
 const deployer = "0xa990077c3205cbDf861e17Fa532eeB069cE9fF96";
 const contract = "0x1820a4B7618BdE71Dce8cdc73aAB6C95905faD24";
@@ -12,25 +13,31 @@ describe('EIP 1820', () => {
     return;
   }
 
-  let provider = waffle.provider;
+  const provider = waffle.provider;
 
   describe('Deploy', () => {
     it('transferred value and fee', async () => {
+      const [owner] = await ethers.getSigners();
+
+      // Deploy ERC20
+      const token = await waffle.deployContract(owner, { abi: ERC20_ABI, bytecode: ERC20_BYTECODE }, ["pckb", "pCKB", 10000, 1, 18])
+      await token.deployed();
+      console.log(`Token deployed to: ${token.address}, hash: ${token.deployTransaction.hash}`);
+
       let code = await provider.getCode(contract);
       expect(code).to.be.equal("0x", "account isn't deployed");
+
       // Create a transaction object
-      let tx = {
-        to: deployer,
-        // Convert currency unit from ether to wei
-        value: ethers.utils.parseEther("0.08")
-      };
-      // Send a transaction
-      let txObj = await wallet.sendTransaction(tx);
-      console.log('prepare deployment ETH', txObj.hash)
+      // Convert currency unit from ether to wei
+      const transferTx = await token.transfer(deployer, ethers.utils.parseEther("0.08"));
+      await transferTx.wait();
+      console.log('prepare deployment ETH', transferTx.hash)
+
       // send the deployment transaction
       const { hash } = await provider.sendTransaction(
         rawTx
       );
+      console.log("deployment hash:", hash)
       await provider.waitForTransaction(hash);
       await provider.getCode(deployer);
       code = await provider.getCode(contract);
