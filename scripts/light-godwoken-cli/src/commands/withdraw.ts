@@ -1,31 +1,32 @@
 import { utils } from 'ethers';
 import { Command, Option } from 'commander';
 import { HexString } from '@ckb-lumos/base';
+import { utils as lumosUtils } from '@ckb-lumos/lumos';
 import { Network } from '../config';
 import { createSudtTypeScript } from '../utils/sudt';
 import { createLightGodwoken } from '../utils/client';
 import { isAllDefinedOrAllNot } from '../utils/check';
 import { getConfig } from '../utils/config';
 
-export default function setupDeposit(program: Command) {
+export default function setupWithdrawal(program: Command) {
   program
-    .command('deposit')
-    .description('Deposit capacity from layer1 to Godwoken layer2')
+    .command('withdraw')
+    .description('Withdraw capacity from Godwoken layer2 to layer1')
     .requiredOption('-p, --private-key <HEX_STRING>', 'account private key')
     .requiredOption('-c, --capacity <STRING>', 'deposit capacity (1:1CKB)')
-    .option('-sl, --sudt-lock-args <HEX_STRING>', 'deposit sudt L1 lock_args')
-    .option('-sa, --sudt-amount <STRING>', 'deposit sudt amount')
+    .option('-sl, --sudt-lock-args <HEX_STRING>', 'withdraw sudt l1 lock_args')
+    .option('-sa, --sudt-amount <STRING>', 'withdraw sudt amount')
     .option('-sd, --sudt-decimals <STRING>', 'sudt decimals')
     .addOption(
       new Option('-n, --network <NETWORK>', 'network to use')
         .choices(Object.values(Network))
         .default(Network.TestnetV1)
     )
-    .action(deposit)
+    .action(withdraw)
   ;
 }
 
-export async function deposit(params: {
+export async function withdraw(params: {
   privateKey: HexString;
   capacity: string;
   network: Network;
@@ -50,16 +51,28 @@ export async function deposit(params: {
   const sudtType = params.sudtLockArgs
     ? createSudtTypeScript(params.sudtLockArgs, lightGodwokenConfig)
     : void 0;
+  const sudtScriptHash = sudtType
+    ? lumosUtils.computeScriptHash(sudtType)
+    : '0x0000000000000000000000000000000000000000000000000000000000000000';
   const sudtAmount = params.sudtAmount
     ? utils.parseUnits(params.sudtAmount, params.sudtDecimals).toHexString()
     : '0x0';
 
   const capacity = utils.parseUnits(params.capacity, 8);
-  const result = await lightGodwokenV1.deposit({
+  const result = await lightGodwokenV1.withdrawWithEvent({
     capacity: capacity.toHexString(),
-    sudtType: sudtType,
     amount: sudtAmount,
+    sudt_script_hash: sudtScriptHash,
   });
 
-  console.log('deposit-tx: ', result);
+  return new Promise<void>((resolve, reject) => {
+    result.on('sent', (tx) => {
+      console.debug('withdrawal-tx: ', tx);
+      resolve();
+    });
+    result.on('fail', (error) => {
+      console.debug('withdrawal-failed: ', error.message);
+      reject(error);
+    });
+  });
 }
