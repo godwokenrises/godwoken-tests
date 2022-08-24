@@ -14,7 +14,7 @@
     "lib": ["esnext", "dom"],
     "paths": {
       "light-godwoken": [
-        "src/libraries/light-godwoken"
+        "./src/libraries/light-godwoken"
       ]
     }
   },
