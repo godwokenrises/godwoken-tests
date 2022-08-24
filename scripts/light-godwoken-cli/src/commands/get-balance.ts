@@ -7,7 +7,7 @@ import { createLightGodwoken } from '../utils/client';
 export default function setupGetBalance(program: Command) {
   program
     .command('get-balance')
-    .option('-p, --private-key <HEX_STRING>', 'account private key')
+    .argument('<PRIVATE_KEY>', 'account private key')
     .addOption(
       new Option('-n, --network <NETWORK>', 'network to use')
         .choices(Object.values(Network))
@@ -17,13 +17,12 @@ export default function setupGetBalance(program: Command) {
   ;
 }
 
-export async function getBalance(params: {
-  privateKey: string;
+export async function getBalance(privateKey: string, params: {
   network: Network;
 }) {
   const network = getConfig(params.network);
   const client = await createLightGodwoken({
-    privateKey: params.privateKey,
+    privateKey: privateKey,
     rpc: network.rpc,
     network: network.network,
     version: network.version,
@@ -32,10 +31,8 @@ export async function getBalance(params: {
 
   const l1 = await client.getL1CkbBalance();
   const l2 = await client.getL2CkbBalance();
-  const balances = {
-    l1: `${utils.formatUnits(l1, 8)} CKB`,
-    l2: `${utils.formatUnits(l2)} pCKB`,
-  };
-
-  console.debug(balances);
+  console.debug({
+    l1: utils.formatUnits(l1, 8),
+    l2: utils.formatUnits(l2),
+  });
 }
