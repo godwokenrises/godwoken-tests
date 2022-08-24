@@ -15,4 +15,7 @@ yarn                # please use node@14
 yarn build-tools
 yarn copy-configs   # copy and convert config format
 yarn build-all
-cd ..
+
+# setup light-godwoken-cli
+cd ../scripts/light-godwoken-cli
+./init.sh
