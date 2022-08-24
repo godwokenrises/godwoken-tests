@@ -154,6 +154,10 @@ jobs:
     #     docker restart docker_godwoken_1
     #     docker-compose --file docker/docker-compose.yml logs --tail 6
 
+    - name: Setup Light-Godwoken-CLI
+      working-directory: scripts/light-godwoken-cli
+      run: ./init.sh
+
     - name: Deposit for 2 dev accounts
       working-directory: kicker
       run: |
@@ -163,6 +167,12 @@ jobs:
         #   2dc6374a2238e414e51874f514b0fa871f8ce0eb1e7ecaa0aed229312ffc91b0
         ./kicker deposit 0x966B30e576A4d6731996748B48Dd67C94eF29067 10000
         ./kicker deposit 0x4fef21f1d42e0d23d72100aefe84d555781c31bb 10000
+
+    - name: Withdraw for 2 dev accounts
+      working-directory: scripts/light-godwoken-cli
+      run: |
+        lgc withdraw 1390c30e5d5867ee7246619173b5922d3b04009cab9e9d91e14506231281a997 400
+        lgc withdraw 2dc6374a2238e414e51874f514b0fa871f8ce0eb1e7ecaa0aed229312ffc91b0 400
 
     - name: Deposit for withdraw from v0 to v1 test
       working-directory: kicker
