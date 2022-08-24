@@ -39,7 +39,6 @@ describe('EIP 1820', () => {
       );
       console.log("deployment hash:", hash)
       await provider.waitForTransaction(hash);
-      await provider.getCode(deployer);
       code = await provider.getCode(contract);
       expect(code).to.not.be.equal("0x", "account is deployed");
     });
