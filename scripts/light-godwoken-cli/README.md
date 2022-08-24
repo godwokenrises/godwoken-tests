@@ -29,8 +29,8 @@ $ lgc deposit -p <PRIVATE_KEY> -c <DEPOSIT_CAPACITY> -n <NETWORK>
 ```
 
 ### Withdrawal
-Withdrawal capacity from Godwoken layer2 to CKB layer1:
+Withdraw capacity from Godwoken layer2 to CKB layer1:
 ```shell
 # position: godwoken-tests/scripts/light-godwoken-cli/
-$ lgc withdrawal -p <PRIVATE_KEY> -c <DEPOSIT_CAPACITY> -n <NETWORK>
+$ lgc withdraw -p <PRIVATE_KEY> -c <DEPOSIT_CAPACITY> -n <NETWORK>
 ```
