@@ -49,9 +49,17 @@ describe('Revertable transaction', () => {
 
             // set message
             const tx = await contract.setMsg(0, 'Hello', { value: value, gasLimit: 30000 });
-            const receipt = await provider.getTransactionReceipt(tx.hash);
+
+            let receipt;
+            try {
+                await tx.wait()
+            } catch(e) {
+                receipt = e.receipt;
+            }
 
             // check receipt
+            expect(receipt).not.to.equal(undefined, "receipt should not be undefined");
+            expect(receipt).not.to.equal(null, "receipt should not be null");
             expect(receipt.status).to.be.equal(0, 'transaction should be failed');
             expect(receipt.logs.length).to.be.equal(0, 'should be no relevant log');
             expect(receipt.gasUsed.toNumber()).to.be.greaterThan(0, 'should have used gas');
