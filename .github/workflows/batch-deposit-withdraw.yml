@@ -1,0 +1,56 @@
+name: Batch Deposit & Withdraw On Alphanet_v1
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron:  '0 */4 * * *' # runs every 4 hour
+
+jobs:
+  check-secrets:
+    runs-on: ubuntu-latest
+    outputs:
+      available: ${{ steps.check.outputs.available }}
+    steps:
+      - id: check
+        env:
+          KEY1: '${{ secrets.GODWOKEN_TEST_PRIVATE_KEY }}'
+        if: ${{ env.KEY1 != '' }}
+        run: echo "::set-output name=available::true"
+
+  batch-deposit-and-withdraw:
+    runs-on: ubuntu-latest
+    needs: check-secrets
+    if: needs.check-secrets.outputs.available
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
+        with:
+          node-version: '16'
+
+      - uses: actions/github-script@v6
+        id: start-time
+        with:
+          script: return Date.now()
+          result-encoding: string
+
+      - name: Print start-time
+        run: echo "${{ steps.start-time.outputs.result }}"
+
+      - name: Setup Light-Godwoken-CLI
+        working-directory: scripts/light-godwoken-cli
+        run: ./init.sh
+
+      - name: Run batch-deposit-withdraw
+        working-directory: scripts/light-godwoken-cli
+        run: |
+          lgc batch-deposit-withdraw \
+            --private-key ${{ secrets.GODWOKEN_TEST_PRIVATE_KEY }} \
+            --start-time ${{ steps.start-time.outputs.result }} \
+            --duration 240 \
+            --network alphanet_v1
+
+      - name: Archive artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: batch-deposit-withdraw
+          path: ${{ github.workspace }}/scripts/light-godwoken-cli/artifacts

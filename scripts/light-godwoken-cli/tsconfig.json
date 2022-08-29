@@ -9,7 +9,6 @@
     "sourceMap": true,
     "types": ["node"],
     "outDir": "dist",
-    "rootDir": "src",
     "allowJs": true,
     "skipLibCheck": true,
     "lib": ["esnext", "dom"],
@@ -21,6 +20,7 @@
   },
   "include": [
     "src/**/*",
+    "package.json",
     "../../light-godwoken/packages/light-godwoken/dist/*"
   ],
   "exclude": [

@@ -11,7 +11,7 @@ $ ./init.sh
 ```
 
 ### Setup manually
-You can set up the module manually if you failed to run the `Quick setup` command by following commands.
+You can set up the module manually by following the steps below, if you failed to run the `Quick setup` command.
 
 If you had run `Quick setup` command and succeed, then you don't need to do this manually.
 
@@ -37,21 +37,21 @@ $ npm i && npm run build
 ## Usage
 
 ### Deposit
-Deposit capacity from CKB layer1 to Godwoken layer2:
+Deposit capacity from CKB L1 to Godwoken L2:
 ```shell
 # position: godwoken-tests/scripts/light-godwoken-cli/
 $ lgc deposit -p <PRIVATE_KEY> -c <DEPOSIT_CAPACITY> -n <NETWORK>
 ```
 
 ### Withdraw
-Withdraw capacity from Godwoken layer2 to CKB layer1:
+Withdraw capacity from Godwoken L2 to CKB L1:
 ```shell
 # position: godwoken-tests/scripts/light-godwoken-cli/
 $ lgc withdraw -p <PRIVATE_KEY> -c <WITHDRAW_CAPACITY> -n <NETWORK>
 ```
 
 ### Get balance
-Get layer1 and layer2 balance of an account:
+Get L1 and L2 balance of an account:
 ```shell
 # position: godwoken-tests/scripts/light-godwoken-cli/
 $ lgc get-balance <PRIVATE_KEY> -n <NETWORK>

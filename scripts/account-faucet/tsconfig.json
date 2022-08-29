@@ -4,13 +4,22 @@
     "target": "es2020",
     "module": "commonjs",
     "esModuleInterop": true,
+    "resolveJsonModule": true,
     "moduleResolution": "node",
+    "downlevelIteration": true,
     "sourceMap": true,
     "types": ["node"],
     "outDir": "dist",
     "allowJs": true,
     "skipLibCheck": true,
-    "lib": ["esnext", "dom"],
+    "lib": ["esnext", "dom"]
   },
-  "exclude": ["**/node_modules", "**/dist"]
+  "include": [
+    "src/**/*",
+    "package.json"
+  ],
+  "exclude": [
+    "**/node_modules",
+    "**/dist"
+  ]
 }

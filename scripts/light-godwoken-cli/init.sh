@@ -7,4 +7,4 @@ cd light-godwoken
 yarn && yarn run build --scope=light-godwoken
 
 cd ../scripts/light-godwoken-cli
-npm i && npm run build
+npm i && (npm run build:config-deps-devnet || true) && npm run build
