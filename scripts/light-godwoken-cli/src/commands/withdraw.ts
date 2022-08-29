@@ -1,6 +1,6 @@
 import { utils } from 'ethers';
 import { Command, Option } from 'commander';
-import { HexString } from '@ckb-lumos/base';
+import { Hash, HexString } from '@ckb-lumos/base';
 import { utils as lumosUtils } from '@ckb-lumos/lumos';
 import { Network } from '../config';
 import { createSudtTypeScript } from '../utils/sudt';
@@ -13,7 +13,7 @@ export default function setupWithdrawal(program: Command) {
     .command('withdraw')
     .description('Withdraw capacity from Godwoken layer2 to layer1')
     .requiredOption('-p, --private-key <HEX_STRING>', 'account private key')
-    .requiredOption('-c, --capacity <STRING>', 'deposit capacity (1:1CKB)')
+    .requiredOption('-c, --capacity <STRING>', 'withdraw capacity (1:1CKB)')
     .option('-sl, --sudt-lock-args <HEX_STRING>', 'withdraw sudt l1 lock_args')
     .option('-sa, --sudt-amount <STRING>', 'withdraw sudt amount')
     .option('-sd, --sudt-decimals <STRING>', 'sudt decimals')
@@ -22,7 +22,9 @@ export default function setupWithdrawal(program: Command) {
         .choices(Object.values(Network))
         .default(Network.TestnetV1)
     )
-    .action(withdraw)
+    .action(async (...args: Parameters<typeof withdraw>) => {
+      await withdraw(...args);
+    })
   ;
 }
 
@@ -39,7 +41,7 @@ export async function withdraw(params: {
   }
 
   const network = getConfig(params.network);
-  const lightGodwokenV1 = await createLightGodwoken({
+  const client = await createLightGodwoken({
     privateKey: params.privateKey,
     rpc: network.rpc,
     network: network.network,
@@ -47,7 +49,8 @@ export async function withdraw(params: {
     config: network.lightGodwokenConfig,
   });
 
-  const lightGodwokenConfig = lightGodwokenV1.provider.getConfig();
+  const lightGodwokenConfig = client.provider.getConfig();
+  const capacity = utils.parseUnits(params.capacity, 8);
   const sudtType = params.sudtLockArgs
     ? createSudtTypeScript(params.sudtLockArgs, lightGodwokenConfig)
     : void 0;
@@ -58,20 +61,32 @@ export async function withdraw(params: {
     ? utils.parseUnits(params.sudtAmount, params.sudtDecimals).toHexString()
     : '0x0';
 
-  const capacity = utils.parseUnits(params.capacity, 8);
-  const result = await lightGodwokenV1.withdrawWithEvent({
+  console.debug(`[withdraw] from: ${client.provider.getL2Address()}`);
+  console.debug(`[withdraw] to: ${client.provider.getL1Address()}`);
+  console.debug(`[withdraw] capacity: ${params.capacity} pCKB`);
+
+  if (sudtType) {
+    console.debug(`[withdraw] sudt-type-hash: ${sudtScriptHash}`);
+    console.debug(`[withdraw] sudt-amount: ${params.sudtAmount}`);
+  }
+
+  const result = await client.withdrawWithEvent({
     capacity: capacity.toHexString(),
     amount: sudtAmount,
     sudt_script_hash: sudtScriptHash,
   });
 
-  return new Promise<void>((resolve, reject) => {
-    result.on('sent', (tx) => {
-      console.debug('withdrawal-tx: ', tx);
-      resolve();
+  return new Promise<Hash>((resolve, reject) => {
+    result.on('pending', (txHash) => {
+      console.debug('[withdraw] pending: tx-hash: ', txHash);
+      resolve(txHash);
+    });
+    result.on('success', (txHash) => {
+      console.debug('[withdraw] succeed: tx-hash: ', txHash);
+      resolve(txHash);
     });
     result.on('fail', (error) => {
-      console.debug('withdrawal-failed: ', error.message);
+      console.debug('[withdraw] failed: ', error.message);
       reject(error);
     });
   });

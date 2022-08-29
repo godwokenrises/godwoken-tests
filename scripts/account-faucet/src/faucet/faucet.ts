@@ -13,7 +13,7 @@ export interface ClaimEvent {
   id: number;
   timestamp: number;
   addressHash: Address;
-  txHash: HexString;
+  txHash?: HexString;
   txStatus: string;
   capacity: string;
   fee: string;
@@ -61,12 +61,29 @@ export async function claimFaucetForCkbAddress(ckbAddress: Address) {
       console.error(`[claim-error] Encountered error but cannot find feedback message`);
     }
   } else {
-    const events = await getAddressClaimEvents(ckbAddress);
-    const event = events.length ? events[0] : null;
-    if (event?.status === ClaimStatus.Pending) {
-      console.log(`[claim-submitted] Claim submitted: capacity: ${event.capacity} CKB`);
-    } else {
-      console.log(`[claim-submitted] Claim submitted, but no logs found`);
+    let retries = 0;
+    await waitFor(1000);
+
+    try {
+      await retryIfFailed(async () => {
+        const events = await getAddressClaimEvents(ckbAddress);
+        const event = events.length ? events[0] : null;
+        if (event?.status === ClaimStatus.Processed) {
+          console.log(`[claim-processed] Claim processed: capacity: ${event.capacity} CKB, tx: ${event.txHash}`);
+        } else if (event?.status === ClaimStatus.Pending) {
+          retries++;
+          const message = `[claim-pending] Claim pending (reties: ${retries}/30)`;
+          console.log(message);
+          throw new Error(message);
+        } else {
+          retries++;
+          const message = `[claim-no-log] Claim submitted, but no logs found (reties: ${retries}/30)`;
+          console.log(message);
+          throw new Error(message);
+        }
+      }, 36, 5000);
+    } catch (e: any) {
+      console.error(e.message);
     }
   }
 

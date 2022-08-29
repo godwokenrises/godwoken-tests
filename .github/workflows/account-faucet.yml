@@ -2,7 +2,7 @@ name: Account Faucet
 
 on:
   schedule:
-  - cron: '0 0 * * *' # every 24 hours
+  - cron: '0 6 * * *' # everyday at 06:00 AM (TODO: what timezone?)
 
 jobs:
   check-secrets:
@@ -44,34 +44,44 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-node_modules-
 
-      - name: Install dependencies
+      - name: Setup environment
         working-directory: scripts/account-faucet
-        run: npm install
+        run: npm install && npm run build
 
-      - name: Claim faucet for open accounts
+      - name: Claim for open test accounts
         working-directory: scripts/account-faucet
         env:
           KEY1: 1390c30e5d5867ee7246619173b5922d3b04009cab9e9d91e14506231281a997
           KEY2: 2dc6374a2238e414e51874f514b0fa871f8ce0eb1e7ecaa0aed229312ffc91b0
           KEY3: dd50cac37ec6dd12539a968c1a2cbedda75bd8724f7bcad486548eaabb87fc8b
         run: |
-          npm run faucet -- claim -p $KEY1
-          npm run faucet -- claim -p $KEY2
-          npm run faucet -- claim -p $KEY3
-          npm run faucet -- claim -p $KEY1 -n alphanet_v1
-          npm run faucet -- claim -p $KEY2 -n alphanet_v1
-          npm run faucet -- claim -p $KEY3 -n alphanet_v1
+          account-faucet claim-l2 -p $KEY1
+          account-faucet claim-l2 -p $KEY2
+          account-faucet claim-l2 -p $KEY3
+          account-faucet claim-l2 -p $KEY1 -n alphanet_v1
+          account-faucet claim-l2 -p $KEY2 -n alphanet_v1
+          account-faucet claim-l2 -p $KEY3 -n alphanet_v1
 
-      - name: Claim faucet for testnet/alphanet accounts
+      - name: Claim for private accounts
         working-directory: scripts/account-faucet
         env:
           KEY1: ${{ secrets.GODWOKEN_TEST_PRIVATE_KEY }}
           KEY2: ${{ secrets.GODWOKEN_TEST_PRIVATE_KEY2 }}
           KEY3: ${{ secrets.GW_TESTNET_V1_TEST_PK }}
         run: |
-          npm run faucet -- claim -p $KEY1
-          npm run faucet -- claim -p $KEY2
-          npm run faucet -- claim -p $KEY3
-          npm run faucet -- claim -p $KEY1 -n alphanet_v1
-          npm run faucet -- claim -p $KEY2 -n alphanet_v1
-          npm run faucet -- claim -p $KEY3 -n alphanet_v1
+          account-faucet claim-l2 -p $KEY1
+          account-faucet claim-l2 -p $KEY2
+          account-faucet claim-l2 -p $KEY3
+          account-faucet claim-l2 -p $KEY1 -n alphanet_v1
+          account-faucet claim-l2 -p $KEY2 -n alphanet_v1
+          account-faucet claim-l2 -p $KEY3 -n alphanet_v1
+
+      - name: Claim for batch-deposit/batch-withdraw derived accounts
+        working-directory: scripts/account-faucet
+        env:
+          KEY1: ${{ secrets.GODWOKEN_TEST_PRIVATE_KEY }}
+        run: |
+          account-faucet batch-claim-l1 \
+            --private-key $KEY1 \
+            --derived-count 10 \
+            --network alphanet_v1

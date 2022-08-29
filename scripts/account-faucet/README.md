@@ -1,70 +1,78 @@
 # Account-Faucet
 
 ## What is this?
-This is Account-Faucet, a CLI tool to claim faucet for your Godwoken layer 2 accounts.
-
-## Why should I use it?
-Originally, when you need to claim faucet to your Godwoken layer 2 wallet, you need to go through all these steps:
+Originally, when you're claiming faucet for your Godwoken layer 2 account, you need to go through the following steps:
 1. Go to [Faucet](https://faucet.nervos.org) page and claim faucet to your CKB account
 2. Go to [Godwoken Bridge](https://testnet.bridge.godwoken.io/) and deposit CKB to your Godwoken layer 2 account
 
-The steps above are fairly simple, but not so easy if you do it manually, every day. 
-With this CLI tool, you can actually finish the entire process in one command, which can save you a lot of time. 
+With this CLI tool, you can actually finish the entire process in one command, which should save you a lot of time. And this is Account-Faucet, a CLI tool to claim faucet for your Godwoken layer 2 accounts.
 
-All you need to prepare is your `ETH address`, or your `CKB private key`.
-
-## Ready
-1. Go to `Account-Faucet` folder in `Godwoken-Tests`:
+## Setup environment
+Go to `Account-Faucet` folder in `Godwoken-Tests` and set up the tool:
 ```bash
+# Position: godwoken-tests/
 $ cd scripts/account-faucet
+$ npm install && npm run build
 ```
-2. Install dependencies:
+
+## Claim faucet for layer 2
+If you want to claim faucet directly to your layer 2 account, you can try the `claim-l2` command.  
+The `claim-l2` command calculates your layer 2 address, then automatically claim faucet to it, so you don't waste extra fee or time doing them all manually.
+
+### Claim with ETH Address (Recommended) or with Private Key
+You can use `-e` or `--eth-address` to claim faucet for layer 2: 
 ```bash
-$ npm install
+$ account-faucet claim-l2 --eth-address <ETH_ADDRESS>
 ```
-
-## Claim faucet
-
-### Claim with ETH Address
-If you're more familiar with your `ETH address`, we recommend you to use this command: 
+Or if you only have a privateKey on hand, you can use `-p` or `--private-key` to claim faucet for layer 2:
 ```bash
-$ npm run faucet -- claim -e <ETH_ADDRESS>
+$ account-faucet claim-l2 --private-key <PRIVATE_KEY>
 ```
 
-### Claim with CKB Private Key
-If you prefer to claim faucet with your `CKB Layer 1 Private Key`:
-```bash
-$ npm run faucet -- claim -p <CKB_PRIVATE_KEY>
-```
-
-### Claim faucet on different networks
+### Claim on different networks
 You can use `-n` or `--network` option to claim faucet on different network:
 ```bash
-$ $ npm run faucet -- claim -p <CKB_PRIVATE_KEY> -n <NETWORK>
+$ account-faucet claim-l2 --private-key <PRIVATE_KEY> --network <NETWORK>
+```
+Right now the tool supports these networks:
+- testnet_v1
+- alphanet_v1
+
+## Claim faucet for layer1
+If you only want to claim faucet to your L1 account instead of layer 2 account, you can try the `claim-l1` command.  
+The `claim-l1` command takes either `--private-key` or `--ckb-address` as param, and will automatically claim faucet to your L1 account, so you don't need to do it by yourself.
+
+### Claim with Private Key or CKB Address
+You can use `-p` or `--private-key` to claim faucet for L1:
+```bash
+$ account-faucet claim-l1 -p <PRIVATE_KEY>
+```
+Or you can use `-c` or `--ckb-address` to claim faucet for L1:
+```bash
+$ account-faucet claim-l1 -c <CKB_ADDRESS>
 ```
 
-One thing to be noted, `mainnet_v1` is not available for the `--network` option.
+### Claim on different networks
+You can use `-n` or `--network` option to claim faucet on different network:
+```bash
+$ account-faucet claim-l1 --private-key <PRIVATE_KEY> --network <NETWORK>
+```
 
 ## Get Layer2 Deposit Address
 
 ### Calculate with ETH Address or CKB Private Key
 This is an util command to calculate the Layer2 Deposit Address.   
-It's a very similar command to the `claim` command, you can pass a ETH address:
+It's a very similar command to the `claim` command, you can pass a ETH address (`-e` or `--eth-address`):
 ```bash
-$ npm run faucet -- get-l2-address -e <ETH_ADDRESS>
+$ account-faucet get-l2-address --eth-address <ETH_ADDRESS>
 ```
-Or pass a CKB Private Key:
+Or pass a CKB Private Key (`-p` or `--private-key`):
 ```bash
-$ npm run faucet -- get-l2-address -p <CKB_PRIVATE_KEY>
+$ account-faucet get-l2-address --private-key <PRIVATE_KEY>
 ```
 
 ### Address on different networks
 You can use `-n` or `--network` option to calculate the Layer2 Deposit Address on different network:
 ```bash
-$ npm run faucet -- get-l2-address -e <ETH_ADDRESS> -n <NETWORK>
+$ account-faucet get-l2-address --eth-address <ETH_ADDRESS> --network <NETWORK>
 ```
-
-Right now the supported networks are:
-- mainnet_v1
-- testnet_v1
-- alphanet_v1

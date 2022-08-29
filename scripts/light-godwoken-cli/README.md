@@ -11,7 +11,7 @@ $ ./init.sh
 ```
 
 ### Setup manually
-You can set up the module manually if you failed to run the `Quick setup` command by following commands.
+You can set up the module manually by following the steps below, if you failed to run the `Quick setup` command.
 
 If you had run `Quick setup` command and succeed, then you don't need to do this manually.
 

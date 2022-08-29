@@ -31,8 +31,9 @@ export async function getBalance(privateKey: string, params: {
 
   const l1 = await client.getL1CkbBalance();
   const l2 = await client.getL2CkbBalance();
-  console.debug({
-    l1: utils.formatUnits(l1, 8),
-    l2: utils.formatUnits(l2),
-  });
+
+  console.debug(`l1-address: ${client.provider.getL1Address()}`);
+  console.debug(`l1-balance: ${utils.formatUnits(l1, 8)}`);
+  console.debug(`l2-address: ${client.provider.getL2Address()}`);
+  console.debug(`l2-balance: ${utils.formatUnits(l2)}`);
 }

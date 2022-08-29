@@ -1,20 +1,20 @@
 {
   "name": "account-faucet",
-  "version": "1.0.0",
-  "description": "Help you claim faucet to your Godwoken layer 2 accounts",
+  "version": "1.1.0",
+  "description": "Help you claim faucet to your Godwoken layer2 account",
   "main": "dist/index.js",
   "scripts": {
-    "build": "tsc",
-    "faucet": "ts-node src/index.ts",
-    "faucet:build": "node dist/index.js"
+    "clean": "rimraf dist",
+    "build": "npm run clean && tsc && npm link",
+    "cli": "ts-node src/index.ts",
+    "cli:prod": "node dist/index.js"
   },
-  "keywords": [
-    "godwoken",
-    "account",
-    "faucet"
-  ],
+  "bin": {
+    "account-faucet": "bin/cli"
+  },
   "devDependencies": {
     "@types/secp256k1": "^4.0.2",
+    "rimraf": "^3.0.2",
     "ts-node": "^10.4.0",
     "typescript": "^4.5.4"
   },
@@ -25,6 +25,7 @@
     "@ckb-lumos/helpers": "^0.18.0-rc7",
     "ckb-js-toolkit": "^0.10.2",
     "commander": "^9.3.0",
+    "ethers": "^5.7.0",
     "keccak256": "^1.0.6",
     "puppeteer": "^15.3.1"
   }

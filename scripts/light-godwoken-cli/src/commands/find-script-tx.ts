@@ -40,9 +40,9 @@ export async function findScriptTransaction(params: {
     hash_type: params.hashType,
     args: params.args,
   });
-  console.log('script_hash: ', hash);
+  console.debug('script_hash: ', hash);
 
   for await (const cell of collect.collect()) {
-    console.log(cell.out_point);
+    console.debug(cell.out_point);
   }
 }
