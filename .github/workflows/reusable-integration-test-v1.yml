@@ -171,8 +171,8 @@ jobs:
     - name: Withdraw for 2 dev accounts
       working-directory: scripts/light-godwoken-cli
       run: |
-        lgc withdraw -p 1390c30e5d5867ee7246619173b5922d3b04009cab9e9d91e14506231281a997 -c 400
-        lgc withdraw -p 2dc6374a2238e414e51874f514b0fa871f8ce0eb1e7ecaa0aed229312ffc91b0 -c 400
+        lgc withdraw -p 1390c30e5d5867ee7246619173b5922d3b04009cab9e9d91e14506231281a997 -c 400 -n devnet_v1
+        lgc withdraw -p 2dc6374a2238e414e51874f514b0fa871f8ce0eb1e7ecaa0aed229312ffc91b0 -c 400 -n devnet_v1
 
     - name: Deposit for withdraw from v0 to v1 test
       working-directory: kicker
