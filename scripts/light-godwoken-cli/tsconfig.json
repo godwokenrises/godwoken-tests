@@ -4,6 +4,7 @@
     "target": "es2020",
     "module": "commonjs",
     "esModuleInterop": true,
+    "resolveJsonModule": true,
     "moduleResolution": "node",
     "sourceMap": true,
     "types": ["node"],

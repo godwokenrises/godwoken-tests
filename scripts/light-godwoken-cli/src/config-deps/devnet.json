@@ -1,0 +1,92 @@
+{
+  "rollupCell": {
+    "typeHash": "0xffdfc173ac8576ec28596ccec26591f57bee186551de6ece311c26ecedf49fc1",
+    "typeScript": {
+      "code_hash": "0x173eac817872c19a51470a47084108226beeace276212057ff962a37a4512dc6",
+      "hash_type": "type",
+      "args": "0x9819c4e41319e099e0dc16bd0b7a34861847593f4335f72e87af648de449d3dc"
+    }
+  },
+  "scripts": {
+    "omniLock": {
+      "typeScript": {
+        "code_hash": "0x00000000000000000000000000000000000000000000000000545950455f4944",
+        "hash_type": "type",
+        "args": "0xa57c8644b456c90d43cd915c5fdc15b998a320b2964033f9639771dc32df35f0"
+      },
+      "typeHash": "0x8adcbae4e6f4fc21977c328965d4740cb9de91b4277920a17839aeefe9e2795a",
+      "hashType": "type",
+      "cellDep": {
+        "out_point": {
+          "index": "0x0",
+          "tx_hash": "0x09a7df80bdc2f6112196335a2e464ade626da68dc81f6418e2daee145380a36f"
+        },
+        "dep_type": "code"
+      }
+    },
+    "l1Sudt": {
+      "typeScript": {
+        "code_hash": "0x00000000000000000000000000000000000000000000000000545950455f4944",
+        "hash_type": "type",
+        "args": "0x57fdfd0617dcb74d1287bb78a7368a3a4bf9a790cfdcf5c1a105fd7cb406de0d"
+      },
+      "typeHash": "0x6283a479a3cf5d4276cd93594de9f1827ab9b55c7b05b3d28e4c2e0a696cfefd",
+      "hashType": "type",
+      "cellDep": {
+        "out_point": {
+          "index": "0x5",
+          "tx_hash": "0x2b397667654f3bc1fcb3efc7db0fd2799eaef962b7920840f3f4c7b467be5487"
+        },
+        "dep_type": "code"
+      }
+    },
+    "deposit": {
+      "typeScript": {
+        "code_hash": "0x00000000000000000000000000000000000000000000000000545950455f4944",
+        "hash_type": "type",
+        "args": "0xe07e505668e03b34a7d941075cd48b9eca29b221dc3a8634e1ed7fd081c7a1e4"
+      },
+      "typeHash": "0xcf0bcea51b7478f06581743efa64bd706ce5f87424e430ed6ab5e681c62fb0fa",
+      "hashType": "type",
+      "cellDep": {
+        "out_point": {
+          "index": "0x0",
+          "tx_hash": "0x9b9fc90f8f1ea639a39a448de1c058e9f1564259fa88da14d49dac8d84211685"
+        },
+        "dep_type": "code"
+      }
+    },
+    "withdraw": {
+      "typeScript": {
+        "code_hash": "0x00000000000000000000000000000000000000000000000000545950455f4944",
+        "hash_type": "type",
+        "args": "0xab449f20aa3235d01fd715467f1202346598e9d1ae816dad0979edeab59cd049"
+      },
+      "typeHash": "0x5722b1fa3d8ba814a9a59bcc05bdbd539f28569b4a2fb446ac08828911947542",
+      "hashType": "type",
+      "cellDep": {
+        "out_point": {
+          "index": "0x0",
+          "tx_hash": "0xd264f9ae4f2ca010b21f95d7bacee06c726e4c3023931dea672bf26500105bbb"
+        },
+        "dep_type": "code"
+      }
+    },
+    "ethAccount": {
+      "typeScript": {
+        "code_hash": "0x00000000000000000000000000000000000000000000000000545950455f4944",
+        "hash_type": "type",
+        "args": "0xf028f569578933f32adaf16e84219d6d8dda602ba5ca7e93e0d446874b95f508"
+      },
+      "typeHash": "0x1d0dffb09055040adbc9f3e59be09c7a6e72d279d7e0bca89d02ef9f41021cc8",
+      "hashType": "type",
+      "cellDep": {
+        "out_point": {
+          "index": "0x0",
+          "tx_hash": "0xa2e60fb98c645051ea902428249aecc4367a818148d49cd2499e06ab33cf9204"
+        },
+        "dep_type": "code"
+      }
+    }
+  }
+}
