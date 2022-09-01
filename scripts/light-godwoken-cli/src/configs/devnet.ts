@@ -1,5 +1,7 @@
 import { Layer1Config, LightGodwokenConfig } from '../../../../light-godwoken/packages/light-godwoken';
-import { createConfig } from '@ckb-lumos/config-manager';
+import { createConfig, ScriptConfig } from '@ckb-lumos/config-manager';
+import { CellDep, DepType, HashType, Script } from '@ckb-lumos/base';
+import DevnetDeps from '../config-deps/devnet.json';
 
 const lumosConfig = createConfig({
   PREFIX: "ckt",
@@ -28,16 +30,16 @@ const lumosConfig = createConfig({
       DEP_TYPE: "code"
     },
     SUDT: {
-      CODE_HASH: "0x6283a479a3cf5d4276cd93594de9f1827ab9b55c7b05b3d28e4c2e0a696cfefd",
-      HASH_TYPE: "type",
-      TX_HASH: "0x2b397667654f3bc1fcb3efc7db0fd2799eaef962b7920840f3f4c7b467be5487",
-      INDEX: "0x5",
-      DEP_TYPE: "code"
+      CODE_HASH: DevnetDeps.scripts.l1Sudt.typeHash,
+      HASH_TYPE: DevnetDeps.scripts.l1Sudt.typeScript.hash_type as ScriptConfig['HASH_TYPE'],
+      TX_HASH: DevnetDeps.scripts.l1Sudt.cellDep.out_point.tx_hash,
+      INDEX: DevnetDeps.scripts.l1Sudt.cellDep.out_point.index,
+      DEP_TYPE: DevnetDeps.scripts.l1Sudt.cellDep.dep_type as ScriptConfig['DEP_TYPE'],
     },
-    ANYONE_CAN_PAY: { // TODO: have no way finding it in devnet
-      CODE_HASH: "0x3419a1c09eb2567f6552ee7a8ecffd64155cffe0f1796e6e61ec088d740c1356",
+    ANYONE_CAN_PAY: { // TODO: haven't found a way to fill this for devnet
+      CODE_HASH: "0x0000000000000000000000000000000000000000000000000000000000000000",
       HASH_TYPE: "type",
-      TX_HASH: "0xec26b0f85ed839ece5f11c4c4e837ec359f5adc4420410f6453b1f6b60fb96a6",
+      TX_HASH: "0x0000000000000000000000000000000000000000000000000000000000000000",
       INDEX: "0x0",
       DEP_TYPE: "dep_group",
       SHORT_ID: 2
@@ -48,11 +50,11 @@ const lumosConfig = createConfig({
 const layer1Config: Layer1Config = {
   SCRIPTS: {
     omni_lock: {
-      code_hash: "0x8adcbae4e6f4fc21977c328965d4740cb9de91b4277920a17839aeefe9e2795a",
-      hash_type: "type",
-      tx_hash: "0x09a7df80bdc2f6112196335a2e464ade626da68dc81f6418e2daee145380a36f",
-      index: "0x0",
-      dep_type: "code",
+      code_hash: DevnetDeps.scripts.omniLock.typeHash,
+      hash_type: DevnetDeps.scripts.omniLock.typeScript.hash_type as HashType,
+      tx_hash: DevnetDeps.scripts.omniLock.cellDep.out_point.tx_hash,
+      index: DevnetDeps.scripts.omniLock.cellDep.out_point.index,
+      dep_type: DevnetDeps.scripts.omniLock.cellDep.dep_type as DepType,
     },
     secp256k1_blake160: { // outputs[1] in genesis block
       code_hash: "0x9bd7e06f3ecf4be0f2fcd2188b23f1b9fcc88e5d4b65a8637b17723bbda3cce8",
@@ -62,11 +64,11 @@ const layer1Config: Layer1Config = {
       dep_type: "dep_group",
     },
     sudt: {
-      code_hash: "0x6283a479a3cf5d4276cd93594de9f1827ab9b55c7b05b3d28e4c2e0a696cfefd",
-      hash_type: "type",
-      tx_hash: "0x2b397667654f3bc1fcb3efc7db0fd2799eaef962b7920840f3f4c7b467be5487",
-      index: "0x5",
-      dep_type: "code",
+      code_hash: DevnetDeps.scripts.l1Sudt.typeHash,
+      hash_type: DevnetDeps.scripts.l1Sudt.typeScript.hash_type as HashType,
+      tx_hash: DevnetDeps.scripts.l1Sudt.cellDep.out_point.tx_hash,
+      index: DevnetDeps.scripts.l1Sudt.cellDep.out_point.index,
+      dep_type: DevnetDeps.scripts.l1Sudt.cellDep.dep_type as DepType,
     },
   },
   CKB_INDEXER_URL: "http://127.0.0.1:8116",
@@ -80,41 +82,25 @@ export const devnetConfigV1: LightGodwokenConfig = {
   layer2Config: {
     SCRIPTS: {
       deposit_lock: {
-        script_type_hash: "0xcf0bcea51b7478f06581743efa64bd706ce5f87424e430ed6ab5e681c62fb0fa",
-        cell_dep: {
-          out_point: {
-            tx_hash: "0x9b9fc90f8f1ea639a39a448de1c058e9f1564259fa88da14d49dac8d84211685",
-            index: "0x0",
-          },
-          dep_type: "code",
-        },
+        script_type_hash: DevnetDeps.scripts.deposit.typeHash,
+        cell_dep: DevnetDeps.scripts.deposit.cellDep as CellDep,
       },
       withdrawal_lock: {
-        script_type_hash: "0x5722b1fa3d8ba814a9a59bcc05bdbd539f28569b4a2fb446ac08828911947542",
-        cell_dep: {
-          out_point: {
-            tx_hash: "0xd264f9ae4f2ca010b21f95d7bacee06c726e4c3023931dea672bf26500105bbb",
-            index: "0x0",
-          },
-          dep_type: "code",
-        },
+        script_type_hash: DevnetDeps.scripts.withdraw.typeHash,
+        cell_dep: DevnetDeps.scripts.withdraw.cellDep as CellDep,
       },
       eth_account_lock: {
-        script_type_hash: "0x1d0dffb09055040adbc9f3e59be09c7a6e72d279d7e0bca89d02ef9f41021cc8",
+        script_type_hash: DevnetDeps.scripts.ethAccount.typeHash,
       },
     },
     ROLLUP_CONFIG: {
-      rollup_type_hash: "0x80873d0200c6150783b3bb43a3c5e3886c08502f564827b077c1246d697a5be3",
-      rollup_type_script: {
-        code_hash: "0x173eac817872c19a51470a47084108226beeace276212057ff962a37a4512dc6",
-        hash_type: "type",
-        args: "0x069c1b95b57442ed99ddf6d6634a0e72c2bb4383e42c0c58e1a9fe13c712133b",
-      },
+      rollup_type_hash: DevnetDeps.rollupCell.typeHash,
+      rollup_type_script: DevnetDeps.rollupCell.typeScript as Script,
     },
 
     GW_POLYJUICE_RPC_URL: "http://127.0.0.1:8024",
-    SCANNER_URL: "", // might not need this
-    SCANNER_API: "", // might not need this
+    SCANNER_URL: "", // only used this field in the browser projects
+    SCANNER_API: "", // only used this field in the browser projects
     CHAIN_NAME: "Godwoken Devnet v1",
     FINALITY_BLOCKS: 100,
     BLOCK_PRODUCE_TIME: 30,
