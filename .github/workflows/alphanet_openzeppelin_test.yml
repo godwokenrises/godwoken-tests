@@ -8,6 +8,7 @@ on:
 jobs:
   contract-tests:
     runs-on: ubuntu-latest
+    if: github.repository == 'nervosnetwork/godwoken-tests'
 
     steps:
       - uses: actions/checkout@v3
