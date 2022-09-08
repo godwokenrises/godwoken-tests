@@ -18,6 +18,7 @@ jobs:
       matrix:
         net: ['alphanet', 'testnet']
     runs-on: ubuntu-latest
+    if: github.repository == 'nervosnetwork/godwoken-tests'
 
     steps:
     - uses: actions/checkout@v2
