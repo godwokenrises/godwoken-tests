@@ -19,7 +19,7 @@ const expectThrowsAsync = async (method, errMsgKeyWords) => {
   console.log(error.message);
   if (errMsgKeyWords) {
     for (keyWord of errMsgKeyWords) {
-      expect(error.message).to.include(keyWord);
+      expect(`${error.message} ${error.error}`).to.include(keyWord);
     }
   }
 };
@@ -57,7 +57,6 @@ describe("Eth_estimateGas Cache Test", function () {
 
     const p = new Array(count).fill(1).map(async () => {
       const errMsgKeyWords = [
-        "UNPREDICTABLE_GAS_LIMIT: ",
         "you trigger death value!",
       ];
       const method = async () => {
