@@ -41,6 +41,10 @@ module.exports = {
       accounts: [`0x${TEST_PK1}`, `0x${TEST_PK2}`],
       chainId: 71402,
     },
+    geth_devnet: {
+      url: "http://localhost:8545",
+      accounts: [`0x${TEST_PK1}`, `0x${TEST_PK2}`],
+    },
     rinkeby: {
       url: `https://rinkeby.infura.io/v3/${INFURA_PROJECT_ID}`,
       accounts: [`0x${TEST_PK1}`],
