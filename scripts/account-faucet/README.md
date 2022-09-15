@@ -65,6 +65,5 @@ $ npm run faucet -- get-l2-address -e <ETH_ADDRESS> -n <NETWORK>
 ```
 
 Right now the supported networks are:
-- mainnet_v1
 - testnet_v1
 - alphanet_v1
