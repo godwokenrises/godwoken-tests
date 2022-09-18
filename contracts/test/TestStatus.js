@@ -1,5 +1,6 @@
 const { ethers, config, network } = require("hardhat");
 const { expect } = require("chai");
+const { RPC } = require('ckb-js-toolkit');
 
 const startingBalances = {};
 
@@ -15,7 +16,14 @@ before("Before testing",() => {
     expect(data.accounts.length).to.equal(uniques.length, 'accounts should not be repeated');
 
     data.accounts = data.accounts.map((account) => ethers.utils.computeAddress(account));
-    console.log(data);
+
+    console.log("Network info:", data);
+  });
+
+  it("Log Godwoken components", async () => {
+    const rpc = new RPC(network.config.url);
+    const info = await rpc["poly_version"]();
+    console.log("Godwoken components info:", info.versions);
   });
 
   it("Record signers' starting balance", async () => {
