@@ -19,8 +19,13 @@ function isGwMainnetV1() {
   return isNetwork(Networks.GwMainnet_v1);
 }
 
+function isHardhatNetwork() {
+  return isNetwork(Networks.Hardhat);
+}
+
 module.exports = {
   Networks,
   isNetwork,
   isGwMainnetV1,
+  isHardhatNetwork,
 };

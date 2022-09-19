@@ -19,7 +19,7 @@
 
 const {expect} = require("chai");
 const {network, ethers} = require("hardhat");
-const {isGwMainnetV1} = require('../utils/network');
+const {isGwMainnetV1, isHardhatNetwork} = require('../utils/network');
 const {fetchJson} = require("ethers/lib/utils");
 
 describe("Revertal", function () {
@@ -28,7 +28,7 @@ describe("Revertal", function () {
         return;
     }
     // Skip for hardhat network
-    if (network.name === "hardhat") {
+    if (isHardhatNetwork()) {
         return;
     }
 
