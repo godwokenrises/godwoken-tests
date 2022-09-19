@@ -1,6 +1,6 @@
+import { Address, HexString } from '@ckb-lumos/base';
 import { Command, Option } from 'commander';
 import { Network, networks } from '../config';
-import { Address, HexString } from '@ckb-lumos/base';
 import { GodwokenWeb3 } from '../godwoken/web3';
 import {
   DEFAULT_CKB_DEPOSIT_ADDRESS,
@@ -13,7 +13,7 @@ import {
 export default function setupGetL2Address(program: Command) {
   program
     .command('get-l2-address')
-    .description('calculate layer 2 deposit address, provide either --private-key or --eth-address')
+    .description('calculate L1 deposit address (transfer to this address for depositing), provide either --private-key or --eth-address')
     .option('-p, --private-key <HEX_STRING>', 'private key')
     .option('-e --eth-address <HEX_STRING>', 'eth address')
     .option('-c --ckb-address <ADDRESS>', 'ckb deposit-from address', DEFAULT_CKB_DEPOSIT_ADDRESS)

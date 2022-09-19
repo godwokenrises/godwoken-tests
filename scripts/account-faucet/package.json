@@ -5,9 +5,9 @@
   "main": "dist/index.js",
   "scripts": {
     "clean": "rimraf dist",
-    "build": "npm run clean && tsc && npm link",
     "cli": "ts-node src/index.ts",
-    "cli:prod": "node dist/index.js"
+    "build": "npm run clean && npm run build:cli && npm link",
+    "build:cli": "esbuild src/index.ts --bundle --sourcemap --platform=node --outfile=dist/index.js --external:electron --external:puppeteer"
   },
   "bin": {
     "account-faucet": "bin/cli"
@@ -25,8 +25,9 @@
     "@ckb-lumos/helpers": "^0.18.0-rc7",
     "ckb-js-toolkit": "^0.10.2",
     "commander": "^9.3.0",
+    "esbuild": "^0.15.7",
     "ethers": "^5.7.0",
     "keccak256": "^1.0.6",
-    "puppeteer": "^15.3.1"
+    "puppeteer": "^17.0.0"
   }
 }

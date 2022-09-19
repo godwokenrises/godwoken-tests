@@ -137,6 +137,7 @@ function waitFor(interval: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, interval));
 }
 
-async function getElementHandleProperty<T = unknown>(handle: puppeteer.ElementHandle<Element>, property: string): Promise<T> {
-  return await (await handle!.getProperty(property)).jsonValue();
+async function getElementHandleProperty<T = any>(handle: puppeteer.ElementHandle, property: string): Promise<T> {
+  const prop = await handle!.getProperty(property);
+  return await prop.jsonValue() as T;
 }

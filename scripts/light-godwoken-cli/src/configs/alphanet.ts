@@ -31,7 +31,7 @@ const layer1Config: Layer1Config = {
   SCANNER_URL: "https://pudge.explorer.nervos.org",
 };
 
-export const alphanetConfigV1: LightGodwokenConfig = {
+export const AlphanetConfigV1: LightGodwokenConfig = {
   lumosConfig: predefined.AGGRON4,
   layer1Config: layer1Config,
   layer2Config: {
@@ -79,4 +79,17 @@ export const alphanetConfigV1: LightGodwokenConfig = {
 
     MULTICALL_ADDRESS: "", // might not need this
   },
+  tokenList: [
+    {
+      id: 79,
+      symbol: "GWK",
+      name: "GWK",
+      decimals: 8,
+      tokenURI: "https://cryptologos.cc/logos/nervos-network-ckb-logo.svg?v=002",
+      address: "0x74149D63D8838c0152e45bb8880B320032294d25",
+      l1LockArgs: "0x5c7253696786b9eddd34e4f6b6e478ec5742bd36569ec60c1d0487480ba4f9e3",
+      layer1UAN: "GWK.ckb",
+      layer2UAN: "GWK.gw|gb.ckb",
+    },
+  ],
 };

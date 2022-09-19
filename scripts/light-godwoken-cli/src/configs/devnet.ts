@@ -76,7 +76,7 @@ const layer1Config: Layer1Config = {
   SCANNER_URL: "",
 };
 
-export const devnetConfigV1: LightGodwokenConfig = {
+export const DevnetConfigV1: LightGodwokenConfig = {
   lumosConfig: lumosConfig,
   layer1Config: layer1Config,
   layer2Config: {
@@ -108,4 +108,5 @@ export const devnetConfigV1: LightGodwokenConfig = {
 
     MULTICALL_ADDRESS: "", // might not need this
   },
+  tokenList: [],
 };

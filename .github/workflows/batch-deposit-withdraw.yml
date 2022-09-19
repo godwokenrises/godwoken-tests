@@ -1,40 +1,7 @@
-name: Batch Deposit&Withdraw
+name: Batch Deposit & Withdraw On Alphanet_v1
 
 on:
-  workflow_dispatch:
-    inputs:
-      derived:
-        description: 'how many derived accounts to use'
-        required: true
-        default: '10'
-        type: string
-      claim:
-        description: 'claim for derived accounts'
-        required: true
-        default: true
-        type: boolean
-      rounds:
-        description: 'for-loop rounds'
-        required: true
-        default: '1'
-        type: string
-      capacity:
-        description: 'deposit/withdraw CKB capacity'
-        required: true
-        default: '400'
-        type: string
-      sudt-lock-args:
-        description: 'sudt lock_args'
-        required: false
-        type: string
-      sudt-amount:
-        description: 'deposit/withdraw sudt amount'
-        required: false
-        type: string
-      sudt-decimals:
-        description: 'decimals of sudt amount'
-        required: false
-        type: string
+  workflow_dispatch
 
 jobs:
   check-secrets:
@@ -48,54 +15,40 @@ jobs:
         if: ${{ env.KEY1 != '' }}
         run: echo "::set-output name=available::true"
 
-  batch-claim-for-l1:
+  batch-transactions:
+    runs-on: ubuntu-latest
     needs: check-secrets
     if: needs.check-secrets.outputs.available
-    runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
-      - name: Setup Account-Faucet
-        working-directory: scripts/account-faucet
-        if: ${{ inputs.claim }}
-        run: npm install && npm run build
-      - name: Claim for derived accounts
-        working-directory: scripts/account-faucet
-        if: ${{ inputs.claim }}
-        run: |
-          account-faucet batch-claim-l1 \
-            --private-key ${{ secrets.GODWOKEN_TEST_PRIVATE_KEY }} \
-            --derived-count ${{ inputs.derived }} \
-            --network alphanet_v1
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
+        with:
+          node-version: '16'
 
-  batch-actions:
-    runs-on: ubuntu-latest
-    needs: [check-secrets, batch-claim-for-l1]
-    if: needs.check-secrets.outputs.available
-    strategy:
-      fail-fast: false
-      matrix:
-        action: [batch-deposit, batch-withdraw]
-    steps:
-      - uses: actions/checkout@v2
+      - uses: actions/github-script@v6
+        id: start-time
+        with:
+          script: return Date.now()
+          result-encoding: string
+
+      - name: Print start-time
+        run: echo "${{ steps.start-time.outputs.result }}"
 
       - name: Setup Light-Godwoken-CLI
         working-directory: scripts/light-godwoken-cli
         run: ./init.sh
 
-      - name: Create batch action
+      - name: Run batch-transactions
         working-directory: scripts/light-godwoken-cli
         run: |
-          for _ in $(seq 1 ${{ inputs.rounds }})
-          do
-            echo "[${{ matrix.action }}] round $_"
-            lgc ${{ matrix.action }} \
-              --private-key ${{ secrets.GODWOKEN_TESTNET_PK1 }} \
-              --derived-count ${{ inputs.derived }} \
-              --capacity ${{ inputs.capacity }} \
-              --sudt-lock-args "${{ inputs.sudt-lock-args }}" \
-              --sudt-amount "${{ inputs.sudt-amount }}" \
-              --sudt-decimals "${{ inputs.sudt-decimals }}" \
-              --network alphanet_v1;
-            echo "---"
-            sleep 10s
-          done
+          lgc batch-transactions \
+            --private-key ${{ secrets.GODWOKEN_TEST_PRIVATE_KEY }} \
+            --start-time ${{ steps.start-time.outputs.result }} \
+            --duration 180 \
+            --network alphanet_v1
+
+      - name: Archive artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: batch-transactions
+          path: ${{ github.workspace }}/scripts/light-godwoken-cli/artifacts

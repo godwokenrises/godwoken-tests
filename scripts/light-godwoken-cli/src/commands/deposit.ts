@@ -2,9 +2,9 @@ import { utils } from 'ethers';
 import { Command, Option } from 'commander';
 import { utils as lumosUtils, HexString, Hash } from '@ckb-lumos/base';
 import { Network } from '../config';
-import { createSudtTypeScript } from '../utils/sudt';
+import { createSudtTypeScript } from '../utils/ckb/sudt';
 import { createLightGodwoken } from '../utils/client';
-import { isAllDefinedOrAllNot } from '../utils/check';
+import { isAllDefinedOrAllNot } from '../utils/format';
 import { getConfig } from '../utils/config';
 
 export default function setupDeposit(program: Command) {
@@ -34,6 +34,7 @@ export async function deposit(params: {
   sudtLockArgs?: string;
   sudtAmount?: string;
   sudtDecimals?: string;
+  waitFor?: 'sent' | 'success';
 }) {
   if (!isAllDefinedOrAllNot([params.sudtLockArgs, params.sudtAmount, params.sudtDecimals])) {
     throw new Error('Missing param sudtLockArgs, or sudtAmount, or sudtDecimals');
@@ -73,16 +74,29 @@ export async function deposit(params: {
     amount: sudtAmount,
   });
 
+  const waitFor = params.waitFor ?? 'success';
   return new Promise<Hash>((resolve, reject) => {
     event.on('sent', (txHash) => {
       console.debug(`[deposit] committed, tx-hash: ${txHash}`);
+      if (waitFor === 'sent') {
+        resolve(txHash);
+      }
     });
     event.on('success', (txHash) => {
       console.debug(`[deposit] succeed, tx-hash: ${txHash}`);
-      resolve(txHash);
+      if (waitFor === 'success') {
+        resolve(txHash);
+      }
     });
     event.on('fail', (e) => {
       console.debug('[deposit] failed: ', e);
+      reject(e);
+    });
+
+    // FIXME: try-catch cannot catch errors in EventEmitter's async callbacks
+    // @ts-ignore
+    event.on('error', (e) => {
+      console.debug('[deposit] failed in caught: ', e);
       reject(e);
     });
   });

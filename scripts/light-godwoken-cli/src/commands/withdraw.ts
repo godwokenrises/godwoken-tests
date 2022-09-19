@@ -3,9 +3,9 @@ import { Command, Option } from 'commander';
 import { Hash, HexString } from '@ckb-lumos/base';
 import { utils as lumosUtils } from '@ckb-lumos/lumos';
 import { Network } from '../config';
-import { createSudtTypeScript } from '../utils/sudt';
+import { createSudtTypeScript } from '../utils/ckb/sudt';
 import { createLightGodwoken } from '../utils/client';
-import { isAllDefinedOrAllNot } from '../utils/check';
+import { isAllDefinedOrAllNot } from '../utils/format';
 import { getConfig } from '../utils/config';
 
 export default function setupWithdrawal(program: Command) {
@@ -70,24 +70,31 @@ export async function withdraw(params: {
     console.debug(`[withdraw] sudt-amount: ${params.sudtAmount}`);
   }
 
-  const result = await client.withdrawWithEvent({
+  const event = await client.withdrawWithEvent({
     capacity: capacity.toHexString(),
     amount: sudtAmount,
     sudt_script_hash: sudtScriptHash,
   });
 
   return new Promise<Hash>((resolve, reject) => {
-    result.on('pending', (txHash) => {
+    event.on('pending', (txHash) => {
       console.debug('[withdraw] pending: tx-hash: ', txHash);
       resolve(txHash);
     });
-    result.on('success', (txHash) => {
+    event.on('success', (txHash) => {
       console.debug('[withdraw] succeed: tx-hash: ', txHash);
       resolve(txHash);
     });
-    result.on('fail', (error) => {
+    event.on('fail', (error) => {
       console.debug('[withdraw] failed: ', error.message);
       reject(error);
+    });
+
+    // FIXME: try-catch cannot catch errors in EventEmitter's async callbacks
+    // @ts-ignore
+    event.on('error', (e) => {
+      console.debug('[withdraw] caught: ', e);
+      reject(e);
     });
   });
 }

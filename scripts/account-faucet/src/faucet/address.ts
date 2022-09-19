@@ -80,6 +80,6 @@ export function toHexString(target: string): HexString {
   return target.startsWith('0x') ? target : `0x${target}`;
 }
 
-export function toNonHexString(target: string): Address {
+export function toNonHexString(target: string): string {
   return target.startsWith('0x') ? target.slice(2) : target;
 }

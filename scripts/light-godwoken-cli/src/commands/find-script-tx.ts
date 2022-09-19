@@ -1,10 +1,10 @@
 import { Command } from 'commander';
 import { HashType, utils } from '@ckb-lumos/base';
 import { Indexer } from '@ckb-lumos/ckb-indexer';
-import { devnetConfigV1 } from '../configs/devnet';
+import { DevnetConfigV1 } from '../configs/devnet';
 import { Network } from '../config';
 
-const config = devnetConfigV1;
+const config = DevnetConfigV1;
 
 export default function setupFindScriptTransaction(program: Command) {
   program

@@ -1,7 +1,7 @@
 import { Address, HexString } from '@ckb-lumos/base';
 import { Command, Option } from 'commander';
 import { Network, networks } from '../config';
-import { privateKeyToOmniCkbAddress } from '../faucet/address';
+import { privateKeyToOmniCkbAddress, toHexString } from '../faucet/address';
 import { claimFaucetForCkbAddress } from '../faucet/faucet';
 
 export default function setupClaimForL1(program: Command) {
@@ -30,7 +30,7 @@ export async function claimForL1(params: {
 
   const config = networks[params.network];
   const depositAddress = (() => {
-    if (params.privateKey) return privateKeyToOmniCkbAddress(params.privateKey, config);
+    if (params.privateKey) return privateKeyToOmniCkbAddress(toHexString(params.privateKey), config);
     return params.ckbAddress!;
   })();
 

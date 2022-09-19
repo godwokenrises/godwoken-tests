@@ -1,10 +1,8 @@
-import { writeFile, access, mkdir } from 'fs/promises';
-import { resolve, relative } from 'path';
-import { constants } from 'fs';
-import { RPC } from 'ckb-js-toolkit';
-import { Indexer } from '@ckb-lumos/lumos';
-import { Indexer as IndexerBase } from '@ckb-lumos/base';
 import { Hash, Hexadecimal, Script, CellDep, HashType } from '@ckb-lumos/base';
+import { Indexer as IndexerBase } from '@ckb-lumos/base';
+import { Indexer } from '@ckb-lumos/lumos';
+import { RPC } from 'ckb-js-toolkit';
+import { absolutePath, writeJson } from '../utils/file';
 
 const CKB_RPC_URL = 'http://127.0.0.1:8114';
 const CKB_INDEXER_URL = 'http://127.0.0.1:8116';
@@ -42,7 +40,7 @@ async function main() {
     },
   };
 
-  const actualPath = await writeJson('../config-deps/devnet.json', config);
+  const actualPath = await writeJson(absolutePath('src/config-deps/devnet.json'), config);
   console.log(`config-deps file for devnet is generated at "${actualPath}"`);
 }
 
@@ -71,41 +69,6 @@ async function getGeneratedScript(indexer: IndexerBase, config: PolyScript): Pro
       dep_type: 'code' // TODO: how to determine this field?
     },
   };
-}
-
-async function writeJson<T extends object>(pathWithFilename: string, json: T) {
-  const targetPath = resolve(__dirname, pathWithFilename);
-  pathWithFilename = relative(process.cwd(), targetPath);
-
-  const withFilename = pathWithFilename.split('/');
-  if (withFilename.length > 1) {
-    const withoutFilename = withFilename.slice(0, withFilename.length - 1);
-    await createPathIfNotExist(withoutFilename.join('/'));
-  }
-
-  await writeFile(pathWithFilename, JSON.stringify(json, null, 2));
-  return pathWithFilename;
-}
-
-async function createPathIfNotExist(path: string) {
-  const list = path.split('/');
-  const startI = path.startsWith('../') ? 2 : 1;
-
-  let notExists = false;
-  for (let i = startI; i <= list.length; i++) {
-    const currentPath = list.slice(0, i).join('/');
-    if (notExists) {
-      await mkdir(currentPath);
-      continue;
-    }
-
-    try {
-      await access(currentPath, constants.R_OK);
-    } catch {
-      if (!notExists) notExists = true;
-      await mkdir(currentPath);
-    }
-  }
 }
 
 main();
