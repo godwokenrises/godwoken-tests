@@ -12,8 +12,7 @@ let gasPrice, EOA0, EOA1, newEOA0, CA0
 
 if (!isGwMainnetV1()) {
     gasPrice = await getGasPrice(ethers.provider)
-    EOA0 = (await ethers.getSigners())[0].address
-    EOA1 = (await ethers.getSigners())[1].address
+    [{ address: EOA0 }, { address: EOA1 }] = await ethers.getSigners();
     newEOA0 = ethers.Wallet.createRandom().address
     const baseFallbackReceive = await ethers.getContractFactory("baseFallbackReceive")
     const contract = await baseFallbackReceive.deploy()
