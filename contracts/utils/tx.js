@@ -20,27 +20,12 @@ async function getGasPrice(provider) {
     return gasPrice.toHexString().replaceAll("0x0", "0x");
 }
 
-async function getTxCount(provider, address) {
-    let loopMaxTime = 100000;
-    while (true) {
-        loopMaxTime--
-        if (loopMaxTime < 0) {
-            return
-        }
-        let pending_count = provider.getTransactionCount(address, "pending")
-        let latest_count = provider.getTransactionCount(address, "latest")
-        let blkNum = provider.getBlockNumber();
-        console.log("address:", address, "nonce pending:", await pending_count, "latest :", await latest_count, ",blockNum:", await blkNum)
-    }
-}
-
 async function sleep(timeOut) {
     await new Promise(r => setTimeout(r, timeOut));
 }
 
 
 module.exports = {
-    getTxCount,
     getTxReceipt,
     getGasPrice,
 };
