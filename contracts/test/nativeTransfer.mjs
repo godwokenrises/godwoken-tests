@@ -42,7 +42,7 @@ describe("transfer success", function () {
         it(test.name, async () => {
             const from_balance = await ethers.provider.getBalance(test.from)
             const to_balance = await ethers.provider.getBalance(test.to)
-            console.log('before transfer from balance:%s to balance:%s', from_balance, to_balance)
+            console.log(`before transfer from balance:${from_balance} to balance:${to_balance}`)
             const response = await tranfer(test.from, test.to, test.value, test.data)
             const estimatedGas = await estGas(test.from, test.to, test.value, test.data)
             const from_balance_sent = await ethers.provider.getBalance(test.from)
