@@ -50,7 +50,7 @@ describe("transfer success", function () {
             console.log('after transfer from balance:%s to balance:%s gasPrice:%s fee:%s estimatedGas:%s', from_balance_sent, to_balance_sent, parseInt(gasPrice, 16), response.gasUsed.mul(gasPrice).toString(), parseInt(estimatedGas, 16))
             expect(response.gasUsed).to.be.equal(test.expectGasUsed)
             expect(estimatedGas).to.be.least(response.gasUsed)
-            if (test.from == test.to) {
+            if (test.from === test.to) {
                 //from_balance-from_balance_sent=gasUsed*gasPrice
                 expect(from_balance.sub(from_balance_sent)).to.be.equal(response.gasUsed.mul(gasPrice))
             } else {
