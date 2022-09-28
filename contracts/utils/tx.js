@@ -17,9 +17,6 @@ async function getTxReceipt(provider, txHash, count) {
 
 async function getGasPrice(provider) {
     let gasPrice = await provider.getGasPrice();
-    if (gasPrice < 16) {
-        return "0x" + gasPrice._hex.toLowerCase().replaceAll("0x0", "");
-    }
     return gasPrice.toHexString().replaceAll("0x0", "0x");
 }
 
