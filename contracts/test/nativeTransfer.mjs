@@ -11,8 +11,8 @@ const {BigNumber} = ethers
 let gasPrice, EOA0, EOA1, newEOA0, CA0
 
 if (!isGwMainnetV1()) {
-    gasPrice = await getGasPrice(ethers.provider)
-    [{ address: EOA0 }, { address: EOA1 }] = await ethers.getSigners();
+    gasPrice = await getGasPrice(ethers.provider);
+    [{address: EOA0}, {address: EOA1}] = await ethers.getSigners();
     newEOA0 = ethers.Wallet.createRandom().address
     const baseFallbackReceive = await ethers.getContractFactory("baseFallbackReceive")
     const contract = await baseFallbackReceive.deploy()
@@ -46,7 +46,7 @@ describe("transfer success", function () {
             const estimatedGas = await estGas(test.from, test.to, test.value, test.data)
             const from_balance_sent = await ethers.provider.getBalance(test.from)
             const to_balance_sent = await ethers.provider.getBalance(test.to)
-            console.log('after transfer from balance:%s to balance:%s gasPrice:%s fee:%s estimatedGas:%s', from_balance_sent, to_balance_sent, parseInt(gasPrice, 16), response.gasUsed.mul(gasPrice).toString(), parseInt(estimatedGas, 16))
+            console.log(`after transfer from balance:${from_balance_sent} to balance:${to_balance_sent} gasPrice:${parseInt(gasPrice, 16)} fee:${response.gasUsed.mul(gasPrice).toString()} estimatedGas:${parseInt(estimatedGas, 16)}`)
             expect(response.gasUsed).to.be.equal(test.expectGasUsed)
             expect(estimatedGas).to.be.least(response.gasUsed)
             if (test.from === test.to) {
@@ -67,11 +67,11 @@ describe("transfer success", function () {
         if (!!test) {
             const from_balance = await ethers.provider.getBalance(test.from)
             const to_balance = await ethers.provider.getBalance(test.to)
-            console.log('before final transfer from balance:%s to balance:%s', from_balance, to_balance)
+            console.log(`before final transfer from balance:${from_balance} to balance:${to_balance}`)
             await tranfer(test.to, test.from, test.value)
             const from_balance_final = await ethers.provider.getBalance(test.from)
             const to_balance_final = await ethers.provider.getBalance(test.to)
-            console.log('after final transfer from balance:%s to balance:%s', from_balance_final, to_balance_final)
+            console.log(`after final transfer from balance:${from_balance_final} to balance:${to_balance_final}`)
         }
     })
 })
@@ -86,7 +86,7 @@ describe("transfer failed", function () {
     it("gasLimit not enough", async () => {
         const from_balance = await ethers.provider.getBalance(from)
         const to_balance = await ethers.provider.getBalance(to)
-        console.log('before transfer from balance:%s to balance:%s', from_balance, to_balance)
+        console.log(`before transfer from balance:${from_balance} to balance:${to_balance}`)
         try {
             await ethers.provider.send("eth_sendTransaction", [{
                 "from": from,
@@ -100,7 +100,7 @@ describe("transfer failed", function () {
         } finally {
             const from_balance_sent = await ethers.provider.getBalance(from)
             const to_balance_sent = await ethers.provider.getBalance(to)
-            console.log('after transfer from balance:%s to balance:%s', from_balance_sent, to_balance_sent)
+            console.log(`after transfer from balance:${from_balance_sent} to balance:${to_balance_sent}`)
             expect(from_balance).to.be.equal(from_balance_sent)
             expect(to_balance).to.be.equal(to_balance_sent)
         }
@@ -109,7 +109,7 @@ describe("transfer failed", function () {
     it("balance not enough", async () => {
         const from_balance = await ethers.provider.getBalance(from)
         const to_balance = await ethers.provider.getBalance(to)
-        console.log('before transfer from balance:%s to balance:%s', from_balance, to_balance)
+        console.log(`before transfer from balance:${from_balance} to balance:${to_balance}`)
         try {
             await tranfer(from, to, "0x845951614014880000000")
         } catch (e) {
@@ -117,7 +117,7 @@ describe("transfer failed", function () {
         } finally {
             const from_balance_sent = await ethers.provider.getBalance(from)
             const to_balance_sent = await ethers.provider.getBalance(to)
-            console.log('after transfer from balance:%s to balance:%s', from_balance_sent, to_balance_sent)
+            console.log(`after transfer from balance:${from_balance_sent} to balance:${to_balance_sent}`)
             expect(from_balance).to.be.equal(from_balance_sent)
             expect(to_balance).to.be.equal(to_balance_sent)
         }
@@ -135,7 +135,7 @@ describe("transfer failed", function () {
         const nonce = await ethers.provider.getTransactionCount(txInfo.from)
         const from_balance = await ethers.provider.getBalance(from)
         const to_balance = await ethers.provider.getBalance(to)
-        console.log('before transfer from balance:%s to balance:%s', from_balance, to_balance)
+        console.log(`before transfer from balance:${from_balance} to balance:${to_balance}`)
         try {
             await (await ethers.getSigners())[0].sendTransaction({
                 "to": to,
@@ -147,7 +147,7 @@ describe("transfer failed", function () {
         } finally {
             const from_balance_sent = await ethers.provider.getBalance(from)
             const to_balance_sent = await ethers.provider.getBalance(to)
-            console.log('after transfer from balance:%s to balance:%s', from_balance_sent, to_balance_sent)
+            console.log(`after transfer from balance:${from_balance_sent} to balance:${to_balance_sent}`)
             expect(from_balance).to.be.equal(from_balance_sent)
             expect(to_balance).to.be.equal(to_balance_sent)
         }
