@@ -1,7 +1,5 @@
 import hardhat from "hardhat"
 import chai from "chai"
-import {getGasPrice, getTxReceipt} from "../utils/tx.js"
-
 import {isGwMainnetV1} from "../utils/network.js"
 
 const {ethers} = hardhat
@@ -178,4 +176,30 @@ async function estGas(from, to, value, data) {
         "value": value,
         "data": data
     }])
+}
+
+async function getTxReceipt(provider, txHash, count) {
+    let response
+    for (let i = 0; i < count; i++) {
+        response = await provider.getTransactionReceipt(txHash);
+        if (response == null) {
+            await sleep(2000)
+
+            continue;
+        }
+        if (response.confirmations >= 1) {
+            return response
+        }
+        await sleep(2000)
+    }
+    return response
+}
+
+async function getGasPrice(provider) {
+    let gasPrice = await provider.getGasPrice();
+    return gasPrice.toHexString().replaceAll("0x0", "0x");
+}
+
+async function sleep(timeOut) {
+    await new Promise(r => setTimeout(r, timeOut));
 }
