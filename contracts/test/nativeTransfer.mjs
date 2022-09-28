@@ -64,8 +64,8 @@ describe("transfer success", function () {
 
     after(async function () {
         this.timeout(10000);
-        if (tests.some(v => v.name == 'transfer big value')) {
-            const test = tests[tests.findIndex(v => v.name == 'transfer big value')];
+        const test = tests.find(v => v.name === 'transfer big value');
+        if (!!test) {
             const from_balance = await ethers.provider.getBalance(test.from)
             const to_balance = await ethers.provider.getBalance(test.to)
             console.log('before final transfer from balance:%s to balance:%s', from_balance, to_balance)
