@@ -156,10 +156,10 @@ describe("transfer failed", function () {
 })
 
 
-async function tranfer(account0, account1, value, data) {
+async function tranfer(from, to, value, data) {
     let tx = await ethers.provider.send("eth_sendTransaction", [{
-        "from": account0,
-        "to": account1,
+        from,
+        to,
         "gas": "0x76c000",
         "gasPrice": gasPrice,
         "value": value,
