@@ -169,10 +169,10 @@ async function tranfer(from, to, value, data) {
     return response
 }
 
-async function estGas(account0, account1, value, data) {
+async function estGas(from, to, value, data) {
     return await ethers.provider.send("eth_estimateGas", [{
-        "from": account0,
-        "to": account1,
+        from,
+        to,
         "gas": "0x76c000",
         "gasPrice": gasPrice,
         "value": value,
