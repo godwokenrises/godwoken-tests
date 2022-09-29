@@ -6,16 +6,23 @@ const {ethers} = hardhat
 const {expect} = chai
 const {BigNumber} = ethers
 
-let gasPrice, EOA0, EOA1, newEOA0, CA0
+let gasPrice, avlAccount, EOA0, EOA1, newEOA0, CA0
 
 if (!isGwMainnetV1()) {
     gasPrice = await getGasPrice(ethers.provider);
-    [{address: EOA0}, {address: EOA1}] = await ethers.getSigners();
-    newEOA0 = ethers.Wallet.createRandom().address
-    const baseFallbackReceive = await ethers.getContractFactory("baseFallbackReceive")
-    const contract = await baseFallbackReceive.deploy()
-    await contract.deployed()
-    CA0 = contract.address
+    //external account0 and external account1 get a fixed balance
+    const signers = await ethers.getSigners();
+    avlAccount = signers[0].address;
+    EOA0 = signers[signers.length - 1].address;
+    EOA1 = signers[signers.length - 2].address;
+    newEOA0 = ethers.Wallet.createRandom().address;
+    await transfer(avlAccount, EOA0, getValidHex(BigNumber.from("1000000000100000000").mul(gasPrice).toHexString()));
+    await transfer(avlAccount, EOA1, getValidHex(BigNumber.from("1").mul(gasPrice).toHexString()));
+    //deploy contract,get contract account
+    const baseFallbackReceive = await ethers.getContractFactory("baseFallbackReceive");
+    const contract = await baseFallbackReceive.deploy();
+    await contract.deployed();
+    CA0 = contract.address;
 }
 
 describe("transfer success", function () {
@@ -28,7 +35,7 @@ describe("transfer success", function () {
         {name: "to EOA tx.data is not null", from: EOA0, to: EOA1, value: "0x1", data: "0x12", expectGasUsed: "21016"},
         {name: "to itself", from: EOA0, to: EOA0, value: "0x10", expectGasUsed: "21000"},
         {name: "transfer 0", from: EOA0, to: EOA1, value: "0x0", expectGasUsed: "21000"},
-        {name: "transfer big value", from: EOA0, to: EOA1, value: "0x8ac7230489e80000", expectGasUsed: "21000"},
+        {name: "transfer large amounts", from: EOA0, to: EOA1, value: "0xde0b6b3aa5ef080", expectGasUsed: "21000"},
         {name: "to new EOA", from: EOA0, to: newEOA0, value: "0x100", expectGasUsed: "46000"},
         {name: "to CA", from: EOA0, to: CA0, value: "0x200", expectGasUsed: "21033"},
         {name: "to CA tx.data is not null", from: EOA0, to: CA0, data: "0x12", value: "0x300", expectGasUsed: "21050"},
@@ -40,8 +47,8 @@ describe("transfer success", function () {
             const from_balance = await ethers.provider.getBalance(test.from)
             const to_balance = await ethers.provider.getBalance(test.to)
             console.log(`before transfer from balance:${from_balance} to balance:${to_balance}`)
-            const response = await tranfer(test.from, test.to, test.value, test.data)
             const estimatedGas = await estGas(test.from, test.to, test.value, test.data)
+            const response = await transfer(test.from, test.to, test.value, test.data)
             const from_balance_sent = await ethers.provider.getBalance(test.from)
             const to_balance_sent = await ethers.provider.getBalance(test.to)
             console.log(`after transfer from balance:${from_balance_sent} to balance:${to_balance_sent} gasPrice:${parseInt(gasPrice, 16)} fee:${response.gasUsed.mul(gasPrice).toString()} estimatedGas:${parseInt(estimatedGas, 16)}`)
@@ -59,18 +66,17 @@ describe("transfer success", function () {
         }).timeout(20000)
     }
 
+    //refund avlAccount large amounts
     after(async function () {
         this.timeout(10000);
-        const test = tests.find(v => v.name === 'transfer big value');
-        if (!!test) {
-            const from_balance = await ethers.provider.getBalance(test.from)
-            const to_balance = await ethers.provider.getBalance(test.to)
-            console.log(`before final transfer from balance:${from_balance} to balance:${to_balance}`)
-            await tranfer(test.to, test.from, test.value)
-            const from_balance_final = await ethers.provider.getBalance(test.from)
-            const to_balance_final = await ethers.provider.getBalance(test.to)
-            console.log(`after final transfer from balance:${from_balance_final} to balance:${to_balance_final}`)
-        }
+        let from = tests.some(v => v.name == 'transfer big value') ? EOA1 : EOA0
+        let from_balance = await ethers.provider.getBalance(from)
+        let to_balance = await ethers.provider.getBalance(avlAccount)
+        console.log(`before final transfer from balance:${from_balance} to balance:${to_balance}`)
+        await transfer(from, avlAccount, getValidHex(BigNumber.from("1000000000000000000").mul(gasPrice).toHexString()))
+        let from_balance_final = await ethers.provider.getBalance(from)
+        let to_balance_final = await ethers.provider.getBalance(avlAccount)
+        console.log(`after final transfer from balance:${from_balance_final} to balance:${to_balance_final}`)
     })
 })
 
@@ -109,7 +115,7 @@ describe("transfer failed", function () {
         const to_balance = await ethers.provider.getBalance(to)
         console.log(`before transfer from balance:${from_balance} to balance:${to_balance}`)
         try {
-            await tranfer(from, to, "0x845951614014880000000")
+            await transfer(from, to, "0x845951614014880000000")
         } catch (e) {
             expect(e.toString()).to.be.contains("insufficient balance")
         } finally {
@@ -153,7 +159,7 @@ describe("transfer failed", function () {
 })
 
 
-async function tranfer(from, to, value, data) {
+async function transfer(from, to, value, data) {
     let tx = await ethers.provider.send("eth_sendTransaction", [{
         from,
         to,
@@ -184,7 +190,6 @@ async function getTxReceipt(provider, txHash, count) {
         response = await provider.getTransactionReceipt(txHash);
         if (response == null) {
             await sleep(2000)
-
             continue;
         }
         if (response.confirmations >= 1) {
@@ -202,4 +207,8 @@ async function getGasPrice(provider) {
 
 async function sleep(timeOut) {
     await new Promise(r => setTimeout(r, timeOut));
+}
+
+function getValidHex(hexString) {
+    return "0x" + hexString.replace(/0x0*/, "")
 }
