@@ -41,8 +41,9 @@ describe("transfer success", function () {
 
     before(async function () {
         this.timeout(15000);
-        await transfer(avlAccount, EOA0, getValidHex(BigNumber.from("1000000000100000000").mul(gasPrice).toHexString()));
+        await transfer(avlAccount, EOA0, getValidHex(BigNumber.from("100000000").mul(gasPrice).toHexString()));
         await transfer(avlAccount, EOA1, getValidHex(BigNumber.from("100000000").mul(gasPrice).toHexString()));
+        await transfer(avlAccount, EOA0, getValidHex(BigNumber.from("1000000000000000000").toHexString()));
     });
 
     for (let i = 0; i < tests.length; i++) {
@@ -77,7 +78,7 @@ describe("transfer success", function () {
         let from_balance = await ethers.provider.getBalance(from)
         let to_balance = await ethers.provider.getBalance(avlAccount)
         console.log(`before final transfer from balance:${from_balance} to balance:${to_balance}`)
-        await transfer(from, avlAccount, getValidHex(BigNumber.from("1000000000000000000").mul(gasPrice).toHexString()))
+        await transfer(from, avlAccount, getValidHex(BigNumber.from("1000000000000000000").toHexString()))
         let from_balance_final = await ethers.provider.getBalance(from)
         let to_balance_final = await ethers.provider.getBalance(avlAccount)
         console.log(`after final transfer from balance:${from_balance_final} to balance:${to_balance_final}`)
