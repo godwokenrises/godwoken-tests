@@ -28,7 +28,7 @@ module.exports = {
   networks: {
     gw_devnet_v1: {
       url: `http://localhost:8024`,
-      accounts: [`0x${TEST_PK1}`, `0x${TEST_PK2}`],
+      accounts: [`0x${TEST_PK1}`, `0x${TEST_PK2}`,`${PRIVATE_KEY0}`, `${PRIVATE_KEY1}`],
     },
     gw_testnet_v1: {
       url: `https://godwoken-testnet-v1.ckbapp.dev`,
