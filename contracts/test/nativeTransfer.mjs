@@ -28,12 +28,6 @@ describe("transfer success", function () {
         return;
     }
 
-    before(async function () {
-        this.timeout(15000);
-        await transfer(avlAccount, EOA0, getValidHex(BigNumber.from("1000000000100000000").mul(gasPrice).toHexString()));
-        await transfer(avlAccount, EOA1, getValidHex(BigNumber.from("100000000").mul(gasPrice).toHexString()));
-    });
-
     const tests = [
         {name: "to EOA", from: EOA0, to: EOA1, value: "0x1", expectGasUsed: "21000"},
         {name: "to EOA tx.data is not null", from: EOA0, to: EOA1, value: "0x1", data: "0x12", expectGasUsed: "21016"},
@@ -44,6 +38,12 @@ describe("transfer success", function () {
         {name: "to CA", from: EOA0, to: CA0, value: "0x200", expectGasUsed: "21033"},
         {name: "to CA tx.data is not null", from: EOA0, to: CA0, data: "0x12", value: "0x300", expectGasUsed: "21050"},
     ]
+
+    before(async function () {
+        this.timeout(15000);
+        await transfer(avlAccount, EOA0, getValidHex(BigNumber.from("1000000000100000000").mul(gasPrice).toHexString()));
+        await transfer(avlAccount, EOA1, getValidHex(BigNumber.from("100000000").mul(gasPrice).toHexString()));
+    });
 
     for (let i = 0; i < tests.length; i++) {
         let test = tests[i]
