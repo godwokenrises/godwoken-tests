@@ -16,8 +16,6 @@ if (!isGwMainnetV1()) {
     EOA0 = signers[signers.length - 1].address;
     EOA1 = signers[signers.length - 2].address;
     newEOA0 = ethers.Wallet.createRandom().address;
-    await transfer(avlAccount, EOA0, getValidHex(BigNumber.from("1000000000100000000").mul(gasPrice).toHexString()));
-    await transfer(avlAccount, EOA1, getValidHex(BigNumber.from("1").mul(gasPrice).toHexString()));
     //deploy contract,get contract account
     const baseFallbackReceive = await ethers.getContractFactory("baseFallbackReceive");
     const contract = await baseFallbackReceive.deploy();
@@ -29,6 +27,12 @@ describe("transfer success", function () {
     if (isGwMainnetV1()) {
         return;
     }
+
+    before(async function () {
+        this.timeout(15000);
+        await transfer(avlAccount, EOA0, getValidHex(BigNumber.from("1000000000100000000").mul(gasPrice).toHexString()));
+        await transfer(avlAccount, EOA1, getValidHex(BigNumber.from("100000000").mul(gasPrice).toHexString()));
+    });
 
     const tests = [
         {name: "to EOA", from: EOA0, to: EOA1, value: "0x1", expectGasUsed: "21000"},
@@ -69,7 +73,7 @@ describe("transfer success", function () {
     //refund avlAccount large amounts
     after(async function () {
         this.timeout(10000);
-        let from = tests.some(v => v.name == 'transfer big value') ? EOA1 : EOA0
+        let from = tests.some(v => v.name == 'transfer large amounts') ? EOA1 : EOA0
         let from_balance = await ethers.provider.getBalance(from)
         let to_balance = await ethers.provider.getBalance(avlAccount)
         console.log(`before final transfer from balance:${from_balance} to balance:${to_balance}`)
@@ -85,8 +89,14 @@ describe("transfer failed", function () {
         return;
     }
 
-    const from = EOA0
-    const to = EOA1
+    const from = EOA1
+    const to = EOA0
+
+    before(async function () {
+        this.timeout(10000);
+        await transfer(avlAccount, EOA1, getValidHex(BigNumber.from("100000000").mul(gasPrice).toHexString()));
+    });
+
     it("gasLimit not enough", async () => {
         const from_balance = await ethers.provider.getBalance(from)
         const to_balance = await ethers.provider.getBalance(to)
