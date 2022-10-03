@@ -15,7 +15,9 @@ if (!isGwMainnetV1()) {
     avlAccount = signers[0].address;
     EOA0 = signers[signers.length - 1].address;
     EOA1 = signers[signers.length - 2].address;
-    newEOA0 = ethers.Wallet.createRandom().address;
+    newEOA0 = ethers.Wallet.createRandom({
+        extraEntropy: Buffer.from('native transfer')
+    }).address;
     //deploy contract,get contract account
     const baseFallbackReceive = await ethers.getContractFactory("baseFallbackReceive");
     const contract = await baseFallbackReceive.deploy();
