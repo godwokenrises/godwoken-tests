@@ -13,7 +13,7 @@ describe("Recursion Contract", function () {
     const recurContract = await contractFact.deploy();
     await recurContract.deployed();
 
-    const maxDepth = 36
+    const maxDepth = 35;
     for (let i = 1; i <= maxDepth; i++) {
       let pureSumLoop = await recurContract.pureSumLoop(i);
       let sum = await recurContract.sum(i);
