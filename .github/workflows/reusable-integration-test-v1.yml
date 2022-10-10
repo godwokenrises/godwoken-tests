@@ -17,7 +17,7 @@ on:
       #
       #   ```yaml
       #   extra_github_env: |
-      #     GODWOKEN_TESTS_REPO=keroro520/godwoken-tests # default is nervosnetwork/godwoken-tests
+      #     GODWOKEN_TESTS_REPO=keroro520/godwoken-tests # default is godwokenrises/godwoken-tests
       #     GODWOKEN_TESTS_REF=helloworld # default is develop
       #     GODWOKEN_KICKER_REPO=keroro520/godwoken-kicker # default is RetricSu/godwoken-kicker
       #     GODWOKEN_KICKER_REF=helloworld # default is compatibility-changes
@@ -45,7 +45,7 @@ jobs:
     - name: Checkout godwoken-tests
       uses: actions/checkout@v3
       with:
-        repository: ${{ env.GODWOKEN_TESTS_REPO || 'nervosnetwork/godwoken-tests' }}
+        repository: ${{ env.GODWOKEN_TESTS_REPO || 'godwokenrises/godwoken-tests' }}
         ref: ${{ env.GODWOKEN_TESTS_REF || 'develop' }}
         submodules: 'recursive'
 

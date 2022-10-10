@@ -17,19 +17,19 @@ on:
         required: false
         type: string
       godwoken_ref:
-        description: 'The reference of https://github.com/nervosnetwork/godwoken.git'
+        description: 'The reference of https://github.com/godwokenrises/godwoken.git'
         required: false
         type: string
       gw_scripts_ref:
-        description: 'The reference of https://github.com/nervosnetwork/godwoken-scripts.git'
+        description: 'The reference of https://github.com/godwokenrises/godwoken-scripts.git'
         required: false
         type: string
       polyjuice_ref:
-        description: 'The reference of https://github.com/nervosnetwork/godwoken-polyjuice.git'
+        description: 'The reference of https://github.com/godwokenrises/godwoken-polyjuice.git'
         required: false
         type: string
       web3_ref:
-        description: 'The reference of https://github.com/nervosnetwork/godwoken-web3.git'
+        description: 'The reference of https://github.com/godwokenrises/godwoken-web3.git'
         required: false
         type: string
       log-level:
@@ -59,7 +59,7 @@ jobs:
     - name: Checkout godwoken-tests
       uses: actions/checkout@v3
       with:
-        repository: nervosnetwork/godwoken-tests
+        repository: godwokenrises/godwoken-tests
         ref: v0
         submodules: 'recursive'
     - name: Checkout Kicker # multiple repos (nested)
