@@ -42,7 +42,7 @@ on:
     - v0
   pull_request:
     branches:
-    - develop
+    - v0
 
 
 jobs:
