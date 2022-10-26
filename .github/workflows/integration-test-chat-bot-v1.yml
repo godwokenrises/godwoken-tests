@@ -45,12 +45,12 @@ jobs:
 
             // Parse commentBody
             const prebuilds = {
-              org: "nervosnetwork",
+              org: "godwokenrises",
               repo: "godwoken-docker-prebuilds",
               pattern: /prebuilds: (.*)/,
               packageType: "container",
               packageName: "godwoken-prebuilds",
-              image: "ghcr.io/nervosnetwork/godwoken-prebuilds",
+              image: "ghcr.io/godwokenrises/godwoken-prebuilds",
               tags: ["^[v]?1"],
               sha: undefined,
               htmlUrl: undefined,
@@ -71,7 +71,7 @@ jobs:
             };
             const components = {
               godwoken: {
-                owner: "nervosnetwork",
+                owner: "godwokenrises",
                 repo: "godwoken",
                 branch: "develop",
                 pattern: /godwoken: (.*)/,
@@ -81,7 +81,7 @@ jobs:
                 usePrebuilds: undefined,
               },
               scripts: {
-                owner: "nervosnetwork",
+                owner: "godwokenrises",
                 repo: "godwoken-scripts",
                 branch: "master",
                 pattern: /scripts: (.*)/,
@@ -91,7 +91,7 @@ jobs:
                 usePrebuilds: undefined,
               },
               polyjuice: {
-                owner: "nervosnetwork",
+                owner: "godwokenrises",
                 repo: "godwoken-polyjuice",
                 branch: "main",
                 pattern: /polyjuice: (.*)/,
@@ -101,7 +101,7 @@ jobs:
                 usePrebuilds: undefined,
               },
               web3: {
-                owner: "nervosnetwork",
+                owner: "godwokenrises",
                 repo: "godwoken-web3",
                 branch: "main",
                 pattern: /web3: (.*)/,
@@ -119,7 +119,7 @@ jobs:
                 branchOrCommit: undefined,
               },
               tests: {
-                owner: "nervosnetwork",
+                owner: "godwokenrises",
                 repo: "godwoken-tests",
                 branch: "develop",
                 pattern: /tests: (.*)/,
