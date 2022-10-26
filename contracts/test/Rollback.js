@@ -62,9 +62,9 @@ describe('RollBack', function () {
     }
 
     before(async () => {
-        let rollBackContractInfo = await ethers.getContractFactory("RollBackTestContract");
+        const rollBackContractInfo = await ethers.getContractFactory("RollBackTestContract");
         rollBackContract = await rollBackContractInfo.deploy({value: 50000});
-        let changeObjContractAddress = await rollBackContract.changeObjContract();
+        const changeObjContractAddress = await rollBackContract.changeObjContract();
         changeObjContract = await ethers.getContractAt("ChangeObjContract", changeObjContractAddress)
     })
 
@@ -83,14 +83,14 @@ describe('RollBack', function () {
                 let prepareData = getPrepareData();
 
                 // getState
-                let preState = await changeObjContract.getJournals(prepareData.deployOpt.newAddress, prepareData.deployOpt.salt, prepareData.deployOpt.isRevert, prepareData.transferOpt.toAddress)
+                const preState = await changeObjContract.getJournals(prepareData.deployOpt.newAddress, prepareData.deployOpt.salt, prepareData.deployOpt.isRevert, prepareData.transferOpt.toAddress)
 
                 // send change state tx
-                let tx = await rollBackContract.changeJournal(prepareData.deployOpt.newAddress, prepareData.deployOpt.salt, prepareData.transferOpt.toAddress, test_way)
+                const tx = await rollBackContract.changeJournal(prepareData.deployOpt.newAddress, prepareData.deployOpt.salt, prepareData.transferOpt.toAddress, test_way)
                 await tx.wait()
 
                 // getState ,should not eq last state
-                let afterState = await changeObjContract.getJournals(prepareData.deployOpt.newAddress, prepareData.deployOpt.salt, prepareData.deployOpt.isRevert, prepareData.transferOpt.toAddress)
+                const afterState = await changeObjContract.getJournals(prepareData.deployOpt.newAddress, prepareData.deployOpt.salt, prepareData.deployOpt.isRevert, prepareData.transferOpt.toAddress)
                 console.log("before:", JSON.stringify(preState))
                 console.log("after:", JSON.stringify(afterState))
                 expect(JSON.stringify(preState)).to.be.not.equal(JSON.stringify(afterState))
@@ -123,13 +123,13 @@ describe('RollBack', function () {
 
 
                 // getState
-                let preState = await changeObjContract.getJournals(prepareData.deployOpt.newAddress, prepareData.deployOpt.salt, prepareData.deployOpt.isRevert, prepareData.transferOpt.toAddress)
+                const preState = await changeObjContract.getJournals(prepareData.deployOpt.newAddress, prepareData.deployOpt.salt, prepareData.deployOpt.isRevert, prepareData.transferOpt.toAddress)
 
-                let tx = await rollBackContract.changeWithRevert(prepareData.deployOpt.newAddress, prepareData.deployOpt.salt, prepareData.transferOpt.toAddress, test_way)
+                const tx = await rollBackContract.changeWithRevert(prepareData.deployOpt.newAddress, prepareData.deployOpt.salt, prepareData.transferOpt.toAddress, test_way)
 
                 await tx.wait()
                 // getState ,should not eq last state
-                let afterState = await changeObjContract.getJournals(prepareData.deployOpt.newAddress, prepareData.deployOpt.salt, prepareData.deployOpt.isRevert, prepareData.transferOpt.toAddress)
+                const afterState = await changeObjContract.getJournals(prepareData.deployOpt.newAddress, prepareData.deployOpt.salt, prepareData.deployOpt.isRevert, prepareData.transferOpt.toAddress)
                 expect(JSON.stringify(preState)).to.be.equal(JSON.stringify(afterState))
             })
         }
@@ -147,13 +147,13 @@ describe('RollBack', function () {
             const prepareData = getPrepareData();
 
             // getState
-            let preState = await changeObjContract.getJournals(prepareData.deployOpt.newAddress, prepareData.deployOpt.salt, prepareData.deployOpt.isRevert, prepareData.transferOpt.toAddress)
+            const preState = await changeObjContract.getJournals(prepareData.deployOpt.newAddress, prepareData.deployOpt.salt, prepareData.deployOpt.isRevert, prepareData.transferOpt.toAddress)
 
             // eth_call
             await rollBackCallState.changeWithRevert(prepareData.deployOpt.newAddress, prepareData.deployOpt.salt, prepareData.transferOpt.toAddress, CALL_STYLE)
 
             // getState
-            let afterState = await changeObjContract.getJournals(prepareData.deployOpt.newAddress, prepareData.deployOpt.salt, prepareData.deployOpt.isRevert, prepareData.transferOpt.toAddress)
+            const afterState = await changeObjContract.getJournals(prepareData.deployOpt.newAddress, prepareData.deployOpt.salt, prepareData.deployOpt.isRevert, prepareData.transferOpt.toAddress)
 
             // eth_call should rollback state change ,state should eq pre state
             expect(JSON.stringify(preState)).to.be.equal(JSON.stringify(afterState))
@@ -161,15 +161,18 @@ describe('RollBack', function () {
         }
 
         it("call_code", async () => {
-            //
-            const RollBackWithCallCodeContractInfo = await ethers.getContractFactory("RollBackWithCallCodeContract");
 
-            let rollBackWithCallCodeContract = await RollBackWithCallCodeContractInfo.deploy()
+            const RollBackWithCallCodeContractInfo = await ethers.getContractFactory("RollBackWithCallCodeContract");
+            // deploy
+            const rollBackWithCallCodeContract = await RollBackWithCallCodeContractInfo.deploy()
             await rollBackWithCallCodeContract.deployed()
-            let beforeState = await rollBackWithCallCodeContract.getState();
-            let tx = await rollBackWithCallCodeContract.callCodeWithMethod("modStateWithRevert()");
+
+            const beforeState = await rollBackWithCallCodeContract.getState();
+
+            const tx = await rollBackWithCallCodeContract.callCodeWithMethod("modStateWithRevert()");
             await tx.wait()
-            let afterState = await rollBackWithCallCodeContract.getState();
+
+            const afterState = await rollBackWithCallCodeContract.getState();
             expect(beforeState).to.be.equal(afterState)
         })
 
