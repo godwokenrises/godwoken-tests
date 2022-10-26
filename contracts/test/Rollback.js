@@ -31,7 +31,7 @@
  */
 const {ethers} = require("hardhat");
 const {expect} = require("chai");
-const {isGwMainnetV1} = require("../utils/network")
+const {isGwMainnetV1, isHardhatNetwork} = require("../utils/network")
 
 describe('RollBack', function () {
 
@@ -70,15 +70,18 @@ describe('RollBack', function () {
 
     describe('not trigger rollback', function () {
 
-        for (let i = 0; i < TEST_ROLLBACK_STYLES.length; i++) {
-            it(TEST_ROLLBACK_NAME[TEST_ROLLBACK_STYLES[i]] + "", async () => {
-                const test_way = TEST_ROLLBACK_STYLES[i];
 
-                if (test_way === STATIC_CALL_STYLE || test_way === CALL_CODE_STYLE) {
-                    // static can't mod state
-                    // call code not support for 0.8.0
-                    return
-                }
+        for (let i = 0; i < TEST_ROLLBACK_STYLES.length; i++) {
+            const test_way = TEST_ROLLBACK_STYLES[i];
+
+            if (test_way === STATIC_CALL_STYLE || test_way === CALL_CODE_STYLE || test_way === SYNC_TX_STYLE) {
+                // STATIC_CALL_STYLE: static can't mod state
+                // CALL_CODE_STYLE: call code not support for 0.8.0
+                // SYNC_TX_STYLE: failed tx trigger rollback
+                continue
+            }
+
+            it(TEST_ROLLBACK_NAME[TEST_ROLLBACK_STYLES[i]] + "", async () => {
 
                 let prepareData = getPrepareData();
 
@@ -86,13 +89,14 @@ describe('RollBack', function () {
                 const preState = await changeObjContract.getJournals(prepareData.deployOpt.newAddress, prepareData.deployOpt.salt, prepareData.deployOpt.isRevert, prepareData.transferOpt.toAddress)
 
                 // send change state tx
-                const tx = await rollBackContract.changeJournal(prepareData.deployOpt.newAddress, prepareData.deployOpt.salt, prepareData.transferOpt.toAddress, test_way)
-                await tx.wait()
+                // add gasLimit option: because selfdestruct make gas estimates are low
+                const tx = await rollBackContract.changeJournal(prepareData.deployOpt.newAddress, prepareData.deployOpt.salt, prepareData.transferOpt.toAddress, test_way,{gasLimit:1000000})
+                const receipt = await tx.wait()
+
+                expect(receipt.logs.length).to.be.gt(0)
 
                 // getState ,should not eq last state
                 const afterState = await changeObjContract.getJournals(prepareData.deployOpt.newAddress, prepareData.deployOpt.salt, prepareData.deployOpt.isRevert, prepareData.transferOpt.toAddress)
-                console.log("before:", JSON.stringify(preState))
-                console.log("after:", JSON.stringify(afterState))
                 expect(JSON.stringify(preState)).to.be.not.equal(JSON.stringify(afterState))
             })
         }
@@ -101,18 +105,15 @@ describe('RollBack', function () {
     describe('trigger rollback ', function () {
 
         for (let i = 0; i < TEST_ROLLBACK_STYLES.length; i++) {
+            const test_way = TEST_ROLLBACK_STYLES[i];
+            if (test_way === SYNC_TX_STYLE || test_way === CALL_CODE_STYLE) {
+                // SYNC_TX_STYLE: sync tx failed tx : tx.wait() will return throw
+                // CALL_CODE_STYLE:0.8.0 not support call_code
+                continue;
+            }
+
+
             it(TEST_ROLLBACK_NAME[TEST_ROLLBACK_STYLES[i]], async () => {
-                const test_way = TEST_ROLLBACK_STYLES[i];
-                if (test_way === SYNC_TX_STYLE) {
-                    // sync tx failed tx : tx.wait() will return throw
-                    return;
-                }
-
-                if (test_way === CALL_CODE_STYLE) {
-                    // 0.8.0 not support call_code
-                    return;
-                }
-
 
                 const prepareData = getPrepareData();
 
@@ -127,12 +128,35 @@ describe('RollBack', function () {
 
                 const tx = await rollBackContract.changeWithRevert(prepareData.deployOpt.newAddress, prepareData.deployOpt.salt, prepareData.transferOpt.toAddress, test_way)
 
-                await tx.wait()
+                const receipt = await tx.wait()
+
+                expect(receipt.logs.length).to.be.equal(0)
+
                 // getState ,should not eq last state
                 const afterState = await changeObjContract.getJournals(prepareData.deployOpt.newAddress, prepareData.deployOpt.salt, prepareData.deployOpt.isRevert, prepareData.transferOpt.toAddress)
                 expect(JSON.stringify(preState)).to.be.equal(JSON.stringify(afterState))
             })
         }
+
+        it("SYNC_TX_STYLE",async ()=>{
+
+            if (isHardhatNetwork()) {
+                return;
+            }
+            const prepareData = getPrepareData();
+
+            // getState
+            const preState = await changeObjContract.getJournals(prepareData.deployOpt.newAddress, prepareData.deployOpt.salt, prepareData.deployOpt.isRevert, prepareData.transferOpt.toAddress)
+
+            const tx = await rollBackContract.changeWithRevert(prepareData.deployOpt.newAddress, prepareData.deployOpt.salt, prepareData.transferOpt.toAddress, SYNC_TX_STYLE,{gasLimit:1000_000})
+
+            // failed tx: statue== 0 ,will revert
+            await expect(tx.wait()).to.be.reverted
+
+            // getState ,should not eq last state
+            const afterState = await changeObjContract.getJournals(prepareData.deployOpt.newAddress, prepareData.deployOpt.salt, prepareData.deployOpt.isRevert, prepareData.transferOpt.toAddress)
+            expect(JSON.stringify(preState)).to.be.equal(JSON.stringify(afterState))
+        })
 
         it("eth_call", async () => {
             await test_simulate_call_rollback(changeObjContract, rollBackContract.callStatic)

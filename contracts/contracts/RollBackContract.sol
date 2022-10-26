@@ -276,8 +276,6 @@ contract FactoryAssembly {
         //                revert(0, 0)
         //            }
         //        }
-
-        emit Deployed(addr, _salt);
         return addr;
     }
 }
