@@ -141,6 +141,7 @@ describe('RollBack', function () {
         it("SYNC_TX_STYLE",async ()=>{
 
             if (isHardhatNetwork()) {
+                // run  failed tx will revert
                 return;
             }
             const prepareData = getPrepareData();
