@@ -4,7 +4,7 @@ const { isGwMainnetV1 } = require('../utils/network');
 
 const { BigNumber, constants } = ethers;
 
-describe("Multicall2", function () {
+describe.skip("Multicall2", function () {
   if (isGwMainnetV1()) {
     return;
   }
