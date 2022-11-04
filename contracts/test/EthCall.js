@@ -2,23 +2,10 @@ const { expect } = require("chai");
 const { ethers, network } = require("hardhat");
 const fetch = require("node-fetch");
 const { isGwMainnetV1 } = require('../utils/network');
+const { expectThrowsAsync } = require('../utils/throw');
 
 const expectedValue = 10;
 let ethCallContract;
-
-const expectThrowsAsync = async (method, errorMessage) => {
-  let error = null;
-  try {
-    await method();
-  } catch (err) {
-    error = err;
-  }
-  expect(error).to.be.an("Error");
-  console.log(error.message);
-  if (errorMessage) {
-    expect(`${error.message} ${error.error}`).to.include(errorMessage);
-  }
-};
 
 describe("Eth_Call Cache Test", function () {
   if (isGwMainnetV1()) {

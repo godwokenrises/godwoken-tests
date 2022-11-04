@@ -4,29 +4,14 @@ const toolkit = require("@ckb-lumos/toolkit");
 const schemas = require("../../schemas");
 const normalizers = require("../lib/normalizer");
 const { getAccountIdByContractAddress } = require("../lib/helper");
-const { isGwMainnetV1 } = require('../utils/network');
+const { isGwMainnetV1 } = require("../utils/network");
+const { expectThrowsAsync } = require("../utils/throw");
 
 const expectedValue = 10;
 
 let ethCallContract;
 
 const rpc = new toolkit.RPC(network.config.url);
-
-const expectThrowsAsync = async (method, errMsgKeyWords) => {
-  let error = null;
-  try {
-    await method();
-  } catch (err) {
-    error = err;
-  }
-  expect(error).to.be.an("Error");
-  console.log(error.message);
-  if (errMsgKeyWords) {
-    for (keyWord of errMsgKeyWords) {
-      expect(error.message).to.include(keyWord);
-    }
-  }
-};
 
 const executeGwRawTx = async (chainId, toId, polyArgs) => {
   const rawL2Tx = {
