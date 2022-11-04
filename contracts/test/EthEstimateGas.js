@@ -2,27 +2,12 @@ const fetch = require("node-fetch");
 const { expect } = require("chai");
 const { ethers, network } = require("hardhat");
 const { isGwMainnetV1 } = require('../utils/network');
+const { expectThrowsAsync } = require('../utils/throw');
 
 const expectedValue = 10;
 const expectedGas = "21000";
 
 let ethCallContract;
-
-const expectThrowsAsync = async (method, errMsgKeyWords) => {
-  let error = null;
-  try {
-    await method();
-  } catch (err) {
-    error = err;
-  }
-  expect(error).to.be.an("Error");
-  console.log(error.message);
-  if (errMsgKeyWords) {
-    for (keyWord of errMsgKeyWords) {
-      expect(`${error.message} ${error.error}`).to.include(keyWord);
-    }
-  }
-};
 
 describe("Eth_estimateGas Cache Test", function () {
   if (isGwMainnetV1()) {
