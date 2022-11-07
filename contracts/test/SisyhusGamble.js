@@ -37,7 +37,7 @@ describe("SisyphusGamble", function () {
       1, // startingPrize
       1, // minGamble
       1, // weight
-      4, // gamblingBlocks
+      7, // gamblingBlocks, set longer for with/without instant-finality hack
     );
     await tx1.wait();
     expect(await erc20.balanceOf(sender.address)).to.equal(balanceOfSender - 1);
