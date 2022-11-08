@@ -69,7 +69,7 @@ export const alphanetConfigV1: LightGodwokenConfig = {
       },
     },
 
-    GW_POLYJUICE_RPC_URL: "https://godwoken-alphanet-v1.ckbapp.dev",
+    GW_POLYJUICE_RPC_URL: "https://gw-alphanet-v1.godwoken.cf",
     SCANNER_URL: "", // might not need this
     SCANNER_API: "", // might not need this
     CHAIN_NAME: "Godwoken Alphanet v1",
