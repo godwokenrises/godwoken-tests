@@ -36,7 +36,7 @@ module.exports = {
       chainId: 71401,
     },
     gw_alphanet_v1: { // for internal testing
-      url: `https://godwoken-alphanet-v1.ckbapp.dev`,
+      url: `https://gw-alphanet-v1.godwoken.cf`,
       accounts: [`0x${TEST_PK1}`, `0x${TEST_PK2}`,`${PRIVATE_KEY0}`, `${PRIVATE_KEY1}`],
       chainId: 202206,
       gasPrice: 1,

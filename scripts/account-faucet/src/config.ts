@@ -27,7 +27,7 @@ export const networks : Record<Network, NetworkConfig> = {
     },
   },
   [Network.AlphanetV1]: {
-    rpc: 'https://godwoken-alphanet-v1.ckbapp.dev',
+    rpc: 'https://gw-alphanet-v1.godwoken.cf',
     lumos: {
       config: predefined.AGGRON4
     },

@@ -28,7 +28,7 @@ export const networks : Record<Network, NetworkConfig> = {
     version: 'v1',
   },
   [Network.AlphanetV1]: {
-    rpc: 'https://godwoken-alphanet-v1.ckbapp.dev',
+    rpc: 'https://gw-alphanet-v1.godwoken.cf',
     network: 'alphanet',
     version: 'v1',
     lightGodwokenConfig: alphanetConfigV1,
