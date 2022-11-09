@@ -167,6 +167,13 @@ jobs:
         #   2dc6374a2238e414e51874f514b0fa871f8ce0eb1e7ecaa0aed229312ffc91b0
         ./kicker deposit 0x966B30e576A4d6731996748B48Dd67C94eF29067 10000
         ./kicker deposit 0x4fef21f1d42e0d23d72100aefe84d555781c31bb 10000
+      
+    - name: Wait 1 layer2 blocks passed
+      uses: actions/github-script@v5
+      with:
+        script: |
+          const { waitXl2BlocksPassed } = require("./scripts/helper");
+          await waitXl2BlocksPassed(1);
 
     - name: Withdraw for 2 dev accounts
       working-directory: scripts/light-godwoken-cli
@@ -179,6 +186,13 @@ jobs:
       run: |
         ./kicker deposit 0x966B30e576A4d6731996748B48Dd67C94eF29999 1000
         ./kicker deposit-v0 10000 # Use ckb-miner key
+    
+    - name: Wait 1 layer2 blocks passed
+      uses: actions/github-script@v5
+      with:
+        script: |
+          const { waitXl2BlocksPassed } = require("./scripts/helper");
+          await waitXl2BlocksPassed(1);
 
     - name: Withdraw from v0 to v1
       working-directory: kicker
