@@ -2,16 +2,12 @@ import { RPC } from 'ckb-js-toolkit';
 import { Hash } from "@ckb-lumos/base";
 
 export class GodwokenWeb3 {
-  private rpc: RPC;
+  private readonly rpc: RPC;
   private nodeInfo: any;
 
   constructor(url: string) {
     if (!url) throw new Error('RPC url cannot be empty');
     this.rpc = new RPC(url);
-  }
-
-  private async rpcCall(method_name: string, ...args: any[]): Promise<any> {
-    return await this.rpc[`gw_${method_name}`](...args);
   }
 
   async getNodeInfo() {

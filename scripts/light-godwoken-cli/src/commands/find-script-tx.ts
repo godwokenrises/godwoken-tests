@@ -1,10 +1,8 @@
-import { Command } from 'commander';
+import { Command, Option } from 'commander';
 import { HashType, utils } from '@ckb-lumos/base';
 import { Indexer } from '@ckb-lumos/ckb-indexer';
-import { devnetConfigV1 } from '../configs/devnet';
+import { getConfig } from '../utils/config';
 import { Network } from '../config';
-
-const config = devnetConfigV1;
 
 export default function setupFindScriptTransaction(program: Command) {
   program
@@ -13,6 +11,11 @@ export default function setupFindScriptTransaction(program: Command) {
     .option('--hash-type <STRING>', 'Script.hash_type')
     .option('--args <STRING>', 'Script.args')
     .option('--script-type <SCRIPT_TYPE>', 'search type, "type" or "lock" (default is "type")', 'type')
+    .addOption(
+      new Option('-n, --network <NETWORK>', 'network to use')
+        .choices(Object.values(Network))
+        .default(Network.TestnetV1)
+    )
     .action(findScriptTransaction)
   ;
 }
@@ -23,6 +26,7 @@ export async function findScriptTransaction(params: {
   args: string;
   network: Network;
 }) {
+  const config = getConfig(params.network).lightGodwokenConfig!;
   const indexerUrl = config.layer1Config.CKB_INDEXER_URL;
   const rpcUrl = config.layer1Config.CKB_RPC_URL;
 
@@ -40,9 +44,9 @@ export async function findScriptTransaction(params: {
     hash_type: params.hashType,
     args: params.args,
   });
-  console.log('script_hash: ', hash);
+  console.debug('script_hash: ', hash);
 
   for await (const cell of collect.collect()) {
-    console.log(cell.out_point);
+    console.debug(cell.out_point);
   }
 }

@@ -7,13 +7,16 @@ import { createLightGodwoken } from '../utils/client';
 export default function setupGetBalance(program: Command) {
   program
     .command('get-balance')
-    .argument('<PRIVATE_KEY>', 'account private key')
+    .description('get account L1/L2 balances by --private-key')
+    .argument('<HEX_STRING>', 'account private key')
     .addOption(
       new Option('-n, --network <NETWORK>', 'network to use')
         .choices(Object.values(Network))
         .default(Network.TestnetV1)
     )
-    .action(getBalance)
+    .action(async (...args: Parameters<typeof getBalance>) => {
+      await getBalance(...args);
+    })
   ;
 }
 
@@ -31,8 +34,16 @@ export async function getBalance(privateKey: string, params: {
 
   const l1 = await client.getL1CkbBalance();
   const l2 = await client.getL2CkbBalance();
-  console.debug({
-    l1: utils.formatUnits(l1, 8),
-    l2: utils.formatUnits(l2),
-  });
+  const result = {
+    l1Address: client.provider.getL1Address(),
+    l1Balance: utils.formatUnits(l1, 8),
+    l2Address: client.provider.getL2Address(),
+    l2Balance: utils.formatEther(l2),
+  };
+
+  console.debug(`l1-address: ${result.l1Address}`);
+  console.debug(`l1-balance: ${result.l1Balance}`);
+  console.debug(`l2-address: ${result.l2Address}`);
+  console.debug(`l2-balance: ${result.l2Balance}`);
+  return result;
 }

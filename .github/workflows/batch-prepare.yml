@@ -1,0 +1,79 @@
+name: Batch Prepare For Derived Accounts
+
+on:
+  workflow_dispatch:
+    inputs:
+      prepare-sudt:
+        type: boolean
+        required: true
+        default: false
+        description: "Prepare sUDT for derived accounts (optional)"
+  schedule:
+    - cron: '0 22 * * 0,2,4' # at 06:00 AM on Monday & Wednesday & Friday (UTC+8)
+
+jobs:
+  check-secrets:
+    runs-on: ubuntu-latest
+    if: github.repository == 'godwokenrises/godwoken-tests'
+    outputs:
+      available: ${{ steps.check.outputs.available }}
+    steps:
+      - id: check
+        env:
+          KEY1: '${{ secrets.GODWOKEN_TEST_PRIVATE_KEY }}'
+        if: ${{ env.KEY1 != '' }}
+        run: echo "::set-output name=available::true"
+
+  batch-claim:
+    needs: check-secrets
+    if: needs.check-secrets.outputs.available
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        command: [ batch-claim-l1, batch-claim-l2 ]
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
+        with:
+          node-version: '16'
+          cache: 'npm'
+          cache-dependency-path: scripts/account-faucet/package-lock.json
+
+      - name: Setup Account-Faucet
+        working-directory: scripts/account-faucet
+        run: npm i && npm run build
+
+      - name: Claim for derived accounts
+        working-directory: scripts/account-faucet
+        run: |
+          account-faucet ${{ matrix.command }} \
+            --private-key ${{ secrets.GODWOKEN_TEST_PRIVATE_KEY }} \
+            --network alphanet_v1
+
+  batch-prepare-sudt:
+    runs-on: ubuntu-latest
+    needs: [check-secrets, batch-claim]
+    if: needs.check-secrets.outputs.available && ${{ github.event.inputs.prepare-sudt }}
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
+        with:
+          node-version: '16'
+
+      - name: Setup Light-Godwoken-CLI
+        working-directory: scripts/light-godwoken-cli
+        run: ./init.sh
+
+      - name: Run batch-prepare-sudt
+        working-directory: scripts/light-godwoken-cli
+        run: |
+          lgc batch-prepare-sudt \
+            --private-key ${{ secrets.GODWOKEN_TEST_PRIVATE_KEY }} \
+            --network alphanet_v1
+
+      - name: Archive artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: batch-prepare-sudt
+          path: ${{ github.workspace }}/scripts/light-godwoken-cli/artifacts
