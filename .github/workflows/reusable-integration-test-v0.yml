@@ -5,7 +5,7 @@ on:
     inputs:
       kicker_ref:
         type: string
-        description: 'The reference of https://github.com/RetricSu/godwoken-kicker.git'
+        description: 'The reference of https://github.com/godwokenrises/godwoken-kicker.git'
         required: false
         default: 'rc-0.10.0'
       gw_prebuild_image_name:
@@ -65,7 +65,7 @@ jobs:
     - name: Checkout Kicker # multiple repos (nested)
       uses: actions/checkout@v3
       with:
-        repository: RetricSu/godwoken-kicker
+        repository: godwokenrises/godwoken-kicker
         ref: ${{ inputs.kicker_ref || 'rc-0.10.0' }}
         path: kicker
         submodules: 'recursive'

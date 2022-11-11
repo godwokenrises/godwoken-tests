@@ -13,13 +13,13 @@ You can follow the command-lines below to install Godwoken-Tests in your local e
 
 If you wish to run tests on devnet instead of testnet, please read the current section.
 
-First, you need to install [Godwoken-Kicker](https://github.com/RetricSu/godwoken-kicker), and then deploy a local devnet_v1 running in the localhost network:
+First, you need to install [Godwoken-Kicker](https://github.com/godwokenrises/godwoken-kicker), and then deploy a local devnet_v1 running in the localhost network:
 
-1. `git clonehttps://github.com/RetricSu/godwoken-kicker` - Clone Godwoken-Kicker
+1. `git clonehttps://github.com/godwokenrises/godwoken-kicker` - Clone Godwoken-Kicker
 2. `cd godwoken-kicker` - Go to kicker tool’s folder
 3. `./kicker start` - Deploy and start a devnet_v1 in localhost network
 
-The deployment will take some time to complete, and for more detailed about how to start devnet in your localhost network, please read this: [Deploy Local Network of Godwoken](https://github.com/RetricSu/godwoken-kicker/blob/main/docs/kicker-start.md).
+The deployment will take some time to complete, and for more detailed about how to start devnet in your localhost network, please read this: [Deploy Local Network of Godwoken](https://github.com/godwokenrises/godwoken-kicker/blob/main/docs/kicker-start.md).
 
 After the devnet started, you should deposit some testing capacity of testing accounts from layer 1 (CKB network) to layer 2 (Godwoken network):
 

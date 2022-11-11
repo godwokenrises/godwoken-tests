@@ -52,8 +52,8 @@ jobs:
     - name: Checkout godwoken-kicker
       uses: actions/checkout@v3
       with:
-        repository: ${{ env.GODWOKEN_KICKER_REPO || 'RetricSu/godwoken-kicker' }}
-        ref: ${{ env.GODWOKEN_KICKER_REF || 'master' }}
+        repository: ${{ env.GODWOKEN_KICKER_REPO || 'godwokenrises/godwoken-kicker' }}
+        ref: ${{ env.GODWOKEN_KICKER_REF || 'develop' }}
         path: kicker
         submodules: 'recursive'
 

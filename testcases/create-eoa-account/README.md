@@ -10,7 +10,7 @@ We need set mapping between ETH address and godwoken script hash with Eth Addres
 
 ## Setup
 
-[godwoken-kicker](https://github.com/RetricSu/godwoken-kicker/tree/v1.1.x)
+[godwoken-kicker](https://github.com/godwokenrises/godwoken-kicker/tree/v1.1.x)
 ```sh
 ./kicker start
 ```
