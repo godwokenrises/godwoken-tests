@@ -17,4 +17,4 @@
 [submodule "light-godwoken"]
 	path = light-godwoken
 	url = https://github.com/nervosnetwork/light-godwoken.git
-	branch = ref-gw-rpc
+	branch = v0.3.1
