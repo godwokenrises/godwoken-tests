@@ -6,6 +6,8 @@ export interface DerivedAccount {
   privateKey: HexString;
   ethAddress: Address;
 }
+
+// TODO: private-key has a max-limit, maybe we should generate derived accounts with hd-wallet
 export function privateKeyToDerivedAccounts(privateKey: HexString, count: number): DerivedAccount[] {
   if (count > 64) {
     throw new Error('you can only generate up to 64 derived accounts from a private-key');

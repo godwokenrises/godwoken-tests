@@ -7,11 +7,9 @@ export interface DerivedAccount {
   privateKey: HexString;
   ethAddress: Address;
 }
-export function privateKeyToDerivedAccounts(privateKey: HexString, count: number): DerivedAccount[] {
-  if (count > 64) {
-    throw new Error('you can only generate up to 64 derived accounts from a private-key');
-  }
 
+// TODO: private-key has a max-limit, maybe we should generate derived accounts with hd-wallet
+export function privateKeyToDerivedAccounts(privateKey: HexString, count: number): DerivedAccount[] {
   const keys = [addHexPrefix(privateKey)];
   for (let i = 0; i < count; i++) {
     const newKey = '0x' + keccak256(keys[keys.length - 1]).toString('hex');
