@@ -89,7 +89,7 @@ Admin rights(`actions:write` permission) to this repository is required.
 
 * [Docker](https://docs.docker.com/get-docker/), [docker-compose](https://docs.docker.com/compose/install/), [`Node.js` v14+](https://nodejs.org) and [`Yarn`](https://yarnpkg.com) are required.
 * Before tests can run locally, a godwoken dev chain should be running.
-[Godwoken-Kicker](https://github.com/RetricSu/godwoken-kicker) would be a good choice to start godwoken-polyjuice chain with a one line command.
+[Godwoken-Kicker](https://github.com/godwokenrises/godwoken-kicker) would be a good choice to start godwoken-polyjuice chain with a one line command.
 
 ### Steps
 

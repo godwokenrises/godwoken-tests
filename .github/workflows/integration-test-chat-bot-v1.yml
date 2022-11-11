@@ -110,7 +110,7 @@ jobs:
                 branchOrCommit: undefined,
               },
               kicker: {
-                owner: "RetricSu",
+                owner: "godwokenrises",
                 repo: "godwoken-kicker",
                 branch: "master",
                 pattern: /kicker: (.*)/,
