@@ -168,6 +168,11 @@ jobs:
         ./kicker deposit 0x966B30e576A4d6731996748B48Dd67C94eF29067 10000
         ./kicker deposit 0x4fef21f1d42e0d23d72100aefe84d555781c31bb 10000
       
+    - name: init tools
+      working-directory: tools
+      run: |
+        yarn install && yarn build-all
+
     - name: Wait 1 layer2 blocks passed
       uses: actions/github-script@v5
       with:
@@ -231,11 +236,6 @@ jobs:
     #     key: ${{ runner.os }}-node_modules-${{ hashFiles('/home/runner/work/**/package-lock.json', '/home/runner/work/**/yarn.lock') }}
     #     restore-keys: |
     #       ${{ runner.os }}-node_modules-
-
-    - name: Generate devnet envfile from godwoken-config.toml
-      working-directory: tools
-      run: |
-        yarn install && yarn build-all
 
     - name: Wait 1 layer2 blocks passed
       uses: actions/github-script@v5
