@@ -174,7 +174,7 @@ jobs:
         yarn install && yarn build-all
 
     - name: Wait 1 layer2 blocks passed
-      uses: actions/github-script@v5
+      uses: actions/github-script@v6
       with:
         script: |
           const { waitXl2BlocksPassed } = require("./scripts/helper");
@@ -193,7 +193,7 @@ jobs:
         ./kicker deposit-v0 10000 # Use ckb-miner key
     
     - name: Wait 1 layer2 blocks passed
-      uses: actions/github-script@v5
+      uses: actions/github-script@v6
       with:
         script: |
           const { waitXl2BlocksPassed } = require("./scripts/helper");
@@ -219,7 +219,7 @@ jobs:
         echo "withdraw from v0 to v1 fail"
         exit 1
 
-    - uses: actions/setup-node@v2
+    - uses: actions/setup-node@v3
       with:
         node-version: '16'
     - name: Get yarn cache directory path
@@ -238,7 +238,7 @@ jobs:
     #       ${{ runner.os }}-node_modules-
 
     - name: Wait 1 layer2 blocks passed
-      uses: actions/github-script@v5
+      uses: actions/github-script@v6
       with:
         script: |
           const { waitXl2BlocksPassed } = require("./scripts/helper");
