@@ -199,7 +199,7 @@ jobs:
         fi
         sudo chown -R `whoami` cache/build
 
-    - uses: actions/setup-node@v2
+    - uses: actions/setup-node@v3
       with:
         node-version: '16'
     - name: Get yarn cache directory path
@@ -243,7 +243,7 @@ jobs:
     
     - name: Get current layer2 block number
       id: deposit-block-num
-      uses: actions/github-script@v5
+      uses: actions/github-script@v6
       with:
         script: |
           const { getTipBlockNumber } = require("./scripts/helper");
@@ -289,7 +289,7 @@ jobs:
     # Note:
     # The deposited asset can be withdrawn only after `finalize_blocks` layer2 blocks.
     - name: Wait until [finalize_blocks] layer2 blocks passed
-      uses: actions/github-script@v5
+      uses: actions/github-script@v6
       with:
         script: |
           const { getTipBlockNumber, waitXl2BlocksPassed } = require("./scripts/helper");
@@ -313,7 +313,7 @@ jobs:
         fi
 
     - name: Wait 2 layer2 blocks passed
-      uses: actions/github-script@v5
+      uses: actions/github-script@v6
       with:
         script: |
           const { waitXl2BlocksPassed } = require("./scripts/helper");
@@ -330,7 +330,7 @@ jobs:
     
     - name: Get current layer2 block number
       id: withdrawal-block-num
-      uses: actions/github-script@v5
+      uses: actions/github-script@v6
       with:
         script: |
           const { getTipBlockNumber } = require("./scripts/helper");
@@ -338,7 +338,7 @@ jobs:
         result-encoding: string
 
     - name: Wait until [finalize_blocks] layer2 blocks passed
-      uses: actions/github-script@v5
+      uses: actions/github-script@v6
       with:
         script: |
           const { waitXl2BlocksPassed } = require("./scripts/helper");
