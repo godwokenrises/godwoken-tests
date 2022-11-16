@@ -27,22 +27,22 @@ const PRIVATE_KEY1 = ethers.Wallet.createRandom().privateKey
 module.exports = {
   networks: {
     gw_devnet_v1: {
-      url: `http://localhost:8024`,
+      url: `http://localhost:8024/instant-finality-hack`,
       accounts: [`0x${TEST_PK1}`, `0x${TEST_PK2}`,`${PRIVATE_KEY0}`, `${PRIVATE_KEY1}`],
     },
     gw_testnet_v1: {
-      url: `https://godwoken-testnet-v1.ckbapp.dev`,
+      url: `https://godwoken-testnet-v1.ckbapp.dev/instant-finality-hack`,
       accounts: [`0x${TEST_PK1}`, `0x${TEST_PK2}`, `0x${TEST_PK3}`,`${PRIVATE_KEY0}`, `${PRIVATE_KEY1}`],
       chainId: 71401,
     },
     gw_alphanet_v1: { // for internal testing
-      url: `https://gw-alphanet-v1.godwoken.cf`,
+      url: `https://gw-alphanet-v1.godwoken.cf/instant-finality-hack`,
       accounts: [`0x${TEST_PK1}`, `0x${TEST_PK2}`,`${PRIVATE_KEY0}`, `${PRIVATE_KEY1}`],
       chainId: 202206,
       gasPrice: 1,
     },
     gw_mainnet_v1: { // for regression testing
-      url: `https://v1.mainnet.godwoken.io/rpc`,
+      url: `https://v1.mainnet.godwoken.io/rpc/instant-finality-hack`,
       accounts: [`0x${TEST_PK1}`, `0x${TEST_PK2}`],
       chainId: 71402,
     },
