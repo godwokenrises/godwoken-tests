@@ -31,13 +31,13 @@ export const networks : Record<Network, NetworkConfig> = {
     lightGodwokenConfig: predefinedConfigs.mainnet.v1,
   },
   [Network.TestnetV1]: {
-    rpc: 'https://godwoken-testnet-v1.ckbapp.dev',
+    rpc: 'https://v1.testnet.godwoken.io/rpc/instant-finality-hack',
     network: GodwokenNetwork.Testnet,
     version: GodwokenVersion.V1,
     lightGodwokenConfig: predefinedConfigs.testnet.v1,
   },
   [Network.AlphanetV1]: {
-    rpc: 'https://gw-alphanet-v1.godwoken.cf',
+    rpc: 'https://gw-alphanet-v1.godwoken.cf/instant-finality-hack',
     network: 'alphanet',
     version: GodwokenVersion.V1,
     lightGodwokenConfig: AlphanetConfigV1,

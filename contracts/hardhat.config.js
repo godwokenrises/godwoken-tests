@@ -31,7 +31,7 @@ module.exports = {
       accounts: [`0x${TEST_PK1}`, `0x${TEST_PK2}`,`${PRIVATE_KEY0}`, `${PRIVATE_KEY1}`],
     },
     gw_testnet_v1: {
-      url: `https://godwoken-testnet-v1.ckbapp.dev/instant-finality-hack`,
+      url: `https://v1.testnet.godwoken.io/rpc/instant-finality-hack`,
       accounts: [`0x${TEST_PK1}`, `0x${TEST_PK2}`, `0x${TEST_PK3}`,`${PRIVATE_KEY0}`, `${PRIVATE_KEY1}`],
       chainId: 71401,
     },
