@@ -1,5 +1,6 @@
 require("@nomiclabs/hardhat-waffle");
 require("@nomiclabs/hardhat-web3");
+require('@openzeppelin/hardhat-upgrades');
 var ethers = require("ethers").ethers;
 
 const INFURA_PROJECT_ID = "719d739434254b88ac95d53e2b6ac997";
@@ -82,7 +83,8 @@ module.exports = {
         settings: {}
       },
       { version: "0.7.5" },
-      { version: "0.8.6" }
+      { version: "0.8.6" },
+      { version: "0.8.12"}
     ], overrides: {}
   },
 };
