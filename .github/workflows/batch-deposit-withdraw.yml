@@ -16,7 +16,7 @@ jobs:
         env:
           KEY1: '${{ secrets.GODWOKEN_TEST_PRIVATE_KEY }}'
         if: ${{ env.KEY1 != '' }}
-        run: echo "::set-output name=available::true"
+        run: echo "available=true" >> $GITHUB_OUTPUT
 
   batch-deposit-and-withdraw:
     runs-on: ubuntu-latest

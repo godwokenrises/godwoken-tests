@@ -67,7 +67,7 @@ jobs:
         fi
 
     - name: Rust Cache
-      uses: actions/cache@v2
+      uses: actions/cache@v3
       with:
         path: |
           ~/.cargo/bin/
@@ -108,7 +108,7 @@ jobs:
     # set up buildx/BuildKit runner in the context,
     # make the Docker cache exportable and thus properly cacheable
     - name: Set up Docker Buildx
-      uses: docker/setup-buildx-action@v1
+      uses: docker/setup-buildx-action@v2
 
     # Ensure clean state
     - name: Run Godwoken-Kicker clean
@@ -224,7 +224,7 @@ jobs:
         node-version: '16'
     - name: Get yarn cache directory path
       id: yarn-cache-dir-path
-      run: echo "::set-output name=dir::$(yarn cache dir)"
+      run: echo "dir=$(yarn cache dir)" >> $GITHUB_OUTPUT
     # FIXME: cache failed
     # - name: Node Cache
     #   uses: actions/cache@v2
@@ -263,7 +263,7 @@ jobs:
         docker-compose logs > /tmp/kicker.log
     - name: Archive logs
       if: always()
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v3
       with:
         name: kicker-logs
         path: |
@@ -271,7 +271,7 @@ jobs:
     
     - name: Archive the dumped transactions in kicker/workspace/debug-tx-dump
       if: always()
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v3
       with:
         name: debug-tx-dump
         path: |
