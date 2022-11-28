@@ -23,7 +23,7 @@ jobs:
         node-version: '16'
     - name: Get npm cache directory
       id: npm-cache-dir
-      run: echo "::set-output name=dir::$(npm config get cache)"
+      run: echo "dir=$(npm config get cache)" >> $GITHUB_OUTPUT
     - uses: actions/cache@v2
       id: npm-cache # use this to check for `cache-hit` ==> if: steps.npm-cache.outputs.cache-hit != 'true'
       with:

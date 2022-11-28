@@ -14,7 +14,7 @@ jobs:
           KEY1: '${{ secrets.GW_MAINNET_V1_PK1 }}'
           KEY2: '${{ secrets.GW_MAINNET_V1_PK2 }}'
         if: ${{ env.KEY1 != '' && env.KEY2 != '' }}
-        run: echo "::set-output name=available::true"
+        run: echo "available=true" >> $GITHUB_OUTPUT
 
   contract-tests:
     runs-on: ubuntu-latest
@@ -28,7 +28,7 @@ jobs:
         node-version: '16'
     - name: Get yarn cache directory path
       id: yarn-cache-dir-path
-      run: echo "::set-output name=dir::$(yarn cache dir)"
+      run: echo "dir=$(yarn cache dir)" >> $GITHUB_OUTPUT
     - name: Node Cache
       uses: actions/cache@v2
       id: npm-and-yarn-cache # use this to check for `cache-hit` (`steps.yarn-cache.outputs.cache-hit != 'true'`)
