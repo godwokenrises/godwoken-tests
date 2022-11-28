@@ -267,7 +267,7 @@ jobs:
 
       - name: Generate gw-bot token
         id: generate_gw_bot_token
-        uses: wow-actions/use-app-token@v1
+        uses: wow-actions/use-app-token@v2
         with:
           app_id: ${{ secrets.GW_BOT_APP_ID }}
           private_key: ${{ secrets.GW_BOT_PRIVATE_KEY }}
@@ -450,7 +450,7 @@ jobs:
       # Generate new token in case the tests run over an hour
       - name: Generate gw-bot token
         id: generate_gw_bot_token
-        uses: wow-actions/use-app-token@v1
+        uses: wow-actions/use-app-token@v2
         with:
           app_id: ${{ secrets.GW_BOT_APP_ID }}
           private_key: ${{ secrets.GW_BOT_PRIVATE_KEY }}

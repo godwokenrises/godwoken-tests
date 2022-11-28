@@ -78,10 +78,10 @@ jobs:
     # set up buildx/BuildKit runner in the context,
     # make the Docker cache exportable and thus properly cacheable
     - name: Set up Docker Buildx
-      uses: docker/setup-buildx-action@v1
+      uses: docker/setup-buildx-action@v2
 
     - name: Rust Cache
-      uses: actions/cache@v2
+      uses: actions/cache@v3
       with:
         path: |
           ~/.cargo/bin/
@@ -207,7 +207,7 @@ jobs:
       run: echo "dir=$(yarn cache dir)" >> $GITHUB_OUTPUT
     # FIXME: cache failed
     # - name: Node Cache
-    #   uses: actions/cache@v2
+    #   uses: actions/cache@v3
     #   id: npm-and-yarn-cache # use this to check for `cache-hit` (`steps.yarn-cache.outputs.cache-hit != 'true'`)
     #   with:
     #     path: |
@@ -362,7 +362,7 @@ jobs:
         docker-compose logs > /tmp/kicker.log
     - name: Archive logs
       if: always()
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v3
       with:
         name: kicker-logs
         path: |
@@ -370,7 +370,7 @@ jobs:
     
     - name: Archive the dumped transactions in kicker/workspace/debug-tx-dump
       if: always()
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v3
       with:
         name: debug-tx-dump
         path: |

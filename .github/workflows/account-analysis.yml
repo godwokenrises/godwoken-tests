@@ -15,7 +15,7 @@ jobs:
         net: ['mainnet'] # 'testnet', 
     
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
       with:
         submodules: 'recursive' 
     - uses: actions/setup-node@v3
@@ -24,7 +24,7 @@ jobs:
     - name: Get npm cache directory
       id: npm-cache-dir
       run: echo "dir=$(npm config get cache)" >> $GITHUB_OUTPUT
-    - uses: actions/cache@v2
+    - uses: actions/cache@v3
       id: npm-cache # use this to check for `cache-hit` ==> if: steps.npm-cache.outputs.cache-hit != 'true'
       with:
         path: ${{ steps.npm-cache-dir.outputs.dir }}
@@ -37,7 +37,7 @@ jobs:
       run: npm install && npm run compile
 
     - name: Cache the account data 
-      uses: actions/cache@v2
+      uses: actions/cache@v3
       with:
         key: account-data-${{ hashFiles('**/package-lock.json') }}
         path: |
@@ -48,7 +48,7 @@ jobs:
 
     - name: Archive the account data in dist/account_data_${{ matrix.net }}.json
       if: always()
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v3
       with:
         name: account-data
         path: |
