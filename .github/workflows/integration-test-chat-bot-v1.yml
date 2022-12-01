@@ -276,7 +276,7 @@ jobs:
         id: post_workflow_run_comment
         uses: actions/github-script@v6
         with:
-          github-token: ${{ steps.generate_gw_bot_token.outputs.token }}
+          github-token: ${{ steps.generate_gw_bot_token.outputs.BOT_TOKEN }}
           script: |
             const components_info = JSON.parse(`${{ steps.get_components.outputs.result }}`);
             const prebuilds = components_info.prebuilds;
@@ -458,7 +458,7 @@ jobs:
       - name: Update comment about integration test result
         uses: actions/github-script@v6
         with:
-          github-token: ${{ steps.generate_gw_bot_token.outputs.token }}
+          github-token: ${{ steps.generate_gw_bot_token.outputs.BOT_TOKEN }}
           script: |
             const dispatch = JSON.parse(`${{ github.event.inputs.dispatch }}`);
 
