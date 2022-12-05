@@ -14,13 +14,13 @@ export interface NetworkConfig {
 
 export const networks : Record<Network, NetworkConfig> = {
   [Network.TestnetV1]: {
-    rpc: 'https://v1.testnet.godwoken.io/rpc/instant-finality-hack',
+    rpc: 'https://v1.testnet.godwoken.io/rpc',
     lumos: {
       config: predefined.AGGRON4
     },
   },
   [Network.AlphanetV1]: {
-    rpc: 'https://gw-alphanet-v1.godwoken.cf/instant-finality-hack',
+    rpc: 'https://gw-alphanet-v1.godwoken.cf',
     lumos: {
       config: predefined.AGGRON4
     },
