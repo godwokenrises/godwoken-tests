@@ -7,7 +7,7 @@ describe("ERC721MSHKUUPSTokenUpgrade", function () {
         return;
     }
 
-    it("Deploy and call recursive functions", async () => {
+    it("Contract upgrade test", async () => {
         const ERC721MSHKUUPSToken = await ethers.getContractFactory("ERC721MSHKUUPSToken");
 
         const m = await upgrades.deployProxy(ERC721MSHKUUPSToken, {
