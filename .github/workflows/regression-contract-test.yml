@@ -43,9 +43,12 @@ jobs:
     - name: Install dependencies
       working-directory: contracts
       run: npm install
+
     - name: Run tests
       working-directory: contracts
-      run: npm run test:gw_mainnet_v1
+      run: |
+        npm run test:gw_mainnet_v1
+        npm run test:gw_mainnet_v1_readonlly
       env:
         PRIVATE_KEY: ${{ secrets.GW_MAINNET_V1_PK1 }}
         PRIVATE_KEY2: ${{ secrets.GW_MAINNET_V1_PK2 }}
