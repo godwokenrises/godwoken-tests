@@ -42,8 +42,13 @@ module.exports = {
       chainId: 202206,
       gasPrice: 1,
     },
-    gw_mainnet_v1: { // for regression testing
+    gw_mainnet_v1: { // for regression testing on the mainnet full-node
       url: `https://v1.mainnet.godwoken.io/rpc/instant-finality-hack`,
+      accounts: [`0x${TEST_PK1}`, `0x${TEST_PK2}`],
+      chainId: 71402,
+    },
+    gw_mainnet_v1_readonly: { // for regression testing on an external mainnet readonly-node
+      url: `https://mainnet-readonly.godwoken.cf`,
       accounts: [`0x${TEST_PK1}`, `0x${TEST_PK2}`],
       chainId: 71402,
     },
