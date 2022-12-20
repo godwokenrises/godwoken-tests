@@ -11,7 +11,7 @@
 ### Node RPC with builtin indexer
 - https://mainnet.ckb.dev/rpc
 
-## CKB Testnet Aggron
+## CKB Testnet Pudge
 
 ### Node RPC with builtin indexer
 - https://testnet.ckb.dev/rpc
