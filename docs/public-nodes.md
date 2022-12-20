@@ -6,7 +6,7 @@
 - https://docs.godwoken.io/connectionInfo
 
 
-## CKB Mainnet Lina
+## CKB Mainnet Mirana
 
 ### Node RPC with builtin indexer
 - https://mainnet.ckb.dev/rpc
