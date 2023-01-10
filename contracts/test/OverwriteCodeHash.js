@@ -1,7 +1,7 @@
 const { expect } = require("chai");
 const { isGwMainnetV1 } = require('../utils/network');
-const { ethers } = require("hardhat");
-var request = require('sync-request');
+const { ethers, network } = require("hardhat");
+const request = require('sync-request');
 
 let jsonRPCID = 1;
 
@@ -17,7 +17,7 @@ async function sendRpc(method, params) {
     jsonRPCID += 1;
 
     // Send the request
-    const rpcUrl = hre.network.config.url;
+    const rpcUrl = network.config.url;
 
     const res = request('POST', rpcUrl, { json: requestObject });
     console.log(res.statusCode);
@@ -25,18 +25,18 @@ async function sendRpc(method, params) {
 }
 
 function numToByte(n) {
-    var byteArray = [0, 0, 0, 0];
+    const byteArray = [0, 0, 0, 0];
 
-    for (var index = 0; index < byteArray.length; index++) {
-        var byte = n & 0xff;
+    for (let index = 0; index < byteArray.length; index++) {
+        let byte = n & 0xff;
         byteArray[index] = byte;
         n = (n - byte) / 256;
     }
 
     return Buffer.from(byteArray).toString('hex');
-};
+}
 
-describe.only("Overwrite code hash", function () {
+describe("Overwrite code hash", function () {
     // This test only support mainnet
     if (!isGwMainnetV1()) {
         return;
@@ -71,7 +71,7 @@ describe.only("Overwrite code hash", function () {
         expect(codehash0).to.not.eq("0x0000000000000000000000000000000000000000000000000000000000000000");
 
         // overwrite
-        blockInfoContractFact = await ethers.getContractFactory("AddressContract");
+        const blockInfoContractFact = await ethers.getContractFactory("AddressContract");
         const contract1 = await blockInfoContractFact.deploy();
         await contract1.deployed();
         const codehash1 = await contract1.getCodehash();
