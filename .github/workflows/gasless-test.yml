@@ -43,3 +43,4 @@ jobs:
         yarn
         yarn run ci
         yarn run hardhat test --network gw_alphanet_v1
+        yarn run hardhat test --network gw_testnet_v1
