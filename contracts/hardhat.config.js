@@ -48,7 +48,7 @@ module.exports = {
       chainId: 71402,
     },
     gw_mainnet_v1_readonly: { // for regression testing on an external mainnet readonly-node
-      url: `https://mainnet-readonly.godwoken.cf`,
+      url: `https://mainnet-readonly.godwoken.cf/rpc`,
       accounts: [`0x${TEST_PK1}`, `0x${TEST_PK2}`],
       chainId: 71402,
     },
