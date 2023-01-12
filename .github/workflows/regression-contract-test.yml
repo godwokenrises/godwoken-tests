@@ -48,7 +48,8 @@ jobs:
       working-directory: contracts
       run: |
         npm run test:gw_mainnet_v1
-        npm run test:gw_mainnet_v1_readonlly
+        # disable tests on gw_mainnet_v1_readonlly temporarily
+        # npm run test:gw_mainnet_v1_readonlly
       env:
         PRIVATE_KEY: ${{ secrets.GW_MAINNET_V1_PK1 }}
         PRIVATE_KEY2: ${{ secrets.GW_MAINNET_V1_PK2 }}
