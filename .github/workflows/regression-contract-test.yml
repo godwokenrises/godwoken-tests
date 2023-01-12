@@ -44,12 +44,18 @@ jobs:
       working-directory: contracts
       run: npm install
 
-    - name: Run tests
+    - name: Run tests on v1.mainnet.godwoken.io
       working-directory: contracts
       run: |
         npm run test:gw_mainnet_v1
-        # disable tests on gw_mainnet_v1_readonlly temporarily
-        # npm run test:gw_mainnet_v1_readonlly
+      env:
+        PRIVATE_KEY: ${{ secrets.GW_MAINNET_V1_PK1 }}
+        PRIVATE_KEY2: ${{ secrets.GW_MAINNET_V1_PK2 }}
+    - name: Run tests on mainnet-readonly.godwoken.cf
+      working-directory: contracts
+      run: |
+        sed -i "s|v1.mainnet.godwoken.io|mainnet-readonly.godwoken.cf|g" hardhat.config.js
+        npm run test:gw_mainnet_v1
       env:
         PRIVATE_KEY: ${{ secrets.GW_MAINNET_V1_PK1 }}
         PRIVATE_KEY2: ${{ secrets.GW_MAINNET_V1_PK2 }}
