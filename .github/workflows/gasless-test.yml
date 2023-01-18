@@ -9,7 +9,7 @@ on:
   # Note: GitHub Actions does not support the non-standard syntax @yearly, @monthly, @weekly, @daily, @hourly, and @reboot.
   # You can use crontab guru (https://crontab.guru/) to help generate your cron syntax and confirm what time it will run.
   # To help you get started, there is also a list of crontab guru examples (https://crontab.guru/examples.html).
-  - cron:  '* */6 * * *'
+  - cron:  '20 */12 * * *' # every 12 hour
 
 jobs:
   gasless-test:
