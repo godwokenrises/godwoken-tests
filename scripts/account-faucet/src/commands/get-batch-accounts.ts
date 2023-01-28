@@ -1,6 +1,6 @@
 import { HexString } from '@ckb-lumos/base';
 import { Command, Option } from 'commander';
-import { Network, networks } from '../config';
+import { Network, networks, testnetNetworks } from '../config';
 import { GodwokenWeb3 } from '../godwoken/web3';
 import { privateKeyToDerivedAccounts } from '../utils/derived';
 import { privateKeyToLayer2DepositAddress, privateKeyToOmniCkbAddress, addHexPrefix } from '../utils/address';
@@ -13,7 +13,7 @@ export default function setupBatchAccountsForL1(program: Command) {
     .option('-c, --derived-count <INT>', 'amount of derived accounts to use', '30')
     .addOption(
       new Option('-n, --network <NETWORK>', 'network to use')
-        .choices(Object.values(Network))
+        .choices(testnetNetworks)
         .default(Network.AlphanetV1)
     )
     .action(batchAccountsForL2)

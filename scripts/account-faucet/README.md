@@ -34,7 +34,7 @@ You can use `-n` or `--network` option to claim faucet on different network:
 ```bash
 $ account-faucet claim-l2 --private-key <PRIVATE_KEY> --network <NETWORK>
 ```
-Right now the tool supports these networks:
+These networks are currently supported by most of the tool's commands:
 - testnet_v1
 - alphanet_v1
 
@@ -79,3 +79,8 @@ You can use `-n` or `--network` option to calculate the `L2 Deposit Address` on 
 ```bash
 $ account-faucet get-l2-address --eth-address <ETH_ADDRESS> --network <NETWORK>
 ```
+
+This command supports more networks than the other commands:
+- testnet_v1
+- alphanet_v1
+- mainnet_v1

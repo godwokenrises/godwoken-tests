@@ -1,6 +1,6 @@
 import { Address, HexString } from '@ckb-lumos/base';
 import { Command, Option } from 'commander';
-import { Network, networks } from '../config';
+import { Network, networks, testnetNetworks } from '../config';
 import { privateKeyToOmniCkbAddress, addHexPrefix } from '../utils/address';
 import { claimFaucetForCkbAddress } from '../utils/faucet';
 
@@ -12,7 +12,7 @@ export default function setupClaimForL1(program: Command) {
     .option('-c --ckb-address <ADDRESS>', 'ckb omni-lock address')
     .addOption(
       new Option('-n, --network <NETWORK>', 'network to use')
-        .choices(Object.values(Network))
+        .choices(testnetNetworks)
         .default(Network.TestnetV1)
     )
     .action(claimForL1)

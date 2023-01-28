@@ -57,23 +57,27 @@ export function privateKeyToCkbAddress(privateKey: HexString, config: NetworkCon
 
 export function privateKeyToOmniCkbAddress(privateKey: HexString, config: NetworkConfig): Address {
   const l2Address = privateKeyToEthAddress(privateKey);
+  return ethAddressToOmniCkbAddress(l2Address, config);
+}
+
+export function privateKeyToEthAddress(privateKey: HexString): HexString {
+  privateKey = addHexPrefix(privateKey);
+  return ethersUtils.computeAddress(privateKey);
+}
+
+export function ethAddressToOmniCkbAddress(ethAddress: HexString, config: NetworkConfig): Address {
   const omniLock: Script = {
-    code_hash: '0x79f90bb5e892d80dd213439eeab551120eb417678824f282b4ffb5f21bad2e1e', // TODO: replace the hard-code
+    code_hash: config.scripts.OMNI_LOCK.codeHash,
     hash_type: 'type',
     // omni flag       pubkey hash   omni lock flags
     // chain identity   eth addr      function flag()
     // 00: Nervos       👇            00: owner
     // 01: Ethereum     👇            01: administrator
     //      👇          👇            👇
-    args: `0x01${l2Address.substring(2)}00`,
+    args: `0x01${ethAddress.substring(2)}00`,
   };
 
   return encodeToAddress(omniLock, config.lumos);
-}
-
-export function privateKeyToEthAddress(privateKey: HexString): HexString {
-  privateKey = addHexPrefix(privateKey);
-  return ethersUtils.computeAddress(privateKey);
 }
 
 export function addHexPrefix(target: string): HexString {

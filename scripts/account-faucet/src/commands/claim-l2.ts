@@ -1,5 +1,5 @@
 import { Command, Option } from 'commander';
-import { Network, networks } from '../config';
+import { Network, networks, testnetNetworks } from '../config';
 import { Address, HexString } from '@ckb-lumos/base';
 import { GodwokenWeb3 } from '../godwoken/web3';
 import { claimFaucetForCkbAddress } from '../utils/faucet';
@@ -20,7 +20,7 @@ export default function setupClaimForL2(program: Command) {
     .option('-c --ckb-address <ADDRESS>', 'ckb deposit-from address', DEFAULT_CKB_DEPOSIT_ADDRESS)
     .addOption(
       new Option('-n, --network <NETWORK>', 'network to use')
-        .choices(Object.values(Network))
+        .choices(testnetNetworks)
         .default(Network.TestnetV1)
     )
     .action(claimForL2)
