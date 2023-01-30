@@ -1,6 +1,6 @@
 import { Address, HexString } from '@ckb-lumos/base';
 import { Command, Option } from 'commander';
-import { Network } from '../config';
+import { Network, testnetNetworks } from '../config';
 import { privateKeyToDerivedAccounts } from '../utils/derived';
 import { claimForL2 } from './claim-l2';
 import { addHexPrefix } from '../utils/address';
@@ -14,7 +14,7 @@ export default function setupBatchClaimForL2(program: Command) {
     .option('-c --ckb-address <ADDRESS>', 'ckb deposit-from address')
     .addOption(
       new Option('-n, --network <NETWORK>', 'network to use')
-        .choices(Object.values(Network))
+        .choices(testnetNetworks)
         .default(Network.TestnetV1)
     )
     .action(batchClaimForL2)

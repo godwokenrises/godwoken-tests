@@ -1,6 +1,6 @@
 import { HexString } from '@ckb-lumos/base';
 import { Command, Option } from 'commander';
-import { Network } from '../config';
+import { Network, testnetNetworks } from '../config';
 import { privateKeyToDerivedAccounts } from '../utils/derived';
 import { claimForL1 } from './claim-l1';
 import { addHexPrefix } from '../utils/address';
@@ -13,7 +13,7 @@ export default function setupBatchClaimForL1(program: Command) {
     .option('-c, --derived-count <INT>', 'amount of derived accounts to use', '30')
     .addOption(
       new Option('-n, --network <NETWORK>', 'network to use')
-        .choices(Object.values(Network))
+        .choices(testnetNetworks)
         .default(Network.TestnetV1)
     )
     .action(batchClaimForL1)
