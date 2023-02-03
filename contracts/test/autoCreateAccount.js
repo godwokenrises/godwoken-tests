@@ -3,7 +3,6 @@ const { assert } = require("chai")
 const { RPC } = require("@ckb-lumos/toolkit")
 const { ERC20_BYTECODE, ERC20_ABI } = require("../lib/sudtErc20Proxy")
 const { isGwMainnetV1 } = require("../utils/network")
-const { waitXl2BlocksPassed } = require("../../scripts/helper")
 
 const { ethers } = hardhat;
 
@@ -41,13 +40,15 @@ describe("AutoCreateAccount", function () {
     console.log("random user id:", randomUserId)
     assert.isUndefined(randomUserId)
   
+    console.log(`timestamp before transfer:` + Date.now());
     const transferTx = await token.transfer(randomUser.address, (2000n * 10n**18n).toString());
-    await transferTx.wait();
+    await transferTx.wait(2);
+    console.log(`timestamp after transfer:` + Date.now());
+    
     const ownerBalanceAfterTransfer = await ethers.provider.getBalance(owner.address);
     console.log("owner balance after transfer:", ownerBalanceAfterTransfer);
     const nextFromBalance = await ethers.provider.getBalance(randomUser.address)
     console.log("random user balance after transfer:", nextFromBalance)
-    await waitXl2BlocksPassed(2)
     const randomUserIdAfterTransfer = await ethAddressToAccountId(randomUser.address, rpc)
     console.log("random user id after transfer:", randomUserIdAfterTransfer)
     assert.isDefined(randomUserIdAfterTransfer)
