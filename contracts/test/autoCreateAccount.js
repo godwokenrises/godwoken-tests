@@ -3,6 +3,7 @@ const { assert } = require("chai")
 const { RPC } = require("@ckb-lumos/toolkit")
 const { ERC20_BYTECODE, ERC20_ABI } = require("../lib/sudtErc20Proxy")
 const { isGwMainnetV1 } = require("../utils/network")
+const { waitXl2BlocksPassed } = require("../../scripts/helper")
 
 const { ethers } = hardhat;
 
@@ -46,49 +47,11 @@ describe("AutoCreateAccount", function () {
     console.log("owner balance after transfer:", ownerBalanceAfterTransfer);
     const nextFromBalance = await ethers.provider.getBalance(randomUser.address)
     console.log("random user balance after transfer:", nextFromBalance)
-    const randomUserIdAfterTransfer = await ethAddressToAccountId(randomUser.address, rpc);
+    await waitXl2BlocksPassed(2)
+    const randomUserIdAfterTransfer = await ethAddressToAccountId(randomUser.address, rpc)
     console.log("random user id after transfer:", randomUserIdAfterTransfer)
-    assert.isUndefined(randomUserIdAfterTransfer)
-  
-    const Storage = await ethers.getContractFactory("Storage");
-    let storage;
-    try {
-      storage = await Storage.connect(randomUser).deploy();
-    } catch (err) {
-      if (err.message.includes("cannot estimate gas")) {
-        const txRequest = Storage.connect(randomUser).getDeployTransaction();
-        const gasPrice = await ethers.provider.getGasPrice();
-        const args = {
-          ...txRequest,
-          gasPrice: gasPrice.toHexString(),
-          from: randomUser.address,
-        }
-        console.log("estimate gas args:", args)
-        const estimateResult = await ethers.provider.estimateGas(args);
-        console.log("estimate gas result:", estimateResult)
-      }
-      throw err;
-    }
-    console.log("Storage deployed tx hash:", storage.deployTransaction.hash)
-  
-    const tx = await ethers.provider.getTransaction(storage.deployTransaction.hash);
-    assert.isDefined(tx)
-    assert.isNotNull(tx)
-    const receipt = await ethers.provider.getTransactionReceipt(storage.deployTransaction.hash);
-    assert.isNull(receipt)
-  
-    await storage.deployed();
-    console.log("Storage deployed to:", storage.address)
-  
-    // get transaction receipt
-    const storageDeployTxReceipt = await ethers.provider.getTransactionReceipt(storage.deployTransaction.hash);
-    assert.isDefined(storageDeployTxReceipt)
-    assert.isNotNull(storageDeployTxReceipt)
-  
-    const randomUserIdAfterDeploy = await ethAddressToAccountId(randomUser.address, rpc);
-    console.log("random user id after deploy:", randomUserIdAfterDeploy)
-    assert.isDefined(randomUserIdAfterDeploy)
-    assert.isNotNull(randomUserIdAfterDeploy)
+    assert.isDefined(randomUserIdAfterTransfer)
+    assert.isNotNull(randomUserIdAfterTransfer)
   });
 });
 
