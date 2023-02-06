@@ -33,8 +33,10 @@ on:
 jobs:
   # Run integration-tests on devnet_v1 deployed by Godowoken-Kicker
   test-on-devnet-v1:
-    env:
-      FINALITY_BLOCKS_NUM: 3
+    # env:
+    #   # TODO: if we need more debug logs, we could run godwoken with RUST_LOG=info,ckb_script::verify=debug
+    #   DEBUG_MODE: false
+
     runs-on: ubuntu-latest
     steps:
     - name: Update GITHUB_ENV if inputs.extra_github_env set
@@ -56,15 +58,6 @@ jobs:
         ref: ${{ env.GODWOKEN_KICKER_REF || 'develop' }}
         path: kicker
         submodules: 'recursive'
-
-    - name: Modify kicker image if GODWOKEN_PREBUILD_IMAGE_NAME is set
-      working-directory: kicker/docker/
-      run: |
-        echo "GODWOKEN_PREBUILD_IMAGE_NAME=$GODWOKEN_PREBUILD_IMAGE_NAME"
-        if [[ -n "$GODWOKEN_PREBUILD_IMAGE_NAME" ]]; then
-          sed -i "s|image:.*godwoken-prebuilds.*|image: $GODWOKEN_PREBUILD_IMAGE_NAME |g" docker-compose.yml
-          cat docker-compose.yml
-        fi
 
     - name: Rust Cache
       uses: actions/cache@v3
@@ -89,21 +82,14 @@ jobs:
         && tar xf capsule_${CAPSULE_VERSION}_x86_64-linux.tar.gz \
         && mv capsule_${CAPSULE_VERSION}_x86_64-linux/capsule ~/.cargo/bin/)
 
-    - name: Tune rollupConfig.finality_blocks to ${{ env.FINALITY_BLOCKS_NUM }}
-      working-directory: kicker
-      run: |
-        echo "tune rollupConfig.finality_blocks to ${{ env.FINALITY_BLOCKS_NUM }}"
-        sed -i \
-          -e 's|\\\"finality_blocks\\\": 100|\\\"finality_blocks\\\": ${{ env.FINALITY_BLOCKS_NUM }}|' \
-          docker/layer2/entrypoint.sh
-    # - name: Add debug logs for ckb_script::verify module
-    #   if: ${{ false }}
-    #   working-directory: kicker
-    #   run: |
-    #     echo "add debug logs for ckb_script::verify module"
-    #     sed -i \
-    #       -e 's|RUST_LOG=info|RUST_LOG=info,ckb_script::verify=debug|' \
-    #       docker/layer2/entrypoint.sh
+    - name: Modify kicker image if GODWOKEN_PREBUILD_IMAGE_NAME is set
+      if: ${{ env.GODWOKEN_PREBUILD_IMAGE_NAME }}
+      uses: mikefarah/yq@master
+      with:
+        cmd: yq -i '.services.godwoken.image = "${{ env.GODWOKEN_PREBUILD_IMAGE_NAME }}"' kicker/docker/docker-compose.yml
+    - name: Cat kicker/docker/docker-compose.yml
+      run: cat kicker/docker/docker-compose.yml
+
 
     # set up buildx/BuildKit runner in the context,
     # make the Docker cache exportable and thus properly cacheable
