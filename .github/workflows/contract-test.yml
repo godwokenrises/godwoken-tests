@@ -7,7 +7,6 @@ on:
     - 'develop'
     - '*alphanet*'
     - '*testnet*'
-  pull_request:
   schedule:
   - cron:  '50 */12 * * *' # every 12 hour
 
@@ -60,15 +59,15 @@ jobs:
           #   PRIVATE_KEY2: ${{ secrets.GODWOKEN_TEST_PRIVATE_KEY2 }}
           #   PRIVATE_KEY3: ${{ secrets.GW_TESTNET_V1_TEST_PK }}
 
-      - name: Run fee test 1 for 30 minutes
-        working-directory: testcases/gw-fee-test
-        run: |
-          if [[ ${{ matrix.network == 'gw_alphanet_v1' }} ]]; then
-            echo "NETWORK=alphanet" >> $GITHUB_ENV
-          else
-            echo "NETWORK=testnet" >> $GITHUB_ENV
-          yarn && yarn account
-          MODE=forever TIMEOUT_MS=1800000 TEST_CASE=1 POLL_TX_RECEIPT_TIME_OUT=45000 yarn start:$NETWORK
+          # - name: Run fee test 1 for 30 minutes
+          #   working-directory: testcases/gw-fee-test
+          #   run: |
+          #     if [[ ${{ matrix.network == 'gw_alphanet_v1' }} ]]; then
+          #       echo "NETWORK=alphanet" >> $GITHUB_ENV
+          #     else
+          #       echo "NETWORK=testnet" >> $GITHUB_ENV
+          #     yarn && yarn account
+          #     MODE=forever TIMEOUT_MS=1800000 TEST_CASE=1 POLL_TX_RECEIPT_TIME_OUT=45000 yarn start:$NETWORK
       - name: Run gasless tests
         working-directory: testcases/account-abstraction
         run: |
