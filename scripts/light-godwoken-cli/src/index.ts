@@ -9,6 +9,8 @@ import getBalance from './commands/get-balance';
 import getTokenBalance from './commands/get-token-balance';
 import findTypeScript from './commands/find-script-tx';
 import deploySudtErc20Proxy from './commands/deploy-sudt-erc20-proxy';
+// generating statistics
+import { setupGetLegacyWithdrawalsStats } from './commands/get-legacy-withdrawals-stats';
 // for testing only
 import testCatch from './commands/batch-prepare-sudt';
 import batchPrepareSudt from './commands/test-catch';
@@ -21,6 +23,8 @@ const commands = [
   getTokenBalance,
   findTypeScript,
   deploySudtErc20Proxy,
+
+  setupGetLegacyWithdrawalsStats,
 
   testCatch,
   batchPrepareSudt,
