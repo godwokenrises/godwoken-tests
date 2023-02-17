@@ -13,7 +13,6 @@
     "lgc": "bin/cli"
   },
   "devDependencies": {
-    "@ckb-lumos/config-manager": "^0.18.0",
     "@ethersproject/abstract-signer": "^5.6.2",
     "esbuild": "^0.15.3",
     "keccak256": "^1.0.6",
@@ -21,15 +20,15 @@
     "typescript": "^4.5.4"
   },
   "dependencies": {
-    "@ckb-lumos/base": "^0.18.0",
-    "@ckb-lumos/lumos": "^0.18.0",
-    "@ckb-lumos/codec": "^0.18.0",
+    "@ckb-lumos/config-manager": "^0.17.0",
+    "@ckb-lumos/base": "^0.17.0",
+    "@ckb-lumos/lumos": "^0.17.0",
+    "@ckb-lumos/codec": "^0.17.0",
     "@ckitjs/ckit": "^0.2.0",
     "axios": "^0.27.2",
     "ckb-js-toolkit": "^0.10.2",
     "commander": "^9.3.0",
     "dotenv": "^16.0.1",
-    "ethers": "^5.6.9",
-    "ts-node-dev": "^2.0.0"
+    "ethers": "^5.6.9"
   }
 }
