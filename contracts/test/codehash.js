@@ -103,35 +103,7 @@ describe("CodeHash test cases", function () {
     result = await contract1.getOtherAddressBalance(unregEthAddr);
     expect(result).to.equal(0n)
   });
-
-  // One must create an account on a Godwoken chain in order to use Polyjuice on
-  // that Godwoken chain.
-  // see: https://github.com/nervosnetwork/godwoken/blob/compatibility-breaking-changes/docs/known_caveats_of_polyjuice.md#account-creation
-  // 
-  // Godwoken v1.1 support ineracting with an eth_address that hasn't been
-  // registered on Godwoken.
-  //
-  // see: Godwoken v1.1 Milestone
-  it.skip("Interact with an eth_address that hasn't been registered", async () => {
-    let result = await contract1.getOtherAddress(unregEthAddr);
-    // unregEthAddr
-    expect(result[0]).to.equal(unregEthAddr);
-    // unregEthAddr.balance
-    expect(result[1]).to.equal(0n)
-
-    /**
-     * Not supported:
-
-    // unregEthAddr.code
-    expect(result[2]).to.equal("0x")
-    // unregEthAddr.code.length
-    expect(result[3]).to.equal(0n)
-    // unregEthAddr.codehash
-    expect(result[4]).to.equal(
-      "0x0000000000000000000000000000000000000000000000000000000000000000")
-     */
-  });
-})
+});
 
 /**
  * How to run this test?
