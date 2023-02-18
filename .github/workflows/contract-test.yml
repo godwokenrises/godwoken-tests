@@ -8,7 +8,8 @@ on:
     - '*alphanet*'
     - '*testnet*'
   schedule:
-  - cron:  '50 */12 * * *' # every 12 hour
+  - cron:  '50 0 * * *' # every 24 hour
+  workflow_dispatch:
 
 jobs:
   contract-tests:
@@ -21,19 +22,22 @@ jobs:
     outputs:
       available: ${{ steps.check.outputs.available }}
     steps:
-      - id: check
+      - name: Check Environments
+        id: check
         env:
           KEY1: '${{ secrets.GODWOKEN_TEST_PRIVATE_KEY }}'
           KEY2: '${{ secrets.GODWOKEN_TEST_PRIVATE_KEY2 }}'
           KEY3: '${{ secrets.GW_TESTNET_V1_TEST_PK }}'
         if: ${{ env.KEY1 != '' && env.KEY2 != '' && env.KEY3 != '' }}
         run: echo "available=true" >> $GITHUB_OUTPUT
+
       - uses: actions/checkout@v3
         with:
           submodules: 'recursive'
+
       - uses: actions/setup-node@v3
         with:
-          node-version: '16'
+          node-version: '18'
       - name: Get yarn cache directory path
         id: yarn-cache-dir-path
         run: echo "dir=$(yarn cache dir)" >> $GITHUB_OUTPUT
@@ -44,31 +48,17 @@ jobs:
           path: |
             ${{ steps.yarn-cache-dir-path.outputs.dir }}
             ~/.npm
-          key: ${{ runner.os }}-node_modules-${{ hashFiles('/home/runner/work/**/package-lock.json', '/home/runner/work/**/yarn.lock') }}
+          key: ${{ runner.os }}-node_modules-${{ github.sha }}
           restore-keys: |
             ${{ runner.os }}-node_modules-
-        
-      - name: Install dependencies
-        working-directory: contracts
-        run: npm install
-      - name: Run internal contract tests
-        working-directory: contracts
-        run: npm run test:${{ matrix.network }}
-          # env:
-          #   PRIVATE_KEY: ${{ secrets.GODWOKEN_TEST_PRIVATE_KEY }}
-          #   PRIVATE_KEY2: ${{ secrets.GODWOKEN_TEST_PRIVATE_KEY2 }}
-          #   PRIVATE_KEY3: ${{ secrets.GW_TESTNET_V1_TEST_PK }}
 
-          # - name: Run fee test 1 for 30 minutes
-          #   working-directory: testcases/gw-fee-test
-          #   run: |
-          #     if [[ ${{ matrix.network == 'gw_alphanet_v1' }} ]]; then
-          #       echo "NETWORK=alphanet" >> $GITHUB_ENV
-          #     else
-          #       echo "NETWORK=testnet" >> $GITHUB_ENV
-          #     yarn && yarn account
-          #     MODE=forever TIMEOUT_MS=1800000 TEST_CASE=1 POLL_TX_RECEIPT_TIME_OUT=45000 yarn start:$NETWORK
-      - name: Run gasless tests
+      - name: Test | Run internal contract tests
+        working-directory: contracts
+        run: |
+          npm install
+          npm run test:${{ matrix.network }}
+
+      - name: Test | Run gasless tests
         working-directory: testcases/account-abstraction
         run: |
           yarn
