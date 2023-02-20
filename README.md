@@ -4,7 +4,7 @@
 
 You can follow the command-lines below to install Godwoken-Tests in your local environment, and run contract tests on testnet_v1:
 
-1. `git clone https://github.com/nervosnetwork/godwoken-tests` - Clone Godwoken-Tests
+1. `git clone https://github.com/godwokenrises/godwoken-tests` - Clone Godwoken-Tests
 2. `cd godwoken-tests/contracts` - Go to contracts folder
 3. `npm install` - Install dependencies
 4. `npm run test:gw_testnet_v1` - Run tests on testnet_v1
@@ -33,14 +33,14 @@ After the devnet started, you should deposit some testing capacity of testing ac
 
 After deposited, you can follow command-lines below to install Godwoken-Tests in your local environment, and run contract tests on devnet_v1:
 
-1. `git clone https://github.com/nervosnetwork/godwoken-tests` - Clone Godwoken-Tests
+1. `git clone https://github.com/godwokenrises/godwoken-tests` - Clone Godwoken-Tests
 2. `cd godwoken-tests/contracts` - Go to contracts folder
 3. `npm install` - Install dependencies
 4. `npm run test` - Run tests on devnet_v1
 
 ## Use your preferred accounts in the tests
 
-Testing accounts are defined in [contracts/hardhat.config.js](https://github.com/nervosnetwork/godwoken-tests/blob/develop/contracts/hardhat.config.js).
+Testing accounts are defined in [contracts/hardhat.config.js](https://github.com/godwokenrises/godwoken-tests/blob/develop/contracts/hardhat.config.js).
 
 If you prefer using your own accounts for testing, you can replace them in the source code, or run test commands with environment variables, for example:
 

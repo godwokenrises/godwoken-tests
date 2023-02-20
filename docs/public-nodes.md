@@ -2,7 +2,7 @@
 
 ## Godwoken Public Networks
 
-- https://github.com/nervosnetwork/godwoken-info
+- https://github.com/godwokenrises/godwoken-info
 - https://docs.godwoken.io/connectionInfo
 
 
