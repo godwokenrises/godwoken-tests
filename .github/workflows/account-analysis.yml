@@ -5,22 +5,26 @@ on:
     branches:
     - develop
     - account-analysis
+  schedule:
+  - cron: '0 11 * * *' # everyday at 19:00 AM (UTC+8)
 
 jobs:
   account-analysis:
+    if: github.repository == 'godwokenrises/godwoken-tests'
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       matrix:
-        net: ['mainnet'] # 'testnet', 
+        net: ['mainnet_v0']
     
     steps:
     - uses: actions/checkout@v3
       with:
         submodules: 'recursive' 
+
     - uses: actions/setup-node@v3
       with:
-        node-version: '16'
+        node-version: '18'
     - name: Get npm cache directory
       id: npm-cache-dir
       run: echo "dir=$(npm config get cache)" >> $GITHUB_OUTPUT
@@ -32,24 +36,35 @@ jobs:
         restore-keys: |
           ${{ runner.os }}-node-
 
-    - name: Compile
-      working-directory: scripts/account-analysis
-      run: npm install && npm run compile
+    - name: Setup light-godwoken
+      working-directory: light-godwoken
+      run: yarn && yarn lerna run build --scope=light-godwoken
 
-    - name: Cache the account data 
-      uses: actions/cache@v3
-      with:
-        key: account-data-${{ hashFiles('**/package-lock.json') }}
-        path: |
-          scripts/account-analysis/dist/account_data_${{ matrix.net }}.json
-    - name: Account Analysis
-      working-directory: scripts/account-analysis
-      run: npm run analyze:${{ matrix.net }}
+    - name: Setup light-godwoken-cli
+      working-directory: scripts/light-godwoken-cli
+      run: npm i && npm run build
 
-    - name: Archive the account data in dist/account_data_${{ matrix.net }}.json
-      if: always()
-      uses: actions/upload-artifact@v3
-      with:
-        name: account-data
-        path: |
-          scripts/account-analysis/dist/account_data_${{ matrix.net }}.json
+    - name: Get legacy withdrawal stats of Godwoken mainnet_v0
+      working-directory: scripts/light-godwoken-cli
+      run: lgc get-legacy-withdrawals-stats
+
+    # TODO: remove outdate code
+    # - name: Compile
+    #   working-directory: scripts/account-analysis
+    #   run: npm install && npm run compile
+    # - name: Cache the account data 
+    #   uses: actions/cache@v3
+    #   with:
+    #     key: account-data-${{ hashFiles('**/package-lock.json') }}
+    #     path: |
+    #       scripts/account-analysis/dist/account_data_${{ matrix.net }}.json
+    # - name: Account Analysis
+    #   working-directory: scripts/account-analysis
+    #   run: npm run analyze:${{ matrix.net }}
+    # - name: Archive the account data in dist/account_data_${{ matrix.net }}.json
+    #   if: always()
+    #   uses: actions/upload-artifact@v3
+    #   with:
+    #     name: account-data
+    #     path: |
+    #       scripts/account-analysis/dist/account_data_${{ matrix.net }}.json
