@@ -163,7 +163,7 @@ jobs:
         path: |
           ${{ steps.npm-cache-dir.outputs.dir }}
           ${{ steps.yarn-cache-dir.outputs.dir }}
-        key: ${{ runner.os }}-node-${{ hashFiles('/home/runner/work/**/package.json') }}
+        key: ${{ runner.os }}-node-${{ hashFiles('contracts/package-lock.json', 'light-godwoken/yarn.lock', 'scripts/light-godwoken-cli/package-lock.json') }}
         restore-keys: |
           ${{ runner.os }}-node-
 
