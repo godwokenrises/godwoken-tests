@@ -124,8 +124,6 @@ jobs:
         (echo " == kicker start attempt: 2 == " && ./kicker stop && ./kicker start) || \
         (echo " == kicker start failed == " && exit 1)
         ./kicker logs --tail 6
-      # FIXME: Sometimes, Godwoken service is not running
-      # https://github.com/Flouse/godwoken/runs/3639382192?check_suite_focus=true#step:8:667
 
     # - name: Enable offchain validator of Godwoken
     #   working-directory: kicker
@@ -143,6 +141,31 @@ jobs:
     #     __EOF__
     #     docker restart docker_godwoken_1
     #     docker-compose --file docker/docker-compose.yml logs --tail 6
+
+    - uses: actions/setup-node@v3
+      with:
+        node-version: '18'
+    - name: Get npm cache directory
+      id: npm-cache-dir
+      shell: bash
+      run: |
+        npm --version
+        echo "dir=$(npm config get cache)" >> ${GITHUB_OUTPUT}
+    - name: Get yarn cache directory
+      id: yarn-cache-dir
+      run: |
+        yarn --version
+        echo "dir=$(yarn cache dir)" >> $GITHUB_OUTPUT
+    - name: Node Cache
+      uses: actions/cache@v3
+      id: npm-and-yarn-cache
+      with:
+        path: |
+          ${{ steps.npm-cache-dir.outputs.dir }}
+          ${{ steps.yarn-cache-dir.outputs.dir }}
+        key: ${{ runner.os }}-node-${{ hashFiles('/home/runner/work/**/package.json') }}
+        restore-keys: |
+          ${{ runner.os }}-node-
 
     - name: Setup Light-Godwoken-CLI
       working-directory: scripts/light-godwoken-cli
@@ -208,24 +231,6 @@ jobs:
         done
         echo "withdraw from v0 to v1 fail"
         exit 1
-
-    - uses: actions/setup-node@v3
-      with:
-        node-version: '16'
-    - name: Get yarn cache directory path
-      id: yarn-cache-dir-path
-      run: echo "dir=$(yarn cache dir)" >> $GITHUB_OUTPUT
-    # FIXME: cache failed
-    # - name: Node Cache
-    #   uses: actions/cache@v2
-    #   id: npm-and-yarn-cache # use this to check for `cache-hit` (`steps.yarn-cache.outputs.cache-hit != 'true'`)
-    #   with:
-    #     path: |
-    #       ${{ steps.yarn-cache-dir-path.outputs.dir }}
-    #       ~/.npm
-    #     key: ${{ runner.os }}-node_modules-${{ hashFiles('/home/runner/work/**/package-lock.json', '/home/runner/work/**/yarn.lock') }}
-    #     restore-keys: |
-    #       ${{ runner.os }}-node_modules-
 
     - name: Wait 1 layer2 blocks passed
       uses: actions/github-script@v6
