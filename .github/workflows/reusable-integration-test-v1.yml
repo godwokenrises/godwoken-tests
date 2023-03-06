@@ -1,6 +1,7 @@
 name: Integration Test v1
 
 on:
+  push:
   workflow_call:
     inputs:
       # If `extra_github_env` is set, it will be put into GITHUB_ENV at the beginning of each job
@@ -24,8 +25,11 @@ on:
       #
       #     GODWOKEN_PREBUILD_IMAGE_NAME=ghcr.io/keroro520/godwoken-prebuilds:v1-godwoken-d3eb41a-202205310512 # (deprecated)
       #     GODWOKEN_IMAGE=ghcr.io/godwokenrises/godwoken:develop
-      #   ```
       #
+      #     # DEBUG_MODE: if we need more debug logs, we could enable log levels per Godwoken module
+      #     # See https://rust-lang-nursery.github.io/rust-cookbook/development_tools/debugging/config_log.html#enable-log-levels-per-module
+      #     RUST_LOG=info,ckb_script::verify=debug ...
+      #   ```
       extra_github_env:
         type: string
         description: 'Append write into GITHUB_ENV at the begining of every job'
@@ -34,10 +38,6 @@ on:
 jobs:
   # Run integration-tests on devnet_v1 deployed by Godowoken-Kicker
   test-on-devnet-v1:
-    # env:
-    #   # TODO: if we need more debug logs, we could run godwoken with RUST_LOG=info,ckb_script::verify=debug
-    #   DEBUG_MODE: false
-
     runs-on: ubuntu-latest
     steps:
     - name: Update GITHUB_ENV if inputs.extra_github_env set
