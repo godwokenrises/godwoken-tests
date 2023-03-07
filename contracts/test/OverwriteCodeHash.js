@@ -37,11 +37,6 @@ function numToByte(n) {
 }
 
 describe("Overwrite code hash", function () {
-    // This test only support mainnet
-    if (!isGwMainnetV1()) {
-        return;
-    }
-
     it("Overwrite", async () => {
         // This is a polyjuice bug
         // Godwoken stores all data into a single sparse merkle tree. Typically, the user
