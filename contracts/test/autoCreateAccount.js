@@ -2,12 +2,12 @@ const hardhat = require("hardhat")
 const { assert } = require("chai")
 const { RPC } = require("@ckb-lumos/toolkit")
 const { ERC20_BYTECODE, ERC20_ABI } = require("../lib/sudtErc20Proxy")
-const { isGwMainnetV1 } = require("../utils/network")
+const { isGwMainnetV1, isAxonDevnet } = require("../utils/network")
 
 const { ethers } = hardhat;
 
 describe("AutoCreateAccount", function () {
-  if (isGwMainnetV1()) {
+  if (isGwMainnetV1(), isAxonDevnet()) {
     return;
   }
 

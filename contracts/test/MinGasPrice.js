@@ -5,7 +5,7 @@ const {
   u32ToLittleEnd,
   getAccountIdByContractAddress,
 } = require("../lib/helper");
-const { isGwMainnetV1 } = require('../utils/network');
+const { isGwMainnetV1, isAxonDevnet } = require('../utils/network');
 const { expectThrowsAsync } = require('../utils/throw');
 
 const expectedValue = 10;
@@ -34,6 +34,14 @@ describe("MIN GAS PRICE Test", function () {
   });
 
   it("Eth_sendRawTransaction with lower gasPrice", async () => {
+
+    /**
+        Axon throws a different error message:
+          "Custom error: The transaction gas price is zero"
+    */
+    if (isAxonDevnet()) {
+      return;
+    }
     const p = new Array(1).fill(1).map(async () => {
       const errMsg = [
         "invalid argument",
@@ -51,6 +59,9 @@ describe("MIN GAS PRICE Test", function () {
   });
 
   it("gw_submit_l2transaction with 2000000000000000 gasPrice", async () => {
+    if (isAxonDevnet()) {
+      return true;
+    }
     const noErrMsgKeyWords = ["minimal gas price"];
     const toId = await getAccountIdByContractAddress(
       rpc,
@@ -67,6 +78,9 @@ describe("MIN GAS PRICE Test", function () {
   });
 
   it("gw_submit_l2transaction with 0 gasPrice", async () => {
+    if (isAxonDevnet()) {
+      return true;
+    }
     const errMsg = [
       "invalid argument",
       "minimal gas price",
