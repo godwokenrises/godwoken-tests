@@ -42,9 +42,16 @@ jobs:
         key: ${{ runner.os }}-cargo-${{ hashFiles('Cargo.lock') }}
     - name: Install Rust components
       run: rustup component add rustfmt && rustup component add clippy
+    - name: Copy axon config.toml
+      working-directory: godwoken-tests
+      run: |
+        echo "Copy axon config.toml"
+        cp .github/workflows/axon/config.toml ~/
     - name: Deploy Local Network of Axon
       working-directory: axon
       run: |
+        echo "Overwrite config.toml"
+        cp ~/config.toml devtools/chain/config.toml
         echo "Build axon"
         cargo build
         rm -rf ./devtools/chain/data
