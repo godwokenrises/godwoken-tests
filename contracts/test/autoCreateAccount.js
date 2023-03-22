@@ -7,7 +7,7 @@ const { isGwMainnetV1, isAxonDevnet } = require("../utils/network")
 const { ethers } = hardhat;
 
 describe("AutoCreateAccount", function () {
-  if (isGwMainnetV1(), isAxonDevnet()) {
+  if (isGwMainnetV1() || isAxonDevnet()) {
     return;
   }
 

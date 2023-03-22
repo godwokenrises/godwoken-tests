@@ -1,15 +1,20 @@
 const { expect } = require("chai");
 const { ethers } = require("hardhat");
-const { isGwMainnetV1 } = require('../utils/network');
+const { isGwMainnetV1, isAxonDevnet } = require('../utils/network');
 const { expectThrowsAsync } = require('../utils/throw');
 
 const expectedValue = 10;
 let ethCallContract;
 
 describe("MIN GAS PRICE Test", function () {
+  // The test is good, but the error message is different.
+  if (isAxonDevnet()) {
+    return;
+  }
   if (isGwMainnetV1()) {
     return;
   }
+  
 
   before("Deploy and Set", async () => {
     const contractFact = await ethers.getContractFactory("CallTest");

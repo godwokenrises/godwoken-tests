@@ -19,7 +19,7 @@
 
 const {expect} = require("chai");
 const {network, ethers} = require("hardhat");
-const {isGwMainnetV1, isHardhatNetwork} = require('../utils/network');
+const {isGwMainnetV1, isHardhatNetwork, isAxonDevnet} = require('../utils/network');
 const {fetchJson} = require("ethers/lib/utils");
 
 describe("Revertal", function () {
@@ -44,7 +44,11 @@ describe("Revertal", function () {
         let callData = revertal.interface.encodeFunctionData("revert_null");
         let {error: {message, data}} = await sendEthCall(revertal.address, callData);
         expect(message).contains("execution reverted");
-        expect(data).undefined;
+        if (isAxonDevnet()) {
+          expect(data).to.equal("0x");
+        } else {
+          expect(data).undefined;
+        }
     })
 
     it("call Revertal.revert_string()", async () => {
