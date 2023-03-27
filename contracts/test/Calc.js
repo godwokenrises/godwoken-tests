@@ -1,7 +1,12 @@
 const { expect } = require("chai");
 const { ethers } = require("hardhat");
+const { isGwMainnetV1 } = require("../utils/network");
 
 describe("Calc contract", function () {
+    if (isGwMainnetV1()) {
+        return;
+    }
+
     it("Deployment computing contract", async function () {
         const Storage = await ethers.getContractFactory("Calc");
         const contract = await Storage.deploy();

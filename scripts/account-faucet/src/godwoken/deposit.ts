@@ -1,6 +1,6 @@
 import { Hash, HexNumber, HexString, Script } from '@ckb-lumos/base';
 import { Reader } from '@ckb-lumos/toolkit';
-import { ETH_REGISTRY_ID } from '../faucet/address';
+import { ETH_REGISTRY_ID } from '../utils/address';
 import * as normalizers from './normalizers';
 import * as molecule from './molecule';
 
@@ -45,7 +45,7 @@ export function generateDepositLock(
   const depositLockArgs: DepositLockArgs = {
     owner_lock_hash: ownerLockHash,
     layer2_lock: layer2Lock,
-    cancel_timeout: "0xc000000000093a81",
+    cancel_timeout: "0xc000000000093a80",
     registry_id: '0x' + ETH_REGISTRY_ID,
   };
 

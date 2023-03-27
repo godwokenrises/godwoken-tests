@@ -2,10 +2,11 @@ name: Account Faucet
 
 on:
   schedule:
-  - cron: '0 0 * * *' # every 24 hours
+  - cron: '0 22 * * *' # everyday at 06:00 AM (UTC+8)
 
 jobs:
   check-secrets:
+    if: github.repository == 'godwokenrises/godwoken-tests'
     runs-on: ubuntu-latest
     outputs:
       available: ${{ steps.check.outputs.available }}
@@ -16,7 +17,7 @@ jobs:
           KEY2: '${{ secrets.GODWOKEN_TEST_PRIVATE_KEY2 }}'
           KEY3: '${{ secrets.GW_TESTNET_V1_TEST_PK }}'
         if: ${{ env.KEY1 != '' && env.KEY2 != '' && env.KEY3 != '' }}
-        run: echo "::set-output name=available::true"
+        run: echo "available=true" >> $GITHUB_OUTPUT
 
   account-faucet:
     runs-on: ubuntu-latest
@@ -31,9 +32,9 @@ jobs:
 
       - name: Get yarn cache directory path
         id: yarn-cache-dir-path
-        run: echo "::set-output name=dir::$(yarn cache dir)"
+        run: echo "dir=$(yarn cache dir)" >> $GITHUB_OUTPUT
       - name: Node Cache
-        uses: actions/cache@v2
+        uses: actions/cache@v3
         id: npm-and-yarn-cache # use this to check for `cache-hit` (`steps.yarn-cache.outputs.cache-hit != 'true'`)
         with:
           path: |
@@ -43,22 +44,44 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-node_modules-
 
-      - name: Install dependencies
+      - name: Setup environment
         working-directory: scripts/account-faucet
-        run: npm install
-      - name: Claim faucet for open accounts
+        run: npm install && npm run build
+
+      - name: Claim for open test accounts
         working-directory: scripts/account-faucet
+        env:
+          KEY1: 1390c30e5d5867ee7246619173b5922d3b04009cab9e9d91e14506231281a997
+          KEY2: 2dc6374a2238e414e51874f514b0fa871f8ce0eb1e7ecaa0aed229312ffc91b0
+          KEY3: dd50cac37ec6dd12539a968c1a2cbedda75bd8724f7bcad486548eaabb87fc8b
         run: |
-          npm run faucet -- claim -p 1390c30e5d5867ee7246619173b5922d3b04009cab9e9d91e14506231281a997
-          npm run faucet -- claim -p 2dc6374a2238e414e51874f514b0fa871f8ce0eb1e7ecaa0aed229312ffc91b0
-          npm run faucet -- claim -p dd50cac37ec6dd12539a968c1a2cbedda75bd8724f7bcad486548eaabb87fc8b
-      - name: Claim faucet for testnet/alphanet accounts
+          account-faucet claim-l2 -p $KEY1
+          account-faucet claim-l2 -p $KEY2
+          account-faucet claim-l2 -p $KEY3
+          account-faucet claim-l2 -p $KEY1 -n alphanet_v1
+          account-faucet claim-l2 -p $KEY2 -n alphanet_v1
+          account-faucet claim-l2 -p $KEY3 -n alphanet_v1
+
+      - name: Claim for private accounts
         working-directory: scripts/account-faucet
         env:
           KEY1: ${{ secrets.GODWOKEN_TEST_PRIVATE_KEY }}
           KEY2: ${{ secrets.GODWOKEN_TEST_PRIVATE_KEY2 }}
           KEY3: ${{ secrets.GW_TESTNET_V1_TEST_PK }}
         run: |
-          npm run faucet -- claim -p $KEY1
-          npm run faucet -- claim -p $KEY2
-          npm run faucet -- claim -p $KEY3
+          account-faucet claim-l2 -p $KEY1
+          account-faucet claim-l2 -p $KEY2
+          account-faucet claim-l2 -p $KEY3
+          account-faucet claim-l2 -p $KEY1 -n alphanet_v1
+          account-faucet claim-l2 -p $KEY2 -n alphanet_v1
+          account-faucet claim-l2 -p $KEY3 -n alphanet_v1
+
+      - name: Claim for batch-deposit/batch-withdraw derived accounts
+        working-directory: scripts/account-faucet
+        env:
+          KEY1: ${{ secrets.GODWOKEN_TEST_PRIVATE_KEY }}
+        run: |
+          account-faucet batch-claim-l1 \
+            --private-key $KEY1 \
+            --derived-count 10 \
+            --network alphanet_v1

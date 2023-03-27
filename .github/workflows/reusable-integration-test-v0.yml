@@ -5,7 +5,7 @@ on:
     inputs:
       kicker_ref:
         type: string
-        description: 'The reference of https://github.com/RetricSu/godwoken-kicker.git'
+        description: 'The reference of https://github.com/godwokenrises/godwoken-kicker.git'
         required: false
         default: 'rc-0.10.0'
       gw_prebuild_image_name:
@@ -17,19 +17,19 @@ on:
         required: false
         type: string
       godwoken_ref:
-        description: 'The reference of https://github.com/nervosnetwork/godwoken.git'
+        description: 'The reference of https://github.com/godwokenrises/godwoken.git'
         required: false
         type: string
       gw_scripts_ref:
-        description: 'The reference of https://github.com/nervosnetwork/godwoken-scripts.git'
+        description: 'The reference of https://github.com/godwokenrises/godwoken-scripts.git'
         required: false
         type: string
       polyjuice_ref:
-        description: 'The reference of https://github.com/nervosnetwork/godwoken-polyjuice.git'
+        description: 'The reference of https://github.com/godwokenrises/godwoken-polyjuice.git'
         required: false
         type: string
       web3_ref:
-        description: 'The reference of https://github.com/nervosnetwork/godwoken-web3.git'
+        description: 'The reference of https://github.com/godwokenrises/godwoken-web3.git'
         required: false
         type: string
       log-level:
@@ -42,7 +42,7 @@ on:
     - v0
   pull_request:
     branches:
-    - develop
+    - v0
 
 
 jobs:
@@ -59,13 +59,13 @@ jobs:
     - name: Checkout godwoken-tests
       uses: actions/checkout@v3
       with:
-        repository: nervosnetwork/godwoken-tests
+        repository: godwokenrises/godwoken-tests
         ref: v0
         submodules: 'recursive'
     - name: Checkout Kicker # multiple repos (nested)
       uses: actions/checkout@v3
       with:
-        repository: RetricSu/godwoken-kicker
+        repository: godwokenrises/godwoken-kicker
         ref: ${{ inputs.kicker_ref || 'rc-0.10.0' }}
         path: kicker
         submodules: 'recursive'
@@ -78,10 +78,10 @@ jobs:
     # set up buildx/BuildKit runner in the context,
     # make the Docker cache exportable and thus properly cacheable
     - name: Set up Docker Buildx
-      uses: docker/setup-buildx-action@v1
+      uses: docker/setup-buildx-action@v2
 
     - name: Rust Cache
-      uses: actions/cache@v2
+      uses: actions/cache@v3
       with:
         path: |
           ~/.cargo/bin/
@@ -199,15 +199,15 @@ jobs:
         fi
         sudo chown -R `whoami` cache/build
 
-    - uses: actions/setup-node@v2
+    - uses: actions/setup-node@v3
       with:
         node-version: '16'
     - name: Get yarn cache directory path
       id: yarn-cache-dir-path
-      run: echo "::set-output name=dir::$(yarn cache dir)"
+      run: echo "dir=$(yarn cache dir)" >> $GITHUB_OUTPUT
     # FIXME: cache failed
     # - name: Node Cache
-    #   uses: actions/cache@v2
+    #   uses: actions/cache@v3
     #   id: npm-and-yarn-cache # use this to check for `cache-hit` (`steps.yarn-cache.outputs.cache-hit != 'true'`)
     #   with:
     #     path: |
@@ -243,7 +243,7 @@ jobs:
     
     - name: Get current layer2 block number
       id: deposit-block-num
-      uses: actions/github-script@v5
+      uses: actions/github-script@v6
       with:
         script: |
           const { getTipBlockNumber } = require("./scripts/helper");
@@ -289,7 +289,7 @@ jobs:
     # Note:
     # The deposited asset can be withdrawn only after `finalize_blocks` layer2 blocks.
     - name: Wait until [finalize_blocks] layer2 blocks passed
-      uses: actions/github-script@v5
+      uses: actions/github-script@v6
       with:
         script: |
           const { getTipBlockNumber, waitXl2BlocksPassed } = require("./scripts/helper");
@@ -313,7 +313,7 @@ jobs:
         fi
 
     - name: Wait 2 layer2 blocks passed
-      uses: actions/github-script@v5
+      uses: actions/github-script@v6
       with:
         script: |
           const { waitXl2BlocksPassed } = require("./scripts/helper");
@@ -330,7 +330,7 @@ jobs:
     
     - name: Get current layer2 block number
       id: withdrawal-block-num
-      uses: actions/github-script@v5
+      uses: actions/github-script@v6
       with:
         script: |
           const { getTipBlockNumber } = require("./scripts/helper");
@@ -338,7 +338,7 @@ jobs:
         result-encoding: string
 
     - name: Wait until [finalize_blocks] layer2 blocks passed
-      uses: actions/github-script@v5
+      uses: actions/github-script@v6
       with:
         script: |
           const { waitXl2BlocksPassed } = require("./scripts/helper");
@@ -362,7 +362,7 @@ jobs:
         docker-compose logs > /tmp/kicker.log
     - name: Archive logs
       if: always()
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v3
       with:
         name: kicker-logs
         path: |
@@ -370,7 +370,7 @@ jobs:
     
     - name: Archive the dumped transactions in kicker/workspace/debug-tx-dump
       if: always()
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v3
       with:
         name: debug-tx-dump
         path: |

@@ -1,6 +1,7 @@
 name: Integration Test v1
 
 on:
+  push:
   workflow_call:
     inputs:
       # If `extra_github_env` is set, it will be put into GITHUB_ENV at the beginning of each job
@@ -17,14 +18,18 @@ on:
       #
       #   ```yaml
       #   extra_github_env: |
-      #     GODWOKEN_TESTS_REPO=keroro520/godwoken-tests # default is nervosnetwork/godwoken-tests
+      #     GODWOKEN_TESTS_REPO=keroro520/godwoken-tests # default is godwokenrises/godwoken-tests
       #     GODWOKEN_TESTS_REF=helloworld # default is develop
       #     GODWOKEN_KICKER_REPO=keroro520/godwoken-kicker # default is RetricSu/godwoken-kicker
       #     GODWOKEN_KICKER_REF=helloworld # default is compatibility-changes
       #
-      #     GODWOKEN_PREBUILD_IMAGE_NAME=ghcr.io/keroro520/godwoken-prebuilds:v1-godwoken-d3eb41a-202205310512 # default is ""
-      #   ```
+      #     GODWOKEN_PREBUILD_IMAGE_NAME=ghcr.io/keroro520/godwoken-prebuilds:v1-godwoken-d3eb41a-202205310512 # (deprecated)
+      #     GODWOKEN_IMAGE=ghcr.io/godwokenrises/godwoken:develop
       #
+      #     # DEBUG_MODE: if we need more debug logs, we could enable log levels per Godwoken module
+      #     # See https://rust-lang-nursery.github.io/rust-cookbook/development_tools/debugging/config_log.html#enable-log-levels-per-module
+      #     RUST_LOG=info,ckb_script::verify=debug ...
+      #   ```
       extra_github_env:
         type: string
         description: 'Append write into GITHUB_ENV at the begining of every job'
@@ -33,8 +38,6 @@ on:
 jobs:
   # Run integration-tests on devnet_v1 deployed by Godowoken-Kicker
   test-on-devnet-v1:
-    env:
-      FINALITY_BLOCKS_NUM: 3
     runs-on: ubuntu-latest
     steps:
     - name: Update GITHUB_ENV if inputs.extra_github_env set
@@ -45,29 +48,20 @@ jobs:
     - name: Checkout godwoken-tests
       uses: actions/checkout@v3
       with:
-        repository: ${{ env.GODWOKEN_TESTS_REPO || 'nervosnetwork/godwoken-tests' }}
+        repository: ${{ env.GODWOKEN_TESTS_REPO || 'godwokenrises/godwoken-tests' }}
         ref: ${{ env.GODWOKEN_TESTS_REF || 'develop' }}
         submodules: 'recursive'
 
     - name: Checkout godwoken-kicker
       uses: actions/checkout@v3
       with:
-        repository: ${{ env.GODWOKEN_KICKER_REPO || 'RetricSu/godwoken-kicker' }}
-        ref: ${{ env.GODWOKEN_KICKER_REF || 'master' }}
+        repository: ${{ env.GODWOKEN_KICKER_REPO || 'godwokenrises/godwoken-kicker' }}
+        ref: ${{ env.GODWOKEN_KICKER_REF || 'develop' }}
         path: kicker
         submodules: 'recursive'
 
-    - name: Modify kicker image if GODWOKEN_PREBUILD_IMAGE_NAME is set
-      working-directory: kicker/docker/
-      run: |
-        echo "GODWOKEN_PREBUILD_IMAGE_NAME=$GODWOKEN_PREBUILD_IMAGE_NAME"
-        if [[ -n "$GODWOKEN_PREBUILD_IMAGE_NAME" ]]; then
-          sed -i "s|image:.*godwoken-prebuilds.*|image: $GODWOKEN_PREBUILD_IMAGE_NAME |g" docker-compose.yml
-          cat docker-compose.yml
-        fi
-
     - name: Rust Cache
-      uses: actions/cache@v2
+      uses: actions/cache@v3
       with:
         path: |
           ~/.cargo/bin/
@@ -89,26 +83,28 @@ jobs:
         && tar xf capsule_${CAPSULE_VERSION}_x86_64-linux.tar.gz \
         && mv capsule_${CAPSULE_VERSION}_x86_64-linux/capsule ~/.cargo/bin/)
 
-    - name: Tune rollupConfig.finality_blocks to ${{ env.FINALITY_BLOCKS_NUM }}
-      working-directory: kicker
-      run: |
-        echo "tune rollupConfig.finality_blocks to ${{ env.FINALITY_BLOCKS_NUM }}"
-        sed -i \
-          -e 's|\\\"finality_blocks\\\": 100|\\\"finality_blocks\\\": ${{ env.FINALITY_BLOCKS_NUM }}|' \
-          docker/layer2/entrypoint.sh
-    # - name: Add debug logs for ckb_script::verify module
-    #   if: ${{ false }}
-    #   working-directory: kicker
-    #   run: |
-    #     echo "add debug logs for ckb_script::verify module"
-    #     sed -i \
-    #       -e 's|RUST_LOG=info|RUST_LOG=info,ckb_script::verify=debug|' \
-    #       docker/layer2/entrypoint.sh
+    - name: Modify Godwoken image if GODWOKEN_IMAGE is set
+      if: ${{ env.GODWOKEN_IMAGE }}
+      uses: mikefarah/yq@v4
+      with:
+        cmd: |
+          echo "Update the image of Godwoken fullnode"
+          yq -i '.services.godwoken.image = "${{ env.GODWOKEN_IMAGE }}"' kicker/docker/docker-compose.yml
+          echo "Update the image of Godwoken readonly-node"
+          yq -i '.services.godwoken-readonly.image = "${{ env.GODWOKEN_IMAGE }}"' kicker/docker/docker-compose.yml
+          echo "====== kicker/docker/docker-compose.yml ======"
+          cat kicker/docker/docker-compose.yml
 
     # set up buildx/BuildKit runner in the context,
     # make the Docker cache exportable and thus properly cacheable
     - name: Set up Docker Buildx
-      uses: docker/setup-buildx-action@v1
+      uses: docker/setup-buildx-action@v2
+
+    # Ensure clean state
+    - name: Run Godwoken-Kicker clean
+      working-directory: kicker
+      run: |
+        ./kicker clean
 
     - name: Init Godwoken-Kicker services
       working-directory: kicker
@@ -127,9 +123,7 @@ jobs:
         (echo " == kicker start attempt: 1 == " && ./kicker start) || \
         (echo " == kicker start attempt: 2 == " && ./kicker stop && ./kicker start) || \
         (echo " == kicker start failed == " && exit 1)
-        docker-compose --file docker/docker-compose.yml logs --tail 6
-      # FIXME: Sometimes, Godwoken service is not running
-      # https://github.com/Flouse/godwoken/runs/3639382192?check_suite_focus=true#step:8:667
+        ./kicker logs --tail 6
 
     # - name: Enable offchain validator of Godwoken
     #   working-directory: kicker
@@ -148,6 +142,35 @@ jobs:
     #     docker restart docker_godwoken_1
     #     docker-compose --file docker/docker-compose.yml logs --tail 6
 
+    - uses: actions/setup-node@v3
+      with:
+        node-version: '18'
+    - name: Get npm cache directory
+      id: npm-cache-dir
+      shell: bash
+      run: |
+        npm --version
+        echo "dir=$(npm config get cache)" >> ${GITHUB_OUTPUT}
+    - name: Get yarn cache directory
+      id: yarn-cache-dir
+      run: |
+        yarn --version
+        echo "dir=$(yarn cache dir)" >> $GITHUB_OUTPUT
+    - name: Node Cache
+      uses: actions/cache@v3
+      id: npm-and-yarn-cache
+      with:
+        path: |
+          ${{ steps.npm-cache-dir.outputs.dir }}
+          ${{ steps.yarn-cache-dir.outputs.dir }}
+        key: ${{ runner.os }}-node-${{ hashFiles('contracts/package-lock.json', 'light-godwoken/yarn.lock', 'scripts/light-godwoken-cli/package-lock.json') }}
+        restore-keys: |
+          ${{ runner.os }}-node-
+
+    - name: Setup Light-Godwoken-CLI
+      working-directory: scripts/light-godwoken-cli
+      run: ./init.sh
+
     - name: Deposit for 2 dev accounts
       working-directory: kicker
       run: |
@@ -157,12 +180,37 @@ jobs:
         #   2dc6374a2238e414e51874f514b0fa871f8ce0eb1e7ecaa0aed229312ffc91b0
         ./kicker deposit 0x966B30e576A4d6731996748B48Dd67C94eF29067 10000
         ./kicker deposit 0x4fef21f1d42e0d23d72100aefe84d555781c31bb 10000
+      
+    - name: init tools
+      working-directory: tools
+      run: |
+        yarn install && yarn build-all
+
+    - name: Wait 1 layer2 blocks passed
+      uses: actions/github-script@v6
+      with:
+        script: |
+          const { waitXl2BlocksPassed } = require("./scripts/helper");
+          await waitXl2BlocksPassed(1);
+
+    - name: Withdraw for 2 dev accounts
+      working-directory: scripts/light-godwoken-cli
+      run: |
+        lgc withdraw -p 1390c30e5d5867ee7246619173b5922d3b04009cab9e9d91e14506231281a997 -c 400 -n devnet_v1
+        lgc withdraw -p 2dc6374a2238e414e51874f514b0fa871f8ce0eb1e7ecaa0aed229312ffc91b0 -c 400 -n devnet_v1
 
     - name: Deposit for withdraw from v0 to v1 test
       working-directory: kicker
       run: |
         ./kicker deposit 0x966B30e576A4d6731996748B48Dd67C94eF29999 1000
         ./kicker deposit-v0 10000 # Use ckb-miner key
+    
+    - name: Wait 1 layer2 blocks passed
+      uses: actions/github-script@v6
+      with:
+        script: |
+          const { waitXl2BlocksPassed } = require("./scripts/helper");
+          await waitXl2BlocksPassed(1);
 
     - name: Withdraw from v0 to v1
       working-directory: kicker
@@ -184,31 +232,8 @@ jobs:
         echo "withdraw from v0 to v1 fail"
         exit 1
 
-    - uses: actions/setup-node@v2
-      with:
-        node-version: '16'
-    - name: Get yarn cache directory path
-      id: yarn-cache-dir-path
-      run: echo "::set-output name=dir::$(yarn cache dir)"
-    # FIXME: cache failed
-    # - name: Node Cache
-    #   uses: actions/cache@v2
-    #   id: npm-and-yarn-cache # use this to check for `cache-hit` (`steps.yarn-cache.outputs.cache-hit != 'true'`)
-    #   with:
-    #     path: |
-    #       ${{ steps.yarn-cache-dir-path.outputs.dir }}
-    #       ~/.npm
-    #     key: ${{ runner.os }}-node_modules-${{ hashFiles('/home/runner/work/**/package-lock.json', '/home/runner/work/**/yarn.lock') }}
-    #     restore-keys: |
-    #       ${{ runner.os }}-node_modules-
-
-    - name: Generate devnet envfile from godwoken-config.toml
-      working-directory: tools
-      run: |
-        yarn install && yarn build-all
-
     - name: Wait 1 layer2 blocks passed
-      uses: actions/github-script@v5
+      uses: actions/github-script@v6
       with:
         script: |
           const { waitXl2BlocksPassed } = require("./scripts/helper");
@@ -226,14 +251,14 @@ jobs:
 
     - name: Save logs
       if: always()
-      working-directory: kicker/docker
+      working-directory: kicker
       run: |
-        docker-compose ps
-        docker-compose logs --tail 66
-        docker-compose logs > /tmp/kicker.log
+        ./kicker ps
+        ./kicker logs --tail 66
+        ./kicker logs > /tmp/kicker.log
     - name: Archive logs
       if: always()
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v3
       with:
         name: kicker-logs
         path: |
@@ -241,7 +266,7 @@ jobs:
     
     - name: Archive the dumped transactions in kicker/workspace/debug-tx-dump
       if: always()
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v3
       with:
         name: debug-tx-dump
         path: |

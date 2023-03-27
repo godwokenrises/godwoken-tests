@@ -1,0 +1,30 @@
+{
+  "compilerOptions": {
+    "strict": true,
+    "target": "es2020",
+    "module": "commonjs",
+    "esModuleInterop": true,
+    "resolveJsonModule": true,
+    "moduleResolution": "node",
+    "sourceMap": true,
+    "types": ["node"],
+    "outDir": "dist",
+    "allowJs": true,
+    "skipLibCheck": true,
+    "lib": ["esnext", "dom"],
+    "paths": {
+      "light-godwoken": [
+        "./src/libraries/light-godwoken"
+      ]
+    }
+  },
+  "include": [
+    "src/**/*",
+    "package.json",
+    "../../light-godwoken/packages/light-godwoken/dist/*"
+  ],
+  "exclude": [
+    "**/node_modules",
+    "dist"
+  ]
+}

@@ -14,3 +14,10 @@
 [submodule "testcases/gw-fee-test"]
 	path = testcases/gw-fee-test
 	url = https://github.com/RetricSu/gw-fee-test.git
+[submodule "light-godwoken"]
+	path = light-godwoken
+	url = https://github.com/nervosnetwork/light-godwoken.git
+	branch = v0.3.1
+[submodule "testcases/account-abstraction"]
+	path = testcases/account-abstraction
+	url = https://github.com/godwokenrises/account-abstraction.git

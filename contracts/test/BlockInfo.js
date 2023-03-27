@@ -1,10 +1,16 @@
 const { expect } = require("chai");
 const { ethers, web3 } = require("hardhat");
+const { isGwMainnetV1 } = require("../utils/network");
+const { BlockInfo: mainnetContractAddr } = require("../config/mainnet-contracts.json");
 
 describe("BlockInfo Contract", function () {
   let contract = {
     address: "" // You could fill the deployed address here
   };
+
+  if (isGwMainnetV1()) {
+    contract.address = mainnetContractAddr;
+  }
 
   before(async function () {
     if (contract.address) {
@@ -29,7 +35,7 @@ describe("BlockInfo Contract", function () {
     expect(contractChainId.toString()).to.be.equal(chainId.toString())
   })
 
-  it("should compare web3 coinbase and conibase from EVM with same results", async () => {
+  it("should compare web3 coinbase and coinbase from EVM with same results", async () => {
     // check coinbase
     const miner = await web3.eth.getCoinbase()
     const contractMiner = await contract.getBlockCoinbase()

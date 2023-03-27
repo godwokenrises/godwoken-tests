@@ -18,6 +18,7 @@ jobs:
       matrix:
         net: ['alphanet', 'testnet', 'testnet_v1']
     runs-on: ubuntu-latest
+    if: github.repository == 'godwokenrises/godwoken-tests'
 
     steps:
     - uses: actions/checkout@v3
@@ -26,14 +27,14 @@ jobs:
         repository: Flouse/godwoken-examples
         ref: v1
 
-    - uses: actions/setup-node@v2
+    - uses: actions/setup-node@v3
       with:
         node-version: '16'
     - name: Get yarn cache directory path
       id: yarn-cache-dir-path
-      run: echo "::set-output name=dir::$(yarn cache dir)"
+      run: echo "dir=$(yarn cache dir)" >> $GITHUB_OUTPUT
     - name: Node Cache
-      uses: actions/cache@v2
+      uses: actions/cache@v3
       id: yarn-cache # use this to check for `cache-hit` (`steps.yarn-cache.outputs.cache-hit != 'true'`)
       with:
         path: ${{ steps.yarn-cache-dir-path.outputs.dir }}

@@ -1,31 +1,20 @@
 # Public Nodes
 
-## Godwoken
+## Godwoken Public Networks
 
-### [Testnet Web3 RPC](https://github.com/nervosnetwork/godwoken-testnet#web3-rpc)
-- http://godwoken-testnet-web3-rpc.ckbapp.dev
+- https://github.com/godwokenrises/godwoken-info
+- https://docs.godwoken.io/connectionInfo
 
 
-## CKB Mainnet Lina
+## CKB Mainnet Mirana
 
-### Node RPC
-- https://mainnet.ckb.dev/
+### Node RPC with builtin indexer
 - https://mainnet.ckb.dev/rpc
 
-### Indexer RPC
-- https://mainnet.ckb.dev/indexer
+## CKB Testnet Pudge
 
-
-## CKB Testnet Aggron
-
-### Node RPC
-- CKB2021: https://testnet.ckbapp.dev/rpc
-- https://testnet.ckb.dev/
+### Node RPC with builtin indexer
 - https://testnet.ckb.dev/rpc
-
-### Indexer RPC
-- CKB2021: https://testnet.ckbapp.dev/indexer
-- https://testnet.ckb.dev/indexer
 
 ## Limit
 - rate: 20 req/s

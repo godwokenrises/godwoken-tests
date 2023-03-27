@@ -1,21 +1,59 @@
 import { predefined } from '@ckb-lumos/config-manager';
 
-const environment = {
-  rpc: 'https://godwoken-testnet-v1.ckbapp.dev',
-  lumosConfig: predefined.AGGRON4,
-  // NOT USED YET
-  accounts: [
-    '1390c30e5d5867ee7246619173b5922d3b04009cab9e9d91e14506231281a997',
-    '2dc6374a2238e414e51874f514b0fa871f8ce0eb1e7ecaa0aed229312ffc91b0',
-    'dd50cac37ec6dd12539a968c1a2cbedda75bd8724f7bcad486548eaabb87fc8b',
-  ],
-};
-
-// This function is used to handle external accounts (passing from CI or else)
-// NOT USED YET
-function searchAccounts(prefix: string, env: NodeJS.ProcessEnv) {
-  const keys = Object.keys(env).filter(key => new RegExp(`${prefix}(\d){0,}`).test(key));
-  return keys.map(key => env[key]);
+type ValueOf<T> = T[keyof T];
+export enum Network {
+  TestnetV1 = 'testnet_v1',
+  AlphanetV1 = 'alphanet_v1',
+  MainnetV1 = 'mainnet_v1',
 }
 
-export default environment;
+export const testnetNetworks = [Network.TestnetV1, Network.AlphanetV1];
+export const allNetworks = Object.values(Network);
+
+export interface NetworkConfig {
+  rpc: string;
+  lumos: {
+    config: ValueOf<typeof predefined>,
+  };
+  scripts: {
+    OMNI_LOCK: {
+      codeHash: string,
+    },
+  };
+}
+
+export const networks : Record<Network, NetworkConfig> = {
+  [Network.TestnetV1]: {
+    rpc: 'https://v1.testnet.godwoken.io/rpc',
+    lumos: {
+      config: predefined.AGGRON4
+    },
+    scripts: {
+      OMNI_LOCK: {
+        codeHash: '0x79f90bb5e892d80dd213439eeab551120eb417678824f282b4ffb5f21bad2e1e',
+      },
+    },
+  },
+  [Network.AlphanetV1]: {
+    rpc: 'https://gw-alphanet-v1.godwoken.cf',
+    lumos: {
+      config: predefined.AGGRON4
+    },
+    scripts: {
+      OMNI_LOCK: {
+        codeHash: '0x79f90bb5e892d80dd213439eeab551120eb417678824f282b4ffb5f21bad2e1e',
+      },
+    },
+  },
+  [Network.MainnetV1]: {
+    rpc: 'https://v1.mainnet.godwoken.io/rpc',
+    lumos: {
+      config: predefined.LINA
+    },
+    scripts: {
+      OMNI_LOCK: {
+        codeHash: '0x9f3aeaf2fc439549cbc870c653374943af96a0658bd6b51be8d8983183e6f52f',
+      },
+    },
+  },
+};

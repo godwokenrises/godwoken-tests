@@ -2,10 +2,15 @@ const hardhat = require("hardhat")
 const { assert } = require("chai")
 const { RPC } = require("@ckb-lumos/toolkit")
 const { ERC20_BYTECODE, ERC20_ABI } = require("../lib/sudtErc20Proxy")
+const { isGwMainnetV1 } = require("../utils/network")
 
 const { ethers } = hardhat;
 
 describe("AutoCreateAccount", function () {
+  if (isGwMainnetV1()) {
+    return;
+  }
+
   let rpc
   let owner
   let token
@@ -27,40 +32,27 @@ describe("AutoCreateAccount", function () {
     console.log("random user address:", randomUser.address)
     const randomUserBalance = await ethers.provider.getBalance(randomUser.address);
     console.log("random user balance:", randomUserBalance)
+    const ownerBalance = await ethers.provider.getBalance(owner.address);
+    console.log("owner balance:", ownerBalance);
+
   
     const randomUserId = await ethAddressToAccountId(randomUser.address, rpc);
     console.log("random user id:", randomUserId)
     assert.isUndefined(randomUserId)
   
-    await token.transfer(randomUser.address, 50000);
+    console.log(`timestamp before transfer:` + Date.now());
+    const transferTx = await token.transfer(randomUser.address, (2000n * 10n**18n).toString());
+    await transferTx.wait(2);
+    console.log(`timestamp after transfer:` + Date.now());
+    
+    const ownerBalanceAfterTransfer = await ethers.provider.getBalance(owner.address);
+    console.log("owner balance after transfer:", ownerBalanceAfterTransfer);
     const nextFromBalance = await ethers.provider.getBalance(randomUser.address)
     console.log("random user balance after transfer:", nextFromBalance)
-    const randomUserIdAfterTransfer = await ethAddressToAccountId(randomUser.address, rpc);
+    const randomUserIdAfterTransfer = await ethAddressToAccountId(randomUser.address, rpc)
     console.log("random user id after transfer:", randomUserIdAfterTransfer)
-    assert.isUndefined(randomUserIdAfterTransfer)
-  
-    const Storage = await ethers.getContractFactory("Storage");
-    const storage = await Storage.connect(randomUser).deploy();
-    console.log("Storage deployed tx hash:", storage.deployTransaction.hash)
-  
-    const tx = await ethers.provider.getTransaction(storage.deployTransaction.hash);
-    assert.isDefined(tx)
-    assert.isNotNull(tx)
-    const receipt = await ethers.provider.getTransactionReceipt(storage.deployTransaction.hash);
-    assert.isNull(receipt)
-  
-    await storage.deployed();
-    console.log("Storage deployed to:", storage.address)
-  
-    // get transaction receipt
-    const storageDeployTxReceipt = await ethers.provider.getTransactionReceipt(storage.deployTransaction.hash);
-    assert.isDefined(storageDeployTxReceipt)
-    assert.isNotNull(storageDeployTxReceipt)
-  
-    const randomUserIdAfterDeploy = await ethAddressToAccountId(randomUser.address, rpc);
-    console.log("random user id after deploy:", randomUserIdAfterDeploy)
-    assert.isDefined(randomUserIdAfterDeploy)
-    assert.isNotNull(randomUserIdAfterDeploy)
+    assert.isDefined(randomUserIdAfterTransfer)
+    assert.isNotNull(randomUserIdAfterTransfer)
   });
 });
 

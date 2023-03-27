@@ -8,10 +8,14 @@ export GODWOKEN_CONFIG_PATH=${PWD}/configs/godwoken-config.toml
 [[ -n "$KEEP_INDEXER" ]] || rm -r indexer-data
 
 # use godwoken-examples submodule as tools
-git submodule update --init
+git submodule update --init --recursive --depth=1
 
 cd tools
 yarn                # please use node@14
 yarn build-tools
 yarn copy-configs   # copy and convert config format
 yarn build-all
+
+# setup light-godwoken-cli
+cd ../scripts/light-godwoken-cli
+./init.sh

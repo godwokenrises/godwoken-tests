@@ -1,29 +1,19 @@
+const fetch = require("node-fetch");
 const { expect } = require("chai");
 const { ethers, network } = require("hardhat");
-const fetch = require("node-fetch");
+const { isGwMainnetV1 } = require('../utils/network');
+const { expectThrowsAsync } = require('../utils/throw');
 
 const expectedValue = 10;
 const expectedGas = "21000";
 
 let ethCallContract;
 
-const expectThrowsAsync = async (method, errMsgKeyWords) => {
-  let error = null;
-  try {
-    await method();
-  } catch (err) {
-    error = err;
-  }
-  expect(error).to.be.an("Error");
-  console.log(error.message);
-  if (errMsgKeyWords) {
-    for (keyWord of errMsgKeyWords) {
-      expect(error.message).to.include(keyWord);
-    }
-  }
-};
-
 describe("Eth_estimateGas Cache Test", function () {
+  if (isGwMainnetV1()) {
+    return;
+  }
+
   before("Deploy and Set", async () => {
     const contractFact = await ethers.getContractFactory("CallTest");
     ethCallContract = await contractFact.deploy();
@@ -52,7 +42,6 @@ describe("Eth_estimateGas Cache Test", function () {
 
     const p = new Array(count).fill(1).map(async () => {
       const errMsgKeyWords = [
-        "UNPREDICTABLE_GAS_LIMIT: ",
         "you trigger death value!",
       ];
       const method = async () => {

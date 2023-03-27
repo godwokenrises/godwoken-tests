@@ -6,7 +6,8 @@
     "compile": "hardhat compile",
     "test": "hardhat test --network gw_devnet_v1",
     "test:gw_testnet_v1": "hardhat test --bail --network gw_testnet_v1",
-    "test:gw_alphanet_v1": "hardhat test --bail --network gw_alphanet_v1"
+    "test:gw_alphanet_v1": "hardhat test --bail --network gw_alphanet_v1",
+    "test:gw_mainnet_v1": "hardhat test --bail --network gw_mainnet_v1"
   },
   "keywords": [
     "Solidity",
@@ -15,21 +16,27 @@
   "author": "",
   "license": "MIT",
   "devDependencies": {
-    "@nomiclabs/hardhat-ethers": "^2.0.5",
+    "@nomiclabs/hardhat-ethers": "^2.1.1",
     "@nomiclabs/hardhat-waffle": "^2.0.3",
     "@nomiclabs/hardhat-web3": "^2.0.0",
     "@openzeppelin/contracts": "^4.5.0",
+    "@openzeppelin/contracts-upgradeable": "^4.6.0",
+    "@openzeppelin/hardhat-upgrades": "^1.18.1",
     "chai": "^4.3.4",
     "ethereum-waffle": "^3.4.0",
-    "ethers": "^5.4.1",
-    "hardhat": "^2.9.1",
+    "ethers": "5.6.1",
+    "hardhat": "^2.12.0-esm.1",
     "web3": "^1.7.1"
   },
   "dependencies": {
     "@ckb-lumos/base": "^0.17.0",
+    "@ckb-lumos/hd": "^0.18.0",
     "@ckb-lumos/toolkit": "^0.17.0",
+    "ckb-js-toolkit": "^0.10.2",
     "cross-fetch": "^3.1.5",
     "jsbi": "^4.3.0",
-    "rlp": "^3.0.0"
+    "keccak256": "^1.0.6",
+    "rlp": "^3.0.0",
+    "sync-request": "^6.1.0"
   }
 }

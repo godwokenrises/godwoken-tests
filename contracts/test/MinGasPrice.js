@@ -5,34 +5,19 @@ const {
   u32ToLittleEnd,
   getAccountIdByContractAddress,
 } = require("../lib/helper");
+const { isGwMainnetV1 } = require('../utils/network');
+const { expectThrowsAsync } = require('../utils/throw');
 
 const expectedValue = 10;
 let ethCallContract;
 
 const rpc = new toolkit.RPC(network.config.url);
 
-const expectThrowsAsync = async (method, errMsgKeyWords, noErrMsgKeyWord) => {
-  let error = null;
-  try {
-    await method();
-  } catch (err) {
-    error = err;
-  }
-  expect(error).to.be.an("Error");
-  console.log(error.message);
-  if (errMsgKeyWords) {
-    for (keyWord of errMsgKeyWords) {
-      expect(error.message).to.include(keyWord);
-    }
-  }
-  if (noErrMsgKeyWord) {
-    for (keyWord of noErrMsgKeyWord) {
-      expect(error.message).to.not.include(keyWord);
-    }
-  }
-};
-
 describe("MIN GAS PRICE Test", function () {
+  if (isGwMainnetV1()) {
+    return;
+  }
+
   before("Deploy and Set", async () => {
     const contractFact = await ethers.getContractFactory("CallTest");
     ethCallContract = await contractFact.deploy();

@@ -1,4 +1,4 @@
-# Godwoken Tests
+# Godwoken v0 Tests (deprecated)
 
 This repository contains integration tests that test [Godwoken](https://github.com/nervosnetwork/godwoken). You can trigger a test workflow [here](https://github.com/nervosnetwork/godwoken-tests/actions/workflows/test.yml) or run tests locally.
 
@@ -88,8 +88,8 @@ Admin rights(`actions:write` permission) to this repository is required.
 ### Prerequisites
 
 * [Docker](https://docs.docker.com/get-docker/), [docker-compose](https://docs.docker.com/compose/install/), [`Node.js` v14+](https://nodejs.org) and [`Yarn`](https://yarnpkg.com) are required.
-* Before tests can be run locally, a godwoken dev chain should be runing.
-[Godwoken-Kicker](https://github.com/RetricSu/godwoken-kicker) would be a good choice to start godwoken-polyjuice chain with one line command.
+* Before tests can run locally, a godwoken dev chain should be running.
+[Godwoken-Kicker](https://github.com/godwokenrises/godwoken-kicker) would be a good choice to start godwoken-polyjuice chain with a one line command.
 
 ### Steps
 
@@ -111,7 +111,7 @@ Admin rights(`actions:write` permission) to this repository is required.
     make init && make start
     ```
 
-4. Generate a devnet envfile from [godwoken-config.toml](kicker/workspace/config.toml)
+4. Generate a devnet .env file from [godwoken-config.toml](kicker/workspace/config.toml)
     ```sh
     cd tools
     yarn install

@@ -1,5 +1,6 @@
 // We import Chai to use its asserting functions here.
 const { expect } = require("chai");
+const { isGwMainnetV1 } = require('../utils/network');
 
 // `describe` is a Mocha function that allows you to organize your tests. It's
 // not actually needed, but having your tests organized makes debugging them
@@ -17,6 +18,10 @@ describe("Token contract", function () {
 
   // A common pattern is to declare some variables, and assign them in the
   // `before` and `beforeEach` callbacks.
+
+  if (isGwMainnetV1()) {
+    return;
+  }
 
   let Token;
   let hardhatToken;
