@@ -1,7 +1,14 @@
 const { expect } = require("chai");
 const { ethers } = require("hardhat");
+const { isGwMainnetV1 } = require("../utils/network");
+
+// NOTE: using `tx.wait(2)` for we use instant finality for tests
 
 describe("eth_getFilterChanges", function () {
+  if (isGwMainnetV1()) {
+    return;
+  }
+
   // NOTE: `eth_getFilterChanges` returns a list of block hashes for a block filter, while a part of hashes
   // may not exist on the canonical chain, so `getBlock()` will return `null` for them.
   it("eth_getFilterChanges with BlockFilter", async function () {
@@ -16,7 +23,7 @@ describe("eth_getFilterChanges", function () {
     const nameOfLogs = 1;
     const numberOfLogs = 1;
     const tx = await contract.produce(nameOfLogs, numberOfLogs);
-    await tx.wait();
+    await tx.wait(2);
 
     // 3. eth_getFilterChanges should return a list of block hashes, check count and order(asc) of them
     const blockHashes = await ethers.provider.send("eth_getFilterChanges", [
@@ -57,7 +64,7 @@ describe("eth_getFilterChanges", function () {
     const fn = async () => {
       // 3. Emit $numberOfLogs logs
       const tx = await contract.produce(nameOfLogs, numberOfLogs);
-      await tx.wait();
+      await tx.wait(2);
 
       // 4. We should get `$numberOfLogs` results with order(asc) by id desc
       const receipt = await ethers.provider.getTransactionReceipt(tx.hash);
@@ -80,6 +87,10 @@ describe("eth_getFilterChanges", function () {
 });
 
 describe("eth_getFilterLogs", function () {
+  if (isGwMainnetV1()) {
+    return;
+  }
+
   // NOTE: `eth_getFilterLogs` returns [] for eth_newBlockFilter
   it("eth_getFilterLogs with BlockFilter", async function () {
     // 1. Create a block filter
@@ -93,8 +104,9 @@ describe("eth_getFilterLogs", function () {
     await contract.deployed();
 
     const tx = await contract.produce(nameOfLogs, numberOfLogs);
-    await tx.wait();
+    await tx.wait(2);
 
+    // NOTE:
     // Hardhat & Godwoken returns empty array
     // Geth returns `filter not found`
     try {
@@ -137,7 +149,7 @@ describe("eth_getFilterLogs", function () {
     const fn = async () => {
       // 3. Emit $numberOfLogs logs
       const tx = await contract.produce(nameOfLogs, numberOfLogs);
-      await tx.wait();
+      await tx.wait(2);
 
       // 4. We should get `$numberOfLogs` results with order(asc) by id desc
       const receipt = await ethers.provider.getTransactionReceipt(tx.hash);
@@ -164,6 +176,10 @@ describe("eth_getFilterLogs", function () {
 });
 
 describe("eth_getLogs", function () {
+  if (isGwMainnetV1()) {
+    return;
+  }
+
   it("eth_getLogs with filter using address and topics", async function () {
     // 1. Deploy contract and wait 2 blocks generated
     const logsProducer = await ethers.getContractFactory("LogsProducer");
@@ -194,6 +210,7 @@ describe("eth_getLogs", function () {
       { fromBlock: undefined, toBlock: undefined, expected: [] },
       { fromBlock: "earliest", toBlock: undefined, expected: receiptLogIds },
       { fromBlock: "latest", toBlock: undefined, expected: [] },
+      // NOTE:
       // Geth returns `invalid block range`
       // Hardhat & Godwoken returns []
       {
