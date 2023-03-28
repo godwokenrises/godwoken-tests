@@ -20,8 +20,8 @@ on:
       #   extra_github_env: |
       #     GODWOKEN_TESTS_REPO=keroro520/godwoken-tests # default is godwokenrises/godwoken-tests
       #     GODWOKEN_TESTS_REF=helloworld # default is develop
-      #     GODWOKEN_KICKER_REPO=keroro520/godwoken-kicker # default is RetricSu/godwoken-kicker
-      #     GODWOKEN_KICKER_REF=helloworld # default is compatibility-changes
+      #     GODWOKEN_KICKER_REPO=godwokenrises/godwoken-kicker # default is godwokenrises/godwoken-kicker
+      #     GODWOKEN_KICKER_REF=develop # default is develop
       #
       #     GODWOKEN_PREBUILD_IMAGE_NAME=ghcr.io/keroro520/godwoken-prebuilds:v1-godwoken-d3eb41a-202205310512 # (deprecated)
       #     GODWOKEN_IMAGE=ghcr.io/godwokenrises/godwoken:develop
