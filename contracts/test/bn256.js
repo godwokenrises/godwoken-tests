@@ -34,6 +34,7 @@ describe("bn256 ", function () {
             "data": data
         }])
         const receipt = await getTxReceipt(ethers.provider, tx, 100)
+        // receipt.status: 1 (success) or 0 (failure)
         expect(receipt.status).to.be.equal(0);
         expect(receipt.gasUsed > 0).to.be.true
         // const from_balance_sent = await ethers.provider.getBalance(from)
