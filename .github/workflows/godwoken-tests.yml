@@ -13,4 +13,3 @@ jobs:
       extra_github_env: |
         GODWOKEN_TESTS_REPO=${{ github.repository }}
         GODWOKEN_TESTS_REF=${{ github.ref }}
-        GODWOKEN_KICKER_REF=refs/pull/350/merge
