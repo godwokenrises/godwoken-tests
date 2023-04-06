@@ -106,8 +106,7 @@ describe("transfer failed", function () {
         }
     }).timeout(15000)
 
-    // TODO: remove `skip` after deploying Godwoken v1.13+.
-    it.skip("gasLimit not enough but enough for 21000", async () => {
+    it("gasLimit not enough but enough for 21000", async () => {
         to = ethers.Wallet.createRandom().address;
         const from_balance = await ethers.provider.getBalance(from)
         const to_balance = await ethers.provider.getBalance(to)

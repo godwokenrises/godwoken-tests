@@ -17,8 +17,7 @@ describe("bn256 ", function () {
         expect(receipt.status).to.be.equal(1);
     })
 
-    // TODO: remove `skip` after deploying Godwoken v1.13+.
-    it.skip("0x06 illegal input", async () => {
+    it("0x06 illegal input", async () => {
         const signers = await ethers.getSigners();
         const from = signers[0].address;
         const to = contract.address;
