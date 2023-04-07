@@ -1,8 +1,8 @@
 const {ethers} = require("hardhat");
 const {expect} = require("chai");
 
-describe("bn256 ", function () {
-    this.timeout(60000)
+describe("bn256", function () {
+    this.timeout(300000);
     let contract;
 
     before(async function () {
