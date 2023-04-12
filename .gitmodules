@@ -21,3 +21,7 @@
 [submodule "testcases/account-abstraction"]
 	path = testcases/account-abstraction
 	url = https://github.com/godwokenrises/account-abstraction.git
+[submodule "polyjuice-tests"]
+	path = testcases/polyjuice-tests
+	url = https://github.com/magicalne/axon-polyjuice-contract-test.git
+	branch = main
