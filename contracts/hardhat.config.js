@@ -65,6 +65,11 @@ module.exports = {
       url: `https://kovan.infura.io/v3/${INFURA_PROJECT_ID}`,
       accounts: [`0x${TEST_PK1}`]
     },
+    axon_devnet: {
+      url: "http://34.216.103.183:8000/",
+      accounts: [`0x${TEST_PK1}`, `0x${TEST_PK2}`,`${PRIVATE_KEY0}`, `${PRIVATE_KEY1}`, "0x383fcff8683b8115e31613949be24254b4204ffbe43c227408a76334a2e3fb32"],
+      chainId: 2022,
+    },
     hardhat: {
       hardfork: "berlin"
     }

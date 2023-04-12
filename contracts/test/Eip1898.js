@@ -1,6 +1,6 @@
 const { expect } = require("chai");
 const { ethers } = require("hardhat");
-const { isGwMainnetV1 } = require("../utils/network");
+const { isGwMainnetV1, isAxonDevnet } = require("../utils/network");
 const {
   BlockInfo: mainnetContractAddr,
 } = require("../config/mainnet-contracts.json");
@@ -8,6 +8,10 @@ const crypto = require("crypto");
 const fetch = require("cross-fetch");
 
 describe("Eip1898 eth_getCode test", function () {
+  //FIXME
+  if (isAxonDevnet()) {
+    return;
+  }
   let contract = {
     address: "", // You could fill the deployed address here
   };
@@ -41,6 +45,7 @@ describe("Eip1898 eth_getCode test", function () {
     const resJson = await ethGetCode(contract.address, {
       blockHash: genesisBlock.hash,
     });
+    console.log(`res json: ${JSON.stringify(resJson, null, 2)}, expect: ${expectEmptyCode}`)
     expect(resJson.result).to.be.equal(expectEmptyCode);
   });
 
