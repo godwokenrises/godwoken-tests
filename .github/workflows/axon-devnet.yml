@@ -4,6 +4,12 @@ on:
   push:
   schedule:
   - cron:  '50 0 * * *' # every 24 hour
+# Use concurrency to ensure that only a single job or workflow
+# using the same concurrency group will run at a time.
+# see https://docs.github.com/en/actions/using-workflows/workflow-syntax-for-github-actions?query=workflow_dispatch#concurrency
+concurrency:
+  group: staging_environments
+  cancel-in-progress: false
 jobs:
   contract-test-on-axon:
     runs-on: ubuntu-latest
@@ -29,36 +35,6 @@ jobs:
         key: ${{ runner.os }}-node_modules-${{ github.sha }}
         restore-keys: |
           ${{ runner.os }}-node_modules-
-    - uses: actions/checkout@v3
-      with:
-        repository: axonweb3/axon 
-        path: axon
-    - uses: actions/cache@v3
-      with:
-        path: |
-          ~/.cargo/registry
-          ~/.cargo/git
-          target
-        key: ${{ runner.os }}-cargo-${{ hashFiles('Cargo.lock') }}
-    - name: Install Rust components
-      run: rustup component add rustfmt && rustup component add clippy
-    - name: Copy axon config.toml
-      working-directory: godwoken-tests
-      run: |
-        echo "Copy axon config.toml"
-        cp .github/workflows/axon/config.toml ~/
-    - name: Deploy Local Network of Axon
-      working-directory: axon
-      run: |
-        echo "Overwrite config.toml"
-        cp ~/config.toml devtools/chain/config.toml
-        echo "Build axon"
-        cargo build
-        rm -rf ./devtools/chain/data
-        ./target/debug/axon --config devtools/chain/config.toml --genesis devtools/chain/genesis_single_node.json > /tmp/log 2>&1 &
-        echo "Sleep a while"
-        sleep 5
-        tail /tmp/log
     - name: Test | Run internal contract tests
       working-directory: godwoken-tests/contracts
       run: |
