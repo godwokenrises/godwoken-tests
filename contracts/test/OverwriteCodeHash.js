@@ -1,5 +1,5 @@
 const { expect } = require("chai");
-const { isGwMainnetV1 } = require('../utils/network');
+const { isAxonDevnet } = require('../utils/network');
 const { ethers, network } = require("hardhat");
 const request = require('sync-request');
 
@@ -37,6 +37,10 @@ function numToByte(n) {
 }
 
 describe("Overwrite code hash", function () {
+    // This test should be only related with godwoken.
+    if (isAxonDevnet()) {
+        return
+    }
     it("Overwrite", async () => {
         // This is a polyjuice bug
         // Godwoken stores all data into a single sparse merkle tree. Typically, the user
