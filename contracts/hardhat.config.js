@@ -71,7 +71,11 @@ module.exports = {
       chainId: 2022,
     },
     hardhat: {
-      hardfork: "berlin"
+      hardfork: "berlin",
+      mining: {
+        auto: true,
+        interval: 1000
+      }
     }
   },
   mocha: {
