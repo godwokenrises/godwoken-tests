@@ -71,3 +71,37 @@ jobs:
         yarn
         yarn run ci
         yarn run hardhat test --network ${{ matrix.network }}
+
+  notice:
+    runs-on: ubuntu-latest
+    needs: contract-tests 
+    if: success() || failure()
+    steps:
+      - name: send contract-tests status 
+        run: |
+          curl -H "Content-Type: application/json" \
+          -X POST https://discord.com/api/webhooks/${{secrets.DISCORD_CHANNEL_ID}}/${{secrets.DISCORD_CHANNEL_TOKEN}} \
+          --data '
+             { 
+                "content": "Contract test", 
+                "embeds": [ 
+                    {
+                    "title":"Contract Test Status", 
+                     "color": 5814789,
+                     "fields": [
+                         {
+                             "name": "Job name",
+                             "value": "contract-tests\n"
+                         },   
+                         {    "name":  "Job statues",
+                              "value": "${{needs.contract-tests.result}}\n"
+                         },
+                         {    
+                             "name": "URL",
+                             "value": "[Click and jump to Github workflow](https://github.com/godwokenrises/godwoken-tests/actions/workflows/contract-test.yml)\n"
+                         }
+                         
+                     ]
+                } 
+                ]
+            }'    
