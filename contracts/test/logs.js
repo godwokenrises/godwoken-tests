@@ -1,11 +1,11 @@
 const { expect } = require("chai");
 const { ethers } = require("hardhat");
-const { isGwMainnetV1 } = require("../utils/network");
+const { isGwMainnetV1, isAxonDevnet } = require("../utils/network");
 
 // NOTE: using `tx.wait(2)` for we use instant finality for tests
 
 describe("eth_getFilterChanges", function () {
-  if (isGwMainnetV1()) {
+  if (isGwMainnetV1() || isAxonDevnet()) {
     return;
   }
 
@@ -87,7 +87,7 @@ describe("eth_getFilterChanges", function () {
 });
 
 describe("eth_getFilterLogs", function () {
-  if (isGwMainnetV1()) {
+  if (isGwMainnetV1() || isAxonDevnet()) {
     return;
   }
 
@@ -176,7 +176,7 @@ describe("eth_getFilterLogs", function () {
 });
 
 describe("eth_getLogs", function () {
-  if (isGwMainnetV1()) {
+  if (isGwMainnetV1() || isAxonDevnet()) {
     return;
   }
 
