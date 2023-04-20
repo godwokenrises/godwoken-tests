@@ -98,7 +98,7 @@ jobs:
                          },
                          {    
                              "name": "URL",
-                             "value": "[Click Skip Github](https://github.com/godwokenrises/godwoken-tests/actions/workflows/contract-test.yml)\n"
+                             "value": "[Click and jump to Github workflow](https://github.com/godwokenrises/godwoken-tests/actions/workflows/contract-test.yml)\n"
                          }
                          
                      ]
