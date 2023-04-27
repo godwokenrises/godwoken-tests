@@ -17,7 +17,7 @@ jobs:
     - uses: actions/checkout@v3
       with:
         path: godwoken-tests
-          #submodules: 'recursive'
+        submodules: 'recursive'
 
     - uses: actions/setup-node@v3
       with:
@@ -41,4 +41,9 @@ jobs:
         npm install
         npx hardhat run scripts/before-axon-devnet.js --network axon_devnet
         npx hardhat test --network axon_devnet
+    - name: Test | Run polyjuice tests
+      working-directory: godwoken-tests/testcases/polyjuice-tests
+      run: |
+        npm install
+        npx hardhat run test --network axon_devnet
 
