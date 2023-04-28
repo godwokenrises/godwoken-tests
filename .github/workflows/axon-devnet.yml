@@ -48,5 +48,5 @@ jobs:
       working-directory: godwoken-tests/testcases/polyjuice-tests
       run: |
         npm install
-        npx hardhat run test --network axon_devnet
+        npx hardhat test --network axon_devnet
 
