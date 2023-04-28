@@ -1,6 +1,7 @@
 name: Contract Tests
 
 on:
+  pull_request:
   push:
     branches:
     - 'v1*'
