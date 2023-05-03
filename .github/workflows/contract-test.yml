@@ -49,14 +49,14 @@ jobs:
     - name: Get yarn cache directory path
       id: yarn-cache-dir-path
       run: echo "dir=$(yarn cache dir)" >> $GITHUB_OUTPUT
-    - name: Node Cache
+    - name: Node Cache for contracts directory
       uses: actions/cache@v3
       id: npm-and-yarn-cache # use this to check for `cache-hit` (`steps.yarn-cache.outputs.cache-hit != 'true'`)
       with:
         path: |
           ${{ steps.yarn-cache-dir-path.outputs.dir }}
           ~/.npm
-        key: ${{ runner.os }}-node_modules-${{ github.sha }}
+        key: ${{ runner.os }}-node_modules-${{ hashFiles('contracts/package-lock.json') }}
         restore-keys: |
           ${{ runner.os }}-node_modules-
 
