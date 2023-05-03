@@ -60,6 +60,8 @@ jobs:
         path: |
           ${{ steps.npm-cache-dir.outputs.dir }}
           ${{ steps.yarn-cache-dir.outputs.dir }}
+          contracts/artifacts
+          contracts/cache
         key: ${{ runner.os }}-node_modules-${{ hashFiles('contracts/package-lock.json', 'testcases/account-abstraction/yarn.lock') }}
         restore-keys: |
           ${{ runner.os }}-node_modules-
