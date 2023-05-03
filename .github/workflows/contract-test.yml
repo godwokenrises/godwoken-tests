@@ -46,17 +46,23 @@ jobs:
     - uses: actions/setup-node@v3
       with:
         node-version: '18'
+    - name: Get npm cache directory
+      id: npm-cache-dir
+      shell: bash
+      run: echo "dir=$(npm config get cache)" >> ${GITHUB_OUTPUT}
     - name: Get yarn cache directory path
-      id: yarn-cache-dir-path
+      id: yarn-cache-dir
       run: echo "dir=$(yarn cache dir)" >> $GITHUB_OUTPUT
-    - name: Node Cache
+    - name: Node Cache for contracts directory
       uses: actions/cache@v3
       id: npm-and-yarn-cache # use this to check for `cache-hit` (`steps.yarn-cache.outputs.cache-hit != 'true'`)
       with:
         path: |
-          ${{ steps.yarn-cache-dir-path.outputs.dir }}
-          ~/.npm
-        key: ${{ runner.os }}-node_modules-${{ github.sha }}
+          ${{ steps.npm-cache-dir.outputs.dir }}
+          ${{ steps.yarn-cache-dir.outputs.dir }}
+          contracts/artifacts
+          contracts/cache
+        key: ${{ runner.os }}-node_modules-${{ hashFiles('contracts/package-lock.json', 'testcases/account-abstraction/yarn.lock') }}
         restore-keys: |
           ${{ runner.os }}-node_modules-
 
@@ -64,6 +70,7 @@ jobs:
       working-directory: contracts
       run: |
         npm install
+        npm run compile
         npm run test:${{ matrix.network }}
 
     - name: Test | Run gasless tests
