@@ -68,6 +68,7 @@ jobs:
       working-directory: contracts
       run: |
         npm install
+        npm run compile
         npm run test:${{ matrix.network }}
 
     - name: Test | Run gasless tests
