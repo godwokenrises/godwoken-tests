@@ -1,5 +1,5 @@
 const { expect } = require("chai");
-const { ethers, waffle } = require("hardhat");
+const { ethers } = require("hardhat");
 const { isGwMainnetV1 } = require('../utils/network');
 
 const BET_VALUE = BigInt(1 * 10 ** 3);
@@ -10,7 +10,7 @@ describe('HeadTail', () => {
         return;
     }
 
-    let provider = waffle.provider;
+    let provider = ethers.provider;
 
     let userOne;
     let userTwo;

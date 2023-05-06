@@ -22,7 +22,7 @@ describe("AutoCreateAccount", function () {
     rpc = new RPC(url);
 
     [owner] = await ethers.getSigners();
-    token = await hardhat.waffle.deployContract(owner, { abi: ERC20_ABI, bytecode: ERC20_BYTECODE }, ["pckb", "pCKB", 10000, 1, 18])
+    token = await hardhat.ethers.deployContract(owner, { abi: ERC20_ABI, bytecode: ERC20_BYTECODE }, ["pckb", "pCKB", 10000, 1, 18])
     await token.deployed();
     console.log("Token deployed to:", token.address);
   })

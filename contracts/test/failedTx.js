@@ -1,5 +1,5 @@
 const { expect } = require("chai");
-const { ethers, waffle } = require("hardhat");
+const { ethers } = require("hardhat");
 const { isGwMainnetV1 } = require('../utils/network');
 
 let contract;
@@ -9,7 +9,7 @@ describe('Revertable transaction', () => {
         return;
     }
 
-    let provider = waffle.provider;
+    let provider = ethers.provider;
 
     beforeEach(async function () {
         const factory = await ethers.getContractFactory("RevertHandling");
