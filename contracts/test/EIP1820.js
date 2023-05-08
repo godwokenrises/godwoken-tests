@@ -1,6 +1,6 @@
 const { expect } = require("chai");
 
-const { ethers, waffle } = require("hardhat");
+const { ethers } = require("hardhat");
 const { isGwMainnetV1, isAxonDevnet } = require('../utils/network');
 const { ERC20_BYTECODE, ERC20_ABI } = require("../lib/sudtErc20Proxy")
 
@@ -17,7 +17,7 @@ describe('EIP 1820', () => {
     return;
   }
 
-  const provider = waffle.provider;
+  const provider = ethers.provider;
 
   describe('Deploy', () => {
     it('transferred value and fee', async () => {
@@ -31,7 +31,7 @@ describe('EIP 1820', () => {
       }
 
       // Deploy ERC20
-      const token = await waffle.deployContract(owner, { abi: ERC20_ABI, bytecode: ERC20_BYTECODE }, ["pckb", "pCKB", 10000, 1, 18])
+      const token = await ethers.deployContract(owner, { abi: ERC20_ABI, bytecode: ERC20_BYTECODE }, ["pckb", "pCKB", 10000, 1, 18])
       await token.deployed();
       console.log(`Token deployed to: ${token.address}, hash: ${token.deployTransaction.hash}`);
 

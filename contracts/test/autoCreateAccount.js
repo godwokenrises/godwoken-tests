@@ -22,7 +22,9 @@ describe("AutoCreateAccount", function () {
     rpc = new RPC(url);
 
     [owner] = await ethers.getSigners();
-    token = await hardhat.waffle.deployContract(owner, { abi: ERC20_ABI, bytecode: ERC20_BYTECODE }, ["pckb", "pCKB", 10000, 1, 18])
+
+    const Contract = await ethers.getContractFactory(ERC20_ABI, ERC20_BYTECODE, owner);
+    token = await Contract.deploy("pckb", "pCKB", 10000, 1, 18)
     await token.deployed();
     console.log("Token deployed to:", token.address);
   })
@@ -50,9 +52,8 @@ describe("AutoCreateAccount", function () {
     const nextFromBalance = await ethers.provider.getBalance(randomUser.address)
     console.log("random user balance after transfer:", nextFromBalance)
     const randomUserIdAfterTransfer = await ethAddressToAccountId(randomUser.address, rpc)
-    console.log("random user id after transfer:", randomUserIdAfterTransfer)
-    assert.isDefined(randomUserIdAfterTransfer)
-    assert.isNotNull(randomUserIdAfterTransfer)
+    console.log("random user id after transfer:", randomUserIdAfterTransfer, typeof randomUserIdAfterTransfer)
+    assert.strictEqual(typeof randomUserIdAfterTransfer, "bigint")
   });
 });
 

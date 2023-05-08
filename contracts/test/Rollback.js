@@ -152,7 +152,7 @@ describe('RollBack', function () {
             const tx = await rollBackContract.changeWithRevert(prepareData.deployOpt.newAddress, prepareData.deployOpt.salt, prepareData.transferOpt.toAddress, SYNC_TX_STYLE,{gasLimit:1000_000})
 
             // failed tx: statue== 0 ,will revert
-            await expect(tx.wait()).to.be.reverted
+            await expect(tx.wait()).to.be.rejected
 
             // getState ,should not eq last state
             const afterState = await changeObjContract.getJournals(prepareData.deployOpt.newAddress, prepareData.deployOpt.salt, prepareData.deployOpt.isRevert, prepareData.transferOpt.toAddress)

@@ -1,4 +1,4 @@
-require("@nomiclabs/hardhat-waffle");
+require("@nomicfoundation/hardhat-toolbox");
 require("@nomiclabs/hardhat-web3");
 require('@openzeppelin/hardhat-upgrades');
 var ethers = require("ethers").ethers;
