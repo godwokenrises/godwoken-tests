@@ -31,7 +31,8 @@ describe('EIP 1820', () => {
       }
 
       // Deploy ERC20
-      const token = await ethers.deployContract(owner, { abi: ERC20_ABI, bytecode: ERC20_BYTECODE }, ["pckb", "pCKB", 10000, 1, 18])
+      const Contract = await ethers.getContractFactory(ERC20_ABI, ERC20_BYTECODE, owner);
+      const token = await Contract.deploy("pckb", "pCKB", 10000, 1, 18)
       await token.deployed();
       console.log(`Token deployed to: ${token.address}, hash: ${token.deployTransaction.hash}`);
 
