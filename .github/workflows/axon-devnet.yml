@@ -18,7 +18,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        axon-network: [axon_devnet_20230725, forcerelay_devnet, axon_unknown_devnet, axon_devnet_deprecated_beta_1]
+        axon-network: [axon_alphanet, axon_devnet_20230725, forcerelay_devnet, axon_unknown_devnet, axon_devnet_deprecated_beta_1]
       fail-fast: false
 
     steps:

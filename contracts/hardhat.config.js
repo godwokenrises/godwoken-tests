@@ -73,6 +73,11 @@ module.exports = {
       accounts: [`0x${TEST_PK1}`, `0x${TEST_PK2}`, `${PRIVATE_KEY0}`, `${PRIVATE_KEY1}`, AXON_DEV_KEY],
       chainId: 2022,
     },
+    axon_alphanet: {
+      url: "https://rpc-alphanet-axon.ckbapp.dev/",
+      accounts: [`0x${TEST_PK1}`, `0x${TEST_PK2}`, `${PRIVATE_KEY0}`, `${PRIVATE_KEY1}`, AXON_DEV_KEY],
+      chainId: 2022,
+    },
     axon_unknown_devnet: {
       url: "http://18.176.176.44:8000/",
       accounts: [`0x${TEST_PK1}`, `0x${TEST_PK2}`, `${PRIVATE_KEY0}`, `${PRIVATE_KEY1}`, AXON_DEV_KEY],
