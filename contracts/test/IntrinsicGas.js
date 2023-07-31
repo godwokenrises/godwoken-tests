@@ -1,6 +1,6 @@
 const { expect } = require("chai");
 const { ethers } = require("hardhat");
-const { isGwMainnetV1, isAxonDevnet } = require('../utils/network');
+const { isGwMainnetV1, isAxon } = require('../utils/network');
 const { expectThrowsAsync } = require('../utils/throw');
 
 const expectedValue = 10;
@@ -8,7 +8,7 @@ let ethCallContract;
 
 describe("MIN GAS PRICE Test", function () {
   // The test is good, but the error message is different.
-  if (isAxonDevnet()) {
+  if (isAxon()) {
     return;
   }
   if (isGwMainnetV1()) {
