@@ -8,7 +8,7 @@ const Networks = {
   Rinkeby: 'rinkeby',
   Mainnet: 'mainnet',
   Kovan: 'kovan',
-  AxonDevnet: 'axon_devnet',
+  AxonDevnet: 'axon_devnet_20230725',
   Hardhat: 'hardhat',
 };
 
