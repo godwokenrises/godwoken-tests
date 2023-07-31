@@ -4,7 +4,7 @@ const toolkit = require("@ckb-lumos/toolkit");
 const schemas = require("../../schemas");
 const normalizers = require("../lib/normalizer");
 const { getAccountIdByContractAddress } = require("../lib/helper");
-const { isGwMainnetV1, isAxonDevnet } = require("../utils/network");
+const { isGwMainnetV1, isAxon } = require("../utils/network");
 const { expectThrowsAsync } = require("../utils/throw");
 
 const expectedValue = 10;
@@ -33,7 +33,7 @@ const executeGwRawTx = async (chainId, toId, polyArgs) => {
 };
 
 describe("gw_execute_raw_l2transaction Cache Test", function () {
-  if (isAxonDevnet()) {
+  if (isAxon()) {
       return
   }
   if (isGwMainnetV1()) {

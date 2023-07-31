@@ -5,7 +5,7 @@ const {
   u32ToLittleEnd,
   getAccountIdByContractAddress,
 } = require("../lib/helper");
-const { isGwMainnetV1, isAxonDevnet } = require('../utils/network');
+const { isGwMainnetV1, isAxon } = require('../utils/network');
 const { expectThrowsAsync } = require('../utils/throw');
 
 const expectedValue = 10;
@@ -39,7 +39,7 @@ describe("MIN GAS PRICE Test", function () {
         Axon throws a different error message:
           "Custom error: The transaction gas price is zero"
     */
-    if (isAxonDevnet()) {
+    if (isAxon()) {
       return;
     }
     const p = new Array(1).fill(1).map(async () => {
@@ -59,7 +59,7 @@ describe("MIN GAS PRICE Test", function () {
   });
 
   it("gw_submit_l2transaction with 2000000000000000 gasPrice", async () => {
-    if (isAxonDevnet()) {
+    if (isAxon()) {
       return true;
     }
     const noErrMsgKeyWords = ["minimal gas price"];
@@ -78,7 +78,7 @@ describe("MIN GAS PRICE Test", function () {
   });
 
   it("gw_submit_l2transaction with 0 gasPrice", async () => {
-    if (isAxonDevnet()) {
+    if (isAxon()) {
       return true;
     }
     const errMsg = [

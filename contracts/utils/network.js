@@ -9,6 +9,7 @@ const Networks = {
   Mainnet: 'mainnet',
   Kovan: 'kovan',
   AxonDevnet: 'axon_devnet_20230725',
+  AxonAlphanet: 'axon_alphanet',
   Hardhat: 'hardhat',
 };
 
@@ -24,14 +25,14 @@ function isHardhatNetwork() {
   return isNetwork(Networks.Hardhat);
 }
 
-function isAxonDevnet() {
-  return isNetwork(Networks.AxonDevnet)
+function isAxon() {
+  return isNetwork(Networks.AxonDevnet) || isNetwork(Networks.AxonAlphanet);
 }
 
 module.exports = {
   Networks,
   isNetwork,
   isGwMainnetV1,
-  isAxonDevnet,
+  isAxon,
   isHardhatNetwork,
 };
