@@ -75,6 +75,7 @@ jobs:
     - name: Test | Run internal contract tests
       working-directory: contracts
       run: |
+        ls test
         npm install
         npm run compile
         npm run test:${{ matrix.network }}
@@ -82,6 +83,7 @@ jobs:
     - name: Test | Run gasless tests
       working-directory: testcases/account-abstraction
       run: |
+        ls test
         yarn
         yarn run ci
         yarn run hardhat test --network ${{ matrix.network }}
