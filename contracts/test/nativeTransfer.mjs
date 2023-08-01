@@ -106,35 +106,62 @@ describe("transfer failed", function () {
         }
     }).timeout(15000)
 
-    it("gasLimit not enough but enough for 21000", async () => {
+    it("should fail when transferring to an unregistered account with gasLimit less than 46000", async () => {
         to = ethers.Wallet.createRandom().address;
         const from_balance = await ethers.provider.getBalance(from)
         const to_balance = await ethers.provider.getBalance(to)
-        console.log(`before transfer from_balance(${from.substring(0, 6)}):${from_balance} to_balance(${to.substring(0, 6)}):${to_balance}`)
+        console.log(`before transfer from_balance(${from}): ${from_balance}`)
+        console.log(`before transfer to_balance(${to}): ${to_balance}`)
+
         try {
-            await ethers.provider.send("eth_sendTransaction", [{
+            await ethers.provider.send("eth_call", [{
                 "from": from,
                 "to": to,
-                "gas": "0xb3af", //45999
-                "gasPrice": gasPrice,
+                // gasLimit not enough but enough for 21000
+                "gas": "0xb3af", // 21000 < 0xb3af = 45999 < 46000
                 "value": "0x1"
-            }])
-        } catch (e) {
-            console.log(e)
-            expect(e.toString()).to.be.contains("intrinsic Gas too low")
-        } finally {
-            const from_balance_sent = await ethers.provider.getBalance(from)
-            const to_balance_sent = await ethers.provider.getBalance(to)
-            console.log(`after transfer from_balance(${from.substring(0, 6)}):${from_balance_sent} to_balance(${to.substring(0, 6)}):${to_balance_sent}`)
-            expect(from_balance).to.be.equal(from_balance_sent)
-            expect(to_balance).to.be.equal(to_balance_sent)
+            }, "latest"])
+        } catch (err) {
+            // Why does the error only say "ProviderError: unknown error"?
+            // https://github.com/godwokenrises/godwoken/pull/1013 reverted the extra error info,
+            // so we can't get the detailed error info:
+            // 
+            // ```js
+            // errorInsufficientGasLimit: {
+            //     code: -93,
+            //     type: "ERROR_INSUFFICIENT_GAS_LIMIT",
+            //     message: "error insufficient gas limit",
+            // }
+            // ```
+            //
+            // see: https://github.com/godwokenrises/godwoken/blob/v1.14.0/web3/packages/api-server/src/methods/exit-code.ts
+            console.log("errorInsufficientGasLimit", err);
         }
+
+        const w = await ethers.getSigner(EOA1)
+        const res = await w.sendTransaction({
+            "to": to,
+            // intrinsic Gas too low
+            "gasLimit": "0xb3af", // 21000 < 0xb3af = 45999 < 46000
+            // "gasPrice": gasPrice,
+            "value": "0x1",
+        })
+        console.log(`The transfer (${res.hash}) should be failed.`)
+
+        let receipt = null
+        while (receipt === null) {
+            console.log("Transaction is still pending")
+            receipt = await ethers.provider.getTransactionReceipt(res.hash)
+            await sleep(2000)
+        }
+        expect(receipt.status).equals(0)
     }).timeout(15000)
 
     it("balance not enough", async () => {
         const from_balance = await ethers.provider.getBalance(from)
         const to_balance = await ethers.provider.getBalance(to)
-        console.log(`before transfer from_balance(${from.substring(0, 6)}):${from_balance} to_balance(${to.substring(0, 6)}):${to_balance}`)
+        console.log(`before transfer from_balance(${from}): ${from_balance}`)
+        console.log(`before transfer to_balance(${to}): ${to_balance}`)
         try {
             await transfer(from, to, "0x845951614014880000000")
         } catch (e) {
@@ -185,7 +212,7 @@ async function transfer(from, to, value, data) {
     let tx = await ethers.provider.send("eth_sendTransaction", [{
         from,
         to,
-        "gas": "0xb3b0", //46000
+        "gas": "0xb3b0", // 46000
         "gasPrice": gasPrice,
         "value": value,
         "data": data
@@ -230,3 +257,8 @@ async function getGasPrice(provider) {
 async function sleep(timeOut) {
     await new Promise(r => setTimeout(r, timeOut));
 }
+
+/**
+ * How to run this test?
+ * > npx hardhat test test/nativeTransfer.mjs --network gw_testnet_v1
+ */
