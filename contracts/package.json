@@ -13,16 +13,13 @@
     "Solidity",
     "Hardhat"
   ],
-  "author": "",
   "license": "MIT",
   "devDependencies": {
-    "@nomicfoundation/hardhat-toolbox": "^2.0.2",
+    "@nomicfoundation/hardhat-toolbox": "^3.0.0",
     "@nomiclabs/hardhat-web3": "^2.0.0",
     "@openzeppelin/contracts": "^4.9.2",
     "@openzeppelin/contracts-upgradeable": "^4.8.3",
-    "@openzeppelin/hardhat-upgrades": "^1.18.1",
-    "hardhat": "^2.17.0",
-    "web3": "^1.7.1"
+    "@openzeppelin/hardhat-upgrades": "^2.0.2"
   },
   "dependencies": {
     "@ckb-lumos/base": "^0.17.0",

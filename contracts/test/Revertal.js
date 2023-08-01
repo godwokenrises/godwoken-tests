@@ -17,10 +17,9 @@
  * - Discard the `code` field in `error` in the JSONRPC response, as Godwoken's error codes are different from Geth
  */
 
-const {expect} = require("chai");
-const {network, ethers} = require("hardhat");
-const {isGwMainnetV1, isHardhatNetwork, isAxon} = require('../utils/network');
-const {fetchJson} = require("ethers/lib/utils");
+const { expect } = require("chai");
+const { ethers } = require("hardhat");
+const { isGwMainnetV1, isHardhatNetwork, isAxon} = require('../utils/network');
 
 describe("Revertal", function () {
     // Skip for gw_mainnet_v1 network
@@ -32,17 +31,18 @@ describe("Revertal", function () {
         return;
     }
 
-    let revertal;
+    let revertalContract;
+    let contractAddr;
 
     before(async function () {
-        const contract = await ethers.getContractFactory("Revertal");
-        revertal = await contract.deploy();
-        await revertal.deployed();
+        revertalContract = await ethers.deployContract("Revertal");
+        contractAddr = await revertalContract.getAddress();
     });
 
     it("call Revertal.revert_null()", async () => {
-        let callData = revertal.interface.encodeFunctionData("revert_null");
-        let {error: {message, data}} = await sendEthCall(revertal.address, callData);
+        let callData = revertalContract.interface.encodeFunctionData("revert_null");
+        let { message, data } = await sendEthCall(contractAddr, callData);
+
         expect(message).contains("execution reverted");
         if (isAxon()) {
           expect(data).to.equal("0x");
@@ -52,29 +52,30 @@ describe("Revertal", function () {
     })
 
     it("call Revertal.revert_string()", async () => {
-        let callData = revertal.interface.encodeFunctionData("revert_string", ["reason"]);
-        let {error: {message, data}} = await sendEthCall(revertal.address, callData);
+        let callData = revertalContract.interface.encodeFunctionData("revert_string", ["reason"]);
+        let { message, data } = await sendEthCall(contractAddr, callData);
         expect(message).contains("execution reverted: reason");
         expect(data).eq("0x08c379a000000000000000000000000000000000000000000000000000000000000000200000000000000000000000000000000000000000000000000000000000000006726561736f6e0000000000000000000000000000000000000000000000000000");
     })
 
     it("call Revertal.revert_custom_error()", async () => {
-        let callData = revertal.interface.encodeFunctionData("revert_custom_error", ["reason"]);
-        let {error: {message, data}} = await sendEthCall(revertal.address, callData);
+        let callData = revertalContract.interface.encodeFunctionData("revert_custom_error", ["reason"]);
+        let { message, data } = await sendEthCall(contractAddr, callData);
         expect(message).contains("execution reverted");
         expect(data).eq("0x8d6ea8be00000000000000000000000000000000000000000000000000000000000000200000000000000000000000000000000000000000000000000000000000000006726561736f6e0000000000000000000000000000000000000000000000000000");
     })
 
     it("call Revertal.panic()", async () => {
-        let callData = revertal.interface.encodeFunctionData("panic");
-        let {error: {message, data}} = await sendEthCall(revertal.address, callData);
+        let callData = revertalContract.interface.encodeFunctionData("panic");
+        let { message, data } = await sendEthCall(contractAddr, callData);
         expect(message).contains("execution reverted");
         expect(data).eq("0x4e487b710000000000000000000000000000000000000000000000000000000000000001");
     })
 
+    // panic code 0x11 (Arithmetic operation underflowed or overflowed outside of an unchecked block)
     it("call Revertal.arithmetic_overflow()", async () => {
-        let callData = revertal.interface.encodeFunctionData("arithmetic_overflow");
-        let {error: {message, data}} = await sendEthCall(revertal.address, callData);
+        let callData = revertalContract.interface.encodeFunctionData("arithmetic_overflow");
+        let { message, data } = await sendEthCall(contractAddr, callData);
         expect(message).contains("execution reverted");
         expect(data).eq("0x4e487b710000000000000000000000000000000000000000000000000000000000000011");
     })
@@ -82,24 +83,22 @@ describe("Revertal", function () {
 
 async function sendEthCall(toAddress, callData) {
     let signer = (await ethers.getSigners())[0].address;
-    let request =
-        {
-            jsonrpc: "2.0",
-            id: 0,
-            method: "eth_call",
-            params: [{
-                to: toAddress,
-                from: signer,
-                nonce: "0x" + (await ethers.provider.getTransactionCount(signer)).toString(16),
-                data: callData,
-            }, "latest",]
-        };
 
-    // NOTE: `network.config.url` works only for external networks. Using Hardhat network, I don't know how to retrieve
-    //       the actual URL.
-    // NOTE: `ethers.provider.send` and other APIs wraps the response handling, while we want to compare the original
-    //       response from the provider.
-    const response = await fetchJson(network.config.url, JSON.stringify(request));
-    // console.log("response: ", response);
+    const response = await ethers.provider.call({
+        to: toAddress,
+        from: signer,
+        data: callData,
+    }).catch(err => {
+        return {
+            message: err.message,
+            data: err.data
+        };
+    });
+
     return response;
 }
+
+/**
+ * How to run this test?
+ * > npx hardhat test test/Revertal --network gw_testnet_v1
+ */
