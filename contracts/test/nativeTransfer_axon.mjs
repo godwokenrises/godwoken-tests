@@ -1,6 +1,6 @@
 import hardhat from "hardhat"
 import chai from "chai"
-import {isGwMainnetV1} from "../utils/network.js"
+import {isGw} from "../utils/network.js"
 
 const {ethers} = hardhat
 const {expect} = chai
@@ -8,7 +8,7 @@ const {BigNumber} = ethers
 
 let gasPrice, faucetAccount, EOA0, EOA1, newEOA0, CA0
 
-if (!isGwMainnetV1()) {
+if (!isGw()) {
     gasPrice = await getGasPrice(ethers.provider);
     //external account0 and external account1 get a fixed balance
     const signers = await ethers.getSigners();
@@ -23,8 +23,8 @@ if (!isGwMainnetV1()) {
     CA0 = contract.address; //contract account address
 }
 
-describe("transfer success", function () {
-    if (isGwMainnetV1()) {
+describe("axon transfer success", function () {
+    if (isGw()) {
         return;
     }
 
@@ -33,7 +33,7 @@ describe("transfer success", function () {
         {name: "to EOA tx.data is not null", from: EOA0, to: EOA1, value: "0x1", data: "0x12", expectGasUsed: "21016"},
         {name: "to itself", from: EOA0, to: EOA0, value: "0x10", expectGasUsed: "21000"},
         {name: "transfer 0", from: EOA0, to: EOA1, value: "0x0", expectGasUsed: "21000"},
-        {name: "to new EOA", from: EOA0, to: newEOA0, value: "0x100", expectGasUsed: "46000"},
+        {name: "to new EOA", from: EOA0, to: newEOA0, value: "0x100", expectGasUsed: "21000"},
         {name: "to CA", from: EOA0, to: CA0, value: "0x200", expectGasUsed: "21033"},
         {name: "to CA tx.data is not null", from: EOA0, to: CA0, data: "0x12", value: "0x300", expectGasUsed: "21050"},
     ]
@@ -70,8 +70,8 @@ describe("transfer success", function () {
     }
 })
 
-describe("transfer failed", function () {
-    if (isGwMainnetV1()) {
+describe("axon transfer failed", function () {
+    if (isGw()) {
         return;
     }
 
@@ -96,7 +96,7 @@ describe("transfer failed", function () {
                 "value": "0x1"
             }])
         } catch (e) {
-            expect(e.toString()).to.be.contains("intrinsic Gas too low")
+            expect(e.toString()).to.be.contains("The transaction gas limit less than 21000")
         } finally {
             const from_balance_sent = await ethers.provider.getBalance(from)
             const to_balance_sent = await ethers.provider.getBalance(to)
@@ -104,57 +104,6 @@ describe("transfer failed", function () {
             expect(from_balance).to.be.equal(from_balance_sent)
             expect(to_balance).to.be.equal(to_balance_sent)
         }
-    }).timeout(15000)
-
-    it("should fail when transferring to an unregistered account with gasLimit less than 46000", async () => {
-        to = ethers.Wallet.createRandom().address;
-        const from_balance = await ethers.provider.getBalance(from)
-        const to_balance = await ethers.provider.getBalance(to)
-        console.log(`before transfer from_balance(${from}): ${from_balance}`)
-        console.log(`before transfer to_balance(${to}): ${to_balance}`)
-
-        try {
-            await ethers.provider.send("eth_call", [{
-                "from": from,
-                "to": to,
-                // gasLimit not enough but enough for 21000
-                "gas": "0xb3af", // 21000 < 0xb3af = 45999 < 46000
-                "value": "0x1"
-            }, "latest"])
-        } catch (err) {
-            // Why does the error only say "ProviderError: unknown error"?
-            // https://github.com/godwokenrises/godwoken/pull/1013 reverted the extra error info,
-            // so we can't get the detailed error info:
-            // 
-            // ```js
-            // errorInsufficientGasLimit: {
-            //     code: -93,
-            //     type: "ERROR_INSUFFICIENT_GAS_LIMIT",
-            //     message: "error insufficient gas limit",
-            // }
-            // ```
-            //
-            // see: https://github.com/godwokenrises/godwoken/blob/v1.14.0/web3/packages/api-server/src/methods/exit-code.ts
-            console.log("errorInsufficientGasLimit", err);
-        }
-
-        const w = await ethers.getSigner(EOA1)
-        const res = await w.sendTransaction({
-            "to": to,
-            // intrinsic Gas too low
-            "gasLimit": "0xb3af", // 21000 < 0xb3af = 45999 < 46000
-            // "gasPrice": gasPrice,
-            "value": "0x1",
-        })
-        console.log(`The transfer (${res.hash}) should be failed.`)
-
-        let receipt = null
-        while (receipt === null) {
-            console.log("Transaction is still pending")
-            receipt = await ethers.provider.getTransactionReceipt(res.hash)
-            await sleep(2000)
-        }
-        expect(receipt.status).equals(0)
     }).timeout(15000)
 
     it("balance not enough", async () => {
@@ -165,7 +114,7 @@ describe("transfer failed", function () {
         try {
             await transfer(from, to, "0x845951614014880000000")
         } catch (e) {
-            expect(e.toString()).to.be.contains("insufficient balance")
+            expect(e.toString()).to.be.contains("ExceedBalance")
         } finally {
             const from_balance_sent = await ethers.provider.getBalance(from)
             const to_balance_sent = await ethers.provider.getBalance(to)
@@ -183,7 +132,7 @@ describe("transfer failed", function () {
             "gasPrice": gasPrice,
             "value": "0x1"
         }])
-        const txInfo = await ethers.provider.getTransaction(txHash)
+        const txInfo = await retryGetTransaction(ethers.provider, txHash, 5);
         const nonce = await ethers.provider.getTransactionCount(txInfo.from)
         await getTxReceipt(ethers.provider, txHash, 100)
         const from_balance = await ethers.provider.getBalance(from)
@@ -196,7 +145,7 @@ describe("transfer failed", function () {
                 "nonce": nonce - 1
             })
         } catch (e) {
-            expect(e.toString()).to.be.contains("invalid nonce")
+            expect(e.toString()).to.be.contains("InvalidNonce")
         } finally {
             const from_balance_sent = await ethers.provider.getBalance(from)
             const to_balance_sent = await ethers.provider.getBalance(to)
@@ -258,7 +207,20 @@ async function sleep(timeOut) {
     await new Promise(r => setTimeout(r, timeOut));
 }
 
+async function retryGetTransaction(provider, txHash, retryCount = 5) {
+    let txInfo = null;
+    while (retryCount > 0) {
+        txInfo = await provider.getTransaction(txHash);
+        if (txInfo !== null) {
+            return txInfo;
+        }
+        retryCount--;
+        await new Promise(resolve => setTimeout(resolve, 200)); // wait for 200 ms before next retry
+    }
+    throw new Error(`Failed to get transaction info after ${retryCount} retries.`);
+}
+
 /**
  * How to run this test?
- * > npx hardhat test test/nativeTransfer.mjs --network gw_testnet_v1
+ * > npx hardhat test test/nativeTransfer_axon.mjs --network axon_alphanet
  */
