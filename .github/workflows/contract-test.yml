@@ -58,7 +58,7 @@ jobs:
       id: hardhat-cache
       with:
         path: ~/.cache/hardhat-nodejs
-        key: ${{ runner.os }}-hardhat-nodejs
+        key: ${{ runner.os }}-hardhat-nodejs-${{ hashFiles('contracts/package-lock.json', 'testcases/account-abstraction/yarn.lock') }}
     - name: Node Cache for contracts directory
       uses: actions/cache@v3
       id: npm-and-yarn-cache # use this to check for `cache-hit` (`steps.yarn-cache.outputs.cache-hit != 'true'`)
