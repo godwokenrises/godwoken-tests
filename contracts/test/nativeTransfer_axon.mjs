@@ -216,7 +216,7 @@ async function retryGetTransaction(provider, txHash, maxRetryCount = 5) {
       return txInfo;
     }
     currentRetryCount++;
-    await new Promise(resolve => setTimeout(resolve, 500)); // wait for 500 ms before next retry
+    await new Promise(resolve => setTimeout(resolve, 1000)); // wait for 1000 ms before next retry
   }
   throw new Error(`Failed to get transaction info after ${currentRetryCount} retries.`);
 }
