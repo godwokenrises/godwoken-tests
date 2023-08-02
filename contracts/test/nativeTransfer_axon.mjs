@@ -1,10 +1,10 @@
 import hardhat from "hardhat"
 import chai from "chai"
-import {isGw} from "../utils/network.js"
+import { isGw } from "../utils/network.js"
 
-const {ethers} = hardhat
-const {expect} = chai
-const {BigNumber} = ethers
+const { ethers } = hardhat
+const { expect } = chai
+const { BigNumber } = ethers
 
 let gasPrice, faucetAccount, EOA0, EOA1, newEOA0, CA0
 
@@ -29,13 +29,13 @@ describe("axon transfer success", function () {
   }
 
   const tests = [
-    {name: "to EOA", from: EOA0, to: EOA1, value: "0x1", expectGasUsed: "21000"},
-    {name: "to EOA tx.data is not null", from: EOA0, to: EOA1, value: "0x1", data: "0x12", expectGasUsed: "21016"},
-    {name: "to itself", from: EOA0, to: EOA0, value: "0x10", expectGasUsed: "21000"},
-    {name: "transfer 0", from: EOA0, to: EOA1, value: "0x0", expectGasUsed: "21000"},
-    {name: "to new EOA", from: EOA0, to: newEOA0, value: "0x100", expectGasUsed: "21000"},
-    {name: "to CA", from: EOA0, to: CA0, value: "0x200", expectGasUsed: "21033"},
-    {name: "to CA tx.data is not null", from: EOA0, to: CA0, data: "0x12", value: "0x300", expectGasUsed: "21050"},
+    { name: "to EOA", from: EOA0, to: EOA1, value: "0x1", expectGasUsed: "21000" },
+    { name: "to EOA tx.data is not null", from: EOA0, to: EOA1, value: "0x1", data: "0x12", expectGasUsed: "21016" },
+    { name: "to itself", from: EOA0, to: EOA0, value: "0x10", expectGasUsed: "21000" },
+    { name: "transfer 0", from: EOA0, to: EOA1, value: "0x0", expectGasUsed: "21000" },
+    { name: "to new EOA", from: EOA0, to: newEOA0, value: "0x100", expectGasUsed: "21000" },
+    { name: "to CA", from: EOA0, to: CA0, value: "0x200", expectGasUsed: "21033" },
+    { name: "to CA tx.data is not null", from: EOA0, to: CA0, data: "0x12", value: "0x300", expectGasUsed: "21050" },
   ]
 
   before(async function () {
@@ -207,17 +207,18 @@ async function sleep(timeOut) {
   await new Promise(r => setTimeout(r, timeOut));
 }
 
-async function retryGetTransaction(provider, txHash, retryCount = 5) {
+async function retryGetTransaction(provider, txHash, maxRetryCount = 5) {
   let txInfo = null;
-  while (retryCount > 0) {
+  let currentRetryCount = 0;
+  while (currentRetryCount < maxRetryCount) {
     txInfo = await provider.getTransaction(txHash);
     if (txInfo !== null) {
       return txInfo;
     }
-    retryCount--;
-    await new Promise(resolve => setTimeout(resolve, 200)); // wait for 200 ms before next retry
+    currentRetryCount++;
+    await new Promise(resolve => setTimeout(resolve, 500)); // wait for 500 ms before next retry
   }
-  throw new Error(`Failed to get transaction info after ${retryCount} retries.`);
+  throw new Error(`Failed to get transaction info after ${currentRetryCount} retries.`);
 }
 
 /**
