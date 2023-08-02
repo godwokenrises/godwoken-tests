@@ -27,7 +27,9 @@ jobs:
         path: godwoken-tests
         submodules: 'recursive'
     - name: Update submodules to latest commit
-      run: git submodule update --remote
+      run: |
+        cd godwoken-tests
+        git submodule update --remote
     - uses: actions/setup-node@v3
       with:
         node-version: '16'
