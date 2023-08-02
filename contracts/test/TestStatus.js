@@ -1,4 +1,4 @@
-const { isAxonDevnet } = require('../utils/network');
+const { isAxon } = require('../utils/network');
 const { ethers, config, network } = require("hardhat");
 const { expect } = require("chai");
 const { RPC } = require('ckb-js-toolkit');
@@ -6,7 +6,7 @@ const { RPC } = require('ckb-js-toolkit');
 const startingBalances = {};
 
 
-if (!isAxonDevnet()) {
+if (!isAxon()) {
   before("Before testing",() => {
     it("Check the Godwoken network version", () => {
       expect(config).not.to.be.undefined;

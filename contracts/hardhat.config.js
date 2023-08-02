@@ -17,6 +17,9 @@ const TEST_PK2 = process.env.PRIVATE_KEY2 ??
 const TEST_PK3 = process.env.PRIVATE_KEY3 ??
   // eth_address: 0x0c1efcca2bcb65a532274f3ef24c044ef4ab6d73
   "dd50cac37ec6dd12539a968c1a2cbedda75bd8724f7bcad486548eaabb87fc8b";
+const AXON_DEV_KEY =
+  // eth_address: 0x8ab0CF264DF99D83525e9E11c7e4db01558AE1b1
+  "0x383fcff8683b8115e31613949be24254b4204ffbe43c227408a76334a2e3fb32";
 
 const PRIVATE_KEY0 = ethers.Wallet.createRandom().privateKey
 
@@ -29,16 +32,16 @@ module.exports = {
   networks: {
     gw_devnet_v1: {
       url: `http://localhost:8024/instant-finality-hack`,
-      accounts: [`0x${TEST_PK1}`, `0x${TEST_PK2}`,`${PRIVATE_KEY0}`, `${PRIVATE_KEY1}`],
+      accounts: [`0x${TEST_PK1}`, `0x${TEST_PK2}`, `${PRIVATE_KEY0}`, `${PRIVATE_KEY1}`],
     },
     gw_testnet_v1: {
       url: `https://v1.testnet.godwoken.io/rpc/instant-finality-hack`,
-      accounts: [`0x${TEST_PK1}`, `0x${TEST_PK2}`, `0x${TEST_PK3}`,`${PRIVATE_KEY0}`, `${PRIVATE_KEY1}`],
+      accounts: [`0x${TEST_PK1}`, `0x${TEST_PK2}`, `0x${TEST_PK3}`, `${PRIVATE_KEY0}`, `${PRIVATE_KEY1}`],
       chainId: 71401,
     },
     gw_alphanet_v1: { // for internal testing
       url: `https://gw-alphanet-v1.godwoken.cf/instant-finality-hack`,
-      accounts: [`0x${TEST_PK1}`, `0x${TEST_PK2}`,`${PRIVATE_KEY0}`, `${PRIVATE_KEY1}`],
+      accounts: [`0x${TEST_PK1}`, `0x${TEST_PK2}`, `${PRIVATE_KEY0}`, `${PRIVATE_KEY1}`],
       chainId: 202206,
       gasPrice: 1,
     },
@@ -65,9 +68,29 @@ module.exports = {
       url: `https://kovan.infura.io/v3/${INFURA_PROJECT_ID}`,
       accounts: [`0x${TEST_PK1}`]
     },
-    axon_devnet: {
+    axon_devnet_deprecated_beta_1: {
       url: "http://34.216.103.183:8000/",
-      accounts: [`0x${TEST_PK1}`, `0x${TEST_PK2}`,`${PRIVATE_KEY0}`, `${PRIVATE_KEY1}`, "0x383fcff8683b8115e31613949be24254b4204ffbe43c227408a76334a2e3fb32"],
+      accounts: [`0x${TEST_PK1}`, `0x${TEST_PK2}`, `${PRIVATE_KEY0}`, `${PRIVATE_KEY1}`, AXON_DEV_KEY],
+      chainId: 2022,
+    },
+    axon_alphanet: {
+      url: "https://rpc-alphanet-axon.ckbapp.dev/",
+      accounts: [`0x${TEST_PK1}`, `0x${TEST_PK2}`, `${PRIVATE_KEY0}`, `${PRIVATE_KEY1}`, AXON_DEV_KEY],
+      chainId: 2022,
+    },
+    axon_unknown_devnet: {
+      url: "http://18.176.176.44:8000/",
+      accounts: [`0x${TEST_PK1}`, `0x${TEST_PK2}`, `${PRIVATE_KEY0}`, `${PRIVATE_KEY1}`, AXON_DEV_KEY],
+      chainId: 2022,
+    },
+    forcerelay_devnet: {
+      url: "http://54.238.73.76:8000",
+      accounts: [`0x${TEST_PK1}`, `0x${TEST_PK2}`, `${PRIVATE_KEY0}`, `${PRIVATE_KEY1}`, AXON_DEV_KEY],
+      chainId: 2022,
+    },
+    axon_devnet_20230725: {
+      url: "http://54.238.73.76:8110",
+      accounts: [`0x${TEST_PK1}`, `0x${TEST_PK2}`, `${PRIVATE_KEY0}`, `${PRIVATE_KEY1}`, AXON_DEV_KEY],
       chainId: 2022,
     },
     hardhat: {
@@ -85,7 +108,7 @@ module.exports = {
     compilers: [
       {
         //for call code
-        version:"0.4.24"
+        version: "0.4.24"
       },
       { // for polyjuice contracts
         version: "0.6.6",

@@ -4,13 +4,13 @@ const rlp = require("rlp");
 const keccak256 = require("keccak256");
 const { key } = require("@ckb-lumos/hd");
 const hardhatConfig = require("../hardhat.config");
-const { isAxonDevnet } = require("../utils/network");
+const { isAxon } = require("../utils/network");
 
 const { ethers } = hardhat;
 
 describe("Non eip155 tx", function () {
   //FIXME
-  if (isAxonDevnet()) {
+  if (isAxon()) {
     return;
   }
   it("Send non eip155 tx", async function () {

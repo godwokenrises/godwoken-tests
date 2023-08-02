@@ -1,5 +1,5 @@
 const { expect } = require("chai");
-const { isAxonDevnet } = require('../utils/network');
+const { isAxon } = require('../utils/network');
 const { ethers, network } = require("hardhat");
 const request = require('sync-request');
 
@@ -38,7 +38,7 @@ function numToByte(n) {
 
 describe("Overwrite code hash", function () {
     // This test should be only related with godwoken.
-    if (isAxonDevnet()) {
+    if (isAxon()) {
         return
     }
     it("Overwrite", async () => {

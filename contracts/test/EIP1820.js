@@ -1,7 +1,7 @@
 const { expect } = require("chai");
 
 const { ethers } = require("hardhat");
-const { isGwMainnetV1, isAxonDevnet } = require('../utils/network');
+const { isGwMainnetV1, isAxon } = require('../utils/network');
 const { ERC20_BYTECODE, ERC20_ABI } = require("../lib/sudtErc20Proxy")
 
 const deployer = "0xa990077c3205cbDf861e17Fa532eeB069cE9fF96";
@@ -10,7 +10,7 @@ const rawTx = "0xf90a388085174876e800830c35008080b909e56080604052348015610010576
 
 describe('EIP 1820', () => {
   //FIXME
-  if (isAxonDevnet()) {
+  if (isAxon()) {
     return;
   }
   if (isGwMainnetV1()) {

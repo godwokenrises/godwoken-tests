@@ -1,6 +1,6 @@
 const { expect } = require("chai");
 const { ethers } = require("hardhat");
-const { isGwMainnetV1, isAxonDevnet } = require("../utils/network");
+const { isGwMainnetV1, isAxon } = require("../utils/network");
 const {
   BlockInfo: mainnetContractAddr,
 } = require("../config/mainnet-contracts.json");
@@ -9,7 +9,7 @@ const fetch = require("cross-fetch");
 
 describe("Eip1898 eth_getCode test", function () {
   //FIXME
-  if (isAxonDevnet()) {
+  if (isAxon()) {
     return;
   }
   let contract = {
