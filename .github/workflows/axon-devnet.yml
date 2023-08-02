@@ -33,12 +33,12 @@ jobs:
     - name: Get yarn cache directory path
       id: yarn-cache-dir-path
       run: echo "dir=$(yarn cache dir)" >> $GITHUB_OUTPUT
-    - name: Hardhat cache
-      uses: actions/cache@v3
-      id: hardhat-cache
-      with:
-        path: ~/.cache/hardhat-nodejs
-        key: ${{ runner.os }}-hardhat-nodejs-axon
+#    - name: Hardhat cache
+#      uses: actions/cache@v3
+#      id: hardhat-cache
+#      with:
+#        path: ~/.cache/hardhat-nodejs
+#        key: ${{ runner.os }}-hardhat-nodejs-axon
     - name: Node Cache
       uses: actions/cache@v3
       id: npm-and-yarn-cache # use this to check for `cache-hit` (`steps.yarn-cache.outputs.cache-hit != 'true'`)
