@@ -26,10 +26,10 @@ jobs:
       with:
         path: godwoken-tests
         submodules: 'recursive'
-    - name: Update submodules to latest commit
+    - name: Update polyjuice-tests submodule
       run: |
-        cd godwoken-tests
-        git submodule update --remote
+        git submodule update --remote testcases/polyjuice-tests
+      working-directory: godwoken-tests
     - uses: actions/setup-node@v3
       with:
         node-version: '16'
