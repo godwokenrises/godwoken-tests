@@ -23,5 +23,5 @@
 	url = https://github.com/godwokenrises/account-abstraction.git
 [submodule "polyjuice-tests"]
 	path = testcases/polyjuice-tests
-	url = https://github.com/sunchengzhu/eth-prepare.git
+	url = https://github.com/sunchengzhu/axon-polyjuice-contract-test.git
 	branch = main
