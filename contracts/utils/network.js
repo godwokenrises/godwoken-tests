@@ -8,7 +8,7 @@ const Networks = {
   Rinkeby: 'rinkeby',
   Mainnet: 'mainnet',
   Kovan: 'kovan',
-  AxonDevnet: 'axon_devnet_20230725',
+  ForcerelayDevnet: 'forcerelay_devnet',
   AxonAlphanet: 'axon_alphanet',
   Hardhat: 'hardhat',
 };
@@ -26,13 +26,18 @@ function isHardhatNetwork() {
 }
 
 function isAxon() {
-  return isNetwork(Networks.AxonDevnet) || isNetwork(Networks.AxonAlphanet);
+  return isNetwork(Networks.ForcerelayDevnet) || isNetwork(Networks.AxonAlphanet);
+}
+
+function isGw() {
+  return isNetwork(Networks.GwDevnet_v1) || isNetwork(Networks.GwTestnet_v1) || isNetwork(Networks.GwAlphanet_v1) || isNetwork(Networks.GwMainnet_v1);
 }
 
 module.exports = {
   Networks,
   isNetwork,
   isGwMainnetV1,
-  isAxon,
   isHardhatNetwork,
+  isAxon,
+  isGw
 };
