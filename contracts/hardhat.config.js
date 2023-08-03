@@ -67,28 +67,13 @@ module.exports = {
       url: `https://kovan.infura.io/v3/${INFURA_PROJECT_ID}`,
       accounts: [`0x${TEST_PK1}`]
     },
-    axon_devnet_deprecated_beta_1: {
-      url: "http://34.216.103.183:8000/",
-      accounts: [`0x${TEST_PK1}`, `0x${TEST_PK2}`, AXON_DEV_KEY, `${PRIVATE_KEY0}`, `${PRIVATE_KEY1}`],
-      chainId: 2022,
-    },
     axon_alphanet: {
       url: "https://rpc-alphanet-axon.ckbapp.dev/",
       accounts: [`0x${TEST_PK1}`, `0x${TEST_PK2}`, AXON_DEV_KEY, `${PRIVATE_KEY0}`, `${PRIVATE_KEY1}`],
       chainId: 2022,
     },
-    axon_unknown_devnet: {
-      url: "http://18.176.176.44:8000/",
-      accounts: [`0x${TEST_PK1}`, `0x${TEST_PK2}`, AXON_DEV_KEY, `${PRIVATE_KEY0}`, `${PRIVATE_KEY1}`],
-      chainId: 2022,
-    },
     forcerelay_devnet: {
       url: "http://54.238.73.76:8000",
-      accounts: [`0x${TEST_PK1}`, `0x${TEST_PK2}`, AXON_DEV_KEY, `${PRIVATE_KEY0}`, `${PRIVATE_KEY1}`],
-      chainId: 2022,
-    },
-    axon_devnet_20230725: {
-      url: "http://54.238.73.76:8110",
       accounts: [`0x${TEST_PK1}`, `0x${TEST_PK2}`, AXON_DEV_KEY, `${PRIVATE_KEY0}`, `${PRIVATE_KEY1}`],
       chainId: 2022,
     },
