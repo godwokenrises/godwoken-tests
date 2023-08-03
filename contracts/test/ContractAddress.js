@@ -1,5 +1,5 @@
 const { assert } = require("chai");
-const { ethers, web3 } = require("hardhat");
+const { ethers } = require("hardhat");
 const { isGwMainnetV1 } = require('../utils/network');
 
 describe("ContractAddress", function () {
@@ -15,7 +15,7 @@ describe("ContractAddress", function () {
         // Set data
         const tx = await contract.store(256);
         await tx.wait();
-        const receipt = await web3.eth.getTransactionReceipt(tx.hash);
+        const receipt = await ethers.provider.getTransactionReceipt(tx.hash);
         assert.isNull(receipt.contractAddress);
         console.log(receipt);
     });

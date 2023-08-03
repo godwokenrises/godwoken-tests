@@ -1,5 +1,5 @@
 const { expect } = require("chai");
-const { ethers, web3 } = require("hardhat");
+const { ethers } = require("hardhat");
 const { isGwMainnetV1 } = require('../utils/network');
 
 describe("Signing Contract", function () {
@@ -18,14 +18,14 @@ describe("Signing Contract", function () {
   it("should sign with address and return the same address as signer through recover", async () => {
     const [sender] = await ethers.getSigners();
 
-    const msg = ethers.utils.keccak256(ethers.utils.RLP.encode([
+    const msgHash = ethers.utils.keccak256(ethers.utils.RLP.encode([
       "0x80",
       [sender.address],
     ]));
 
-    const signature = await web3.eth.sign(msg, sender.address);
-    const signerAddress = await contract.recover(msg, signature)
-
+    // https://ethereum.org/en/developers/docs/apis/json-rpc/#eth_sign
+    const signature = await ethers.provider.send("eth_sign", [sender.address, msgHash])
+    const signerAddress = await contract.recover(msgHash, signature)
     expect(signerAddress).to.be.equal(sender.address)
     expect(signerAddress).to.be.not.equal(ethers.constants.ZeroAddress)
   })
