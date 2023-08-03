@@ -8,7 +8,7 @@ const Networks = {
   Rinkeby: 'rinkeby',
   Mainnet: 'mainnet',
   Kovan: 'kovan',
-  AxonDevnet: 'axon_devnet_20230725',
+  ForcerelayDevnet: 'forcerelay_devnet',
   AxonAlphanet: 'axon_alphanet',
   Hardhat: 'hardhat',
 };
@@ -26,7 +26,7 @@ function isHardhatNetwork() {
 }
 
 function isAxon() {
-  return isNetwork(Networks.AxonDevnet) || isNetwork(Networks.AxonAlphanet);
+  return isNetwork(Networks.ForcerelayDevnet) || isNetwork(Networks.AxonAlphanet);
 }
 
 function isGw() {
