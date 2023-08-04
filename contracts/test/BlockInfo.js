@@ -1,5 +1,5 @@
 const { expect } = require("chai");
-const { ethers, web3 } = require("hardhat");
+const { ethers } = require("hardhat");
 const { isGwMainnetV1 } = require("../utils/network");
 const { BlockInfo: mainnetContractAddr } = require("../config/mainnet-contracts.json");
 
@@ -37,7 +37,7 @@ describe("BlockInfo Contract", function () {
 
   it("should compare web3 coinbase and coinbase from EVM with same results", async () => {
     // check coinbase
-    const miner = await web3.eth.getCoinbase()
+    const miner = await ethers.provider.miner
     const contractMiner = await contract.getBlockCoinbase()
 
     console.log('contractMiner', contractMiner)
@@ -48,7 +48,7 @@ describe("BlockInfo Contract", function () {
 
   it("should compare web3 block number and block number from EVM with same results", async () => {
     // check block number
-    const block = await web3.eth.getBlock("latest") // tip block from web3 db
+    const block = await ethers.provider.getBlock("latest") // tip block from web3 db
     const contractBlockNumber = await contract.getCurrentBlockNumber() // mem block from godwoken
 
     console.log('blockNumber', block.number)
@@ -58,7 +58,7 @@ describe("BlockInfo Contract", function () {
 
   it("should compare web3 block hash and block hash from EVM with same results", async () => {
     // check block hash
-    const block = await web3.eth.getBlock("latest")
+    const block = await ethers.provider.getBlock("latest")
     // TODO: Uncomment when will be fixed
     // throw ProviderError: data out-of-bounds (length=28, offset=32, code=BUFFER_OVERRUN, version=abi/5.0.7)
     // const contractBlockHash = await contract.getBlockHash(block.number)

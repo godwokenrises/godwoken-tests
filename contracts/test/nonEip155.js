@@ -1,7 +1,6 @@
 const { assert } = require("chai");
 const hardhat = require("hardhat");
 const rlp = require("rlp");
-const keccak256 = require("keccak256");
 const { key } = require("@ckb-lumos/hd");
 const hardhatConfig = require("../hardhat.config");
 const { isAxon } = require("../utils/network");
@@ -13,6 +12,7 @@ describe("Non eip155 tx", function () {
   if (isAxon()) {
     return;
   }
+
   it("Send non eip155 tx", async function () {
     const [owner] = await ethers.getSigners();
 
@@ -38,7 +38,7 @@ describe("Non eip155 tx", function () {
     ];
     const rlpEncoded = rlp.encode(rlpData);
 
-    const message = "0x" + keccak256(Buffer.from(rlpEncoded)).toString("hex");
+    const message = ethers.utils.keccak256(Buffer.from(rlpEncoded)).toString("hex");
     const ownerPrivateKey =
       hardhatConfig.networks?.[hardhat.network.name]?.accounts[0];
     const signature = key.signRecoverable(message, ownerPrivateKey);

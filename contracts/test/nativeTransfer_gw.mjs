@@ -143,7 +143,6 @@ describe("gw transfer failed", function () {
       "to": to,
       // intrinsic Gas too low
       "gasLimit": "0xb3af", // 21000 < 0xb3af = 45999 < 46000
-      // "gasPrice": gasPrice,
       "value": "0x1",
     })
     console.log(`The transfer (${res.hash}) should be failed.`)

@@ -17,10 +17,9 @@
  * - Discard the `code` field in `error` in the JSONRPC response, as Godwoken's error codes are different from Geth
  */
 
-const {expect} = require("chai");
-const {network, ethers} = require("hardhat");
-const {isGwMainnetV1, isHardhatNetwork, isAxon} = require('../utils/network');
-const {fetchJson} = require("ethers/lib/utils");
+const { expect } = require("chai");
+const { ethers } = require("hardhat");
+const { isGwMainnetV1, isHardhatNetwork, isAxon} = require('../utils/network');
 
 describe("Revertal", function () {
     // Skip for gw_mainnet_v1 network
@@ -32,74 +31,67 @@ describe("Revertal", function () {
         return;
     }
 
-    let revertal;
+    let revertalContract;
+    let contractAddr;
 
     before(async function () {
-        const contract = await ethers.getContractFactory("Revertal");
-        revertal = await contract.deploy();
-        await revertal.deployed();
+        revertalContract = await ethers.deployContract("Revertal");
+        contractAddr = await revertalContract.address;
     });
 
     it("call Revertal.revert_null()", async () => {
-        let callData = revertal.interface.encodeFunctionData("revert_null");
-        let {error: {message, data}} = await sendEthCall(revertal.address, callData);
+        // 'missing revert data in call exception; Transaction reverted without a reason string
+        // [ See: https://links.ethers.org/v5-errors-CALL_EXCEPTION ]
+        // (data="0x", error={"name":"ProviderError","_stack":"ProviderError: execution reverted
+        // "code":-32000,"_isProviderError":true}, code=CALL_EXCEPTION, version=providers/5.7.2)'
+        const { message, data } = await revertalContract.revert_null().catch(e => e);
         expect(message).contains("execution reverted");
-        if (isAxon()) {
-          expect(data).to.equal("0x");
-        } else {
-          expect(data).undefined;
-        }
+        expect(data).to.equal("0x");
     })
 
     it("call Revertal.revert_string()", async () => {
-        let callData = revertal.interface.encodeFunctionData("revert_string", ["reason"]);
-        let {error: {message, data}} = await sendEthCall(revertal.address, callData);
-        expect(message).contains("execution reverted: reason");
-        expect(data).eq("0x08c379a000000000000000000000000000000000000000000000000000000000000000200000000000000000000000000000000000000000000000000000000000000006726561736f6e0000000000000000000000000000000000000000000000000000");
+        // 'call revert exception; VM Exception while processing transaction: reverted with reason string "reasonXYZ" 
+        // [ See: https://links.ethers.org/v5-errors-CALL_EXCEPTION ] (method="revert_string(string)"
+        const { message, data } = await revertalContract.revert_string("reasonXYZ").catch(e => e);
+        // errorArgs=["reasonXYZ"], errorName="Error", errorSignature="Error(string)", reason="reasonXYZ", code=CALL_EXCEPTION, version=abi/5.7.0)'
+        expect(message).contains("reverted");
+        expect(message).contains("reasonXYZ");
+        expect(data).eq("0x08c379a000000000000000000000000000000000000000000000000000000000000000200000000000000000000000000000000000000000000000000000000000000009726561736f6e58595a0000000000000000000000000000000000000000000000");
     })
 
     it("call Revertal.revert_custom_error()", async () => {
-        let callData = revertal.interface.encodeFunctionData("revert_custom_error", ["reason"]);
-        let {error: {message, data}} = await sendEthCall(revertal.address, callData);
-        expect(message).contains("execution reverted");
-        expect(data).eq("0x8d6ea8be00000000000000000000000000000000000000000000000000000000000000200000000000000000000000000000000000000000000000000000000000000006726561736f6e0000000000000000000000000000000000000000000000000000");
+        const err = await revertalContract.revert_custom_error("reasonABC").catch(err => err);
+        const { message, data, errorSignature } = err;
+        expect(errorSignature).eq("CustomError(string)")
+        expect(message).contains("reasonABC");
+        expect(data).eq("0x8d6ea8be00000000000000000000000000000000000000000000000000000000000000200000000000000000000000000000000000000000000000000000000000000009726561736f6e4142430000000000000000000000000000000000000000000000");
     })
 
     it("call Revertal.panic()", async () => {
-        let callData = revertal.interface.encodeFunctionData("panic");
-        let {error: {message, data}} = await sendEthCall(revertal.address, callData);
-        expect(message).contains("execution reverted");
+        // 'call revert exception; VM Exception while processing transaction: reverted with panic code 1
+        // [ See: https://links.ethers.org/v5-errors-CALL_EXCEPTION ] 
+        // (method="panic()", errorArgs=[{"type":"BigNumber","hex":"0x01"}], errorName="Panic", errorSignature="Panic(uint256)", reason=null, code=CALL_EXCEPTION, version=abi/5.7.0)'
+        const err  = await revertalContract.panic().catch(err => err);
+        const { message, data, errorSignature } = err;
+        expect(message).contains("reverted with panic code 1");
+        expect(errorSignature).eq("Panic(uint256)");
         expect(data).eq("0x4e487b710000000000000000000000000000000000000000000000000000000000000001");
     })
 
+    // panic code 0x11 (Arithmetic operation underflowed or overflowed outside of an unchecked block)
     it("call Revertal.arithmetic_overflow()", async () => {
-        let callData = revertal.interface.encodeFunctionData("arithmetic_overflow");
-        let {error: {message, data}} = await sendEthCall(revertal.address, callData);
-        expect(message).contains("execution reverted");
+        // 'call revert exception; VM Exception while processing transaction: reverted with panic code 17
+        // [ See: https://links.ethers.org/v5-errors-CALL_EXCEPTION ]
+        // (method="arithmetic_overflow()", errorArgs=[{"type":"BigNumber","hex":"0x11"}], errorName="Panic", errorSignature="Panic(uint256)", reason=null, code=CALL_EXCEPTION, version=abi/5.7.0)'
+        const err  = await revertalContract.arithmetic_overflow().catch(err => err);
+        const { message, data, errorSignature } = err;
+        expect(message).contains("reverted with panic code 17");
+        expect(errorSignature).eq("Panic(uint256)");
         expect(data).eq("0x4e487b710000000000000000000000000000000000000000000000000000000000000011");
     })
 });
 
-async function sendEthCall(toAddress, callData) {
-    let signer = (await ethers.getSigners())[0].address;
-    let request =
-        {
-            jsonrpc: "2.0",
-            id: 0,
-            method: "eth_call",
-            params: [{
-                to: toAddress,
-                from: signer,
-                nonce: "0x" + (await ethers.provider.getTransactionCount(signer)).toString(16),
-                data: callData,
-            }, "latest",]
-        };
-
-    // NOTE: `network.config.url` works only for external networks. Using Hardhat network, I don't know how to retrieve
-    //       the actual URL.
-    // NOTE: `ethers.provider.send` and other APIs wraps the response handling, while we want to compare the original
-    //       response from the provider.
-    const response = await fetchJson(network.config.url, JSON.stringify(request));
-    // console.log("response: ", response);
-    return response;
-}
+/**
+ * How to run this test?
+ * > npx hardhat test test/Revertal --network gw_testnet_v1
+ */
