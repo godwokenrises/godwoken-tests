@@ -44,9 +44,17 @@ describe("Revertal", function () {
         // [ See: https://links.ethers.org/v5-errors-CALL_EXCEPTION ]
         // (data="0x", error={"name":"ProviderError","_stack":"ProviderError: execution reverted
         // "code":-32000,"_isProviderError":true}, code=CALL_EXCEPTION, version=providers/5.7.2)'
-        const { message, data } = await revertalContract.revert_null().catch(e => e);
-        expect(message).contains("execution reverted");
-        expect(data).to.equal("0x");
+        const callData = revertalContract.interface.encodeFunctionData("revert_null");
+        const tx = {
+            to: revertalContract.address,
+            data: callData
+        };
+        try {
+            const result = await ethers.provider.call(tx);
+        } catch (error) {
+            expect(error.message).contains("execution reverted");
+            expect(error.data).to.equal("0x");
+        }
     })
 
     it("call Revertal.revert_string()", async () => {
