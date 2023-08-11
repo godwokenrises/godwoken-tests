@@ -26,10 +26,6 @@ describe("Revertal", function () {
     if (isGwMainnetV1()) {
         return;
     }
-    // Skip for hardhat network
-    if (isHardhatNetwork()) {
-        return;
-    }
 
     let revertalContract;
     let contractAddr;
@@ -51,7 +47,10 @@ describe("Revertal", function () {
         };
         try {
             const result = await ethers.provider.call(tx);
+            // no error was catched in Axon or hardhat network
+            expect(result).to.equal("0x");
         } catch (error) {
+            // error was catched in Godwoken networks
             expect(error.message).contains("execution reverted");
             expect(error.data).to.equal("0x");
         }
