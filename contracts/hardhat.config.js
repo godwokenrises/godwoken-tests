@@ -59,10 +59,6 @@ module.exports = {
       // gas: 1_000_000_000_000_001, // Infura seems to cap it at 19981536.
       // gasPrice: 1
     },
-    mainnet: {
-      url: `https://mainnet.infura.io/v3/${INFURA_PROJECT_ID}`,
-      accounts: [`0x${TEST_PK1}`]
-    },
     kovan: {
       url: `https://kovan.infura.io/v3/${INFURA_PROJECT_ID}`,
       accounts: [`0x${TEST_PK1}`]
