@@ -3,6 +3,7 @@ const { expect } = require("chai");
 const { ethers } = require("hardhat");
 const { isGwMainnetV1, isAxon } = require('../utils/network');
 const { ERC20_BYTECODE, ERC20_ABI } = require("../lib/sudtErc20Proxy")
+const { getTxReceipt } = require("../utils/receipt");
 
 const deployer = "0xa990077c3205cbDf861e17Fa532eeB069cE9fF96";
 const contract = "0x1820a4B7618BdE71Dce8cdc73aAB6C95905faD24";
@@ -44,11 +45,10 @@ describe('EIP 1820', () => {
       console.log('prepare deployment ETH', transferTx.hash)
 
       // send the deployment transaction
-      const { hash } = await provider.sendTransaction(
-        rawTx
-      );
+      const hash = await ethers.provider.send('eth_sendRawTransaction', [rawTx]);
+
       console.log("deployment hash:", hash)
-      await provider.waitForTransaction(hash);
+      await getTxReceipt(hash);
       code = await provider.getCode(contract);
       expect(code).to.not.be.equal("0x", "account is deployed");
     });
