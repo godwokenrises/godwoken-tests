@@ -1,6 +1,7 @@
 import hardhat from "hardhat"
 import chai from "chai"
 import { isAxon, isGwMainnetV1 } from "../utils/network.js"
+import { getTxReceipt } from "../utils/receipt.js";
 
 const { ethers } = hardhat
 const { expect } = chai
@@ -152,7 +153,6 @@ describe("gw transfer failed", function () {
     while (receipt === null) {
       console.log("Transaction is still pending")
       receipt = await ethers.provider.getTransactionReceipt(res.hash)
-      await sleep(2000)
     }
     expect(receipt.status).equals(0)
   }).timeout(15000)
@@ -185,7 +185,7 @@ describe("gw transfer failed", function () {
     }])
     const txInfo = await ethers.provider.getTransaction(txHash)
     const nonce = await ethers.provider.getTransactionCount(txInfo.from)
-    await getTxReceipt(ethers.provider, txHash, 100)
+    await getTxReceipt(txHash)
     const from_balance = await ethers.provider.getBalance(from)
     const to_balance = await ethers.provider.getBalance(to)
     console.log(`before transfer from_balance(${from}):${from_balance} to_balance(${to}):${to_balance}`)
@@ -217,7 +217,7 @@ async function transfer(from, to, value, data) {
     "value": value,
     "data": data
   }])
-  let response = await getTxReceipt(ethers.provider, tx, 100)
+  let response = await getTxReceipt(tx)
   expect(response.status).to.be.equal(1)
   return response
 }
@@ -231,21 +231,6 @@ async function estGas(from, to, value, data) {
     "value": value,
     "data": data
   }])
-}
-
-async function getTxReceipt(provider, txHash, attempts) {
-  for (let i = 0; i < attempts; i++) {
-    const receipt = await provider.getTransactionReceipt(txHash);
-    if (receipt !== null) {
-      return receipt;
-    }
-    await sleep(1000);
-  }
-  return null;
-}
-
-async function sleep(timeOut) {
-  await new Promise(r => setTimeout(r, timeOut));
 }
 
 /**

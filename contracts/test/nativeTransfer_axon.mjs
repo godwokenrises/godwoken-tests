@@ -1,6 +1,7 @@
 import hardhat from "hardhat"
 import chai from "chai"
 import { isGw } from "../utils/network.js"
+import { getTxReceipt } from "../utils/receipt.js";
 
 const { ethers } = hardhat
 const { expect } = chai
@@ -134,7 +135,7 @@ describe("axon transfer failed", function () {
     }])
     const txInfo = await retryGetTransaction(ethers.provider, txHash, 5);
     const nonce = await ethers.provider.getTransactionCount(txInfo.from)
-    await getTxReceipt(ethers.provider, txHash, 100)
+    await getTxReceipt(txHash)
     const from_balance = await ethers.provider.getBalance(from)
     const to_balance = await ethers.provider.getBalance(to)
     console.log(`before transfer from_balance(${from}):${from_balance} to_balance(${to}):${to_balance}`)
@@ -166,7 +167,7 @@ async function transfer(from, to, value, data) {
     "value": value,
     "data": data
   }])
-  let response = await getTxReceipt(ethers.provider, tx, 100)
+  let response = await getTxReceipt(tx)
   expect(response.status).to.be.equal(1)
   return response
 }
@@ -180,21 +181,6 @@ async function estGas(from, to, value, data) {
     "value": value,
     "data": data
   }])
-}
-
-async function getTxReceipt(provider, txHash, attempts) {
-  for (let i = 0; i < attempts; i++) {
-    const receipt = await provider.getTransactionReceipt(txHash);
-    if (receipt !== null) {
-      return receipt;
-    }
-    await sleep(1000);
-  }
-  return null;
-}
-
-async function sleep(timeOut) {
-  await new Promise(r => setTimeout(r, timeOut));
 }
 
 async function retryGetTransaction(provider, txHash, maxRetryCount = 5) {
