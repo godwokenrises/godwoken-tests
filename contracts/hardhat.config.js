@@ -68,14 +68,6 @@ module.exports = {
       accounts: [`0x${TEST_PK1}`, `0x${TEST_PK2}`, AXON_DEV_KEY, `${PRIVATE_KEY0}`, `${PRIVATE_KEY1}`],
       chainId: 2022,
     },
-    fantom_testnet: {
-      url: "https://rpc.testnet.fantom.network",
-      accounts: [`0x${TEST_PK1}`, `0x${TEST_PK2}`, AXON_DEV_KEY, `${PRIVATE_KEY0}`, `${PRIVATE_KEY1}`],
-    },
-    sepolia: {
-      url: "https://eth-sepolia.g.alchemy.com/v2/jBG_4O1H5CHQugJjwBt_md0ks3FQpsqN",
-      accounts: [`0x${TEST_PK1}`, `0x${TEST_PK2}`, AXON_DEV_KEY, `${PRIVATE_KEY0}`, `${PRIVATE_KEY1}`],
-    },
     hardhat: {
       hardfork: "berlin",
       mining: {
