@@ -49,13 +49,14 @@ describe("Overwrite code hash", function () {
         // calculated the key correctly, we can overrite the code from user level.
         const OverwriteCodeHash = await ethers.getContractFactory("OverwriteCodeHash");
         const contract = await OverwriteCodeHash.deploy();
-        await contract.deployed();
-        console.log(`contract address: ${contract.address}`);
+        await contract.waitForDeployment();
+        const contractAddress= await contract.getAddress();
+        console.log(`contract address: ${contractAddress}`);
 
         // query godwoken account id
         // Set up the JSON-RPC request object
-        console.log("param", `0x0200000041000000${contract.address.slice(2,)}`);
-        const scriptHash = await sendRpc('gw_get_script_hash_by_registry_address', [`0x0200000014000000${contract.address.slice(2,)}`]);
+        console.log("param", `0x0200000041000000${contractAddress.slice(2,)}`);
+        const scriptHash = await sendRpc('gw_get_script_hash_by_registry_address', [`0x0200000014000000${contractAddress.slice(2,)}`]);
         console.log('script hash', scriptHash);
         const accountId = await sendRpc('gw_get_account_id_by_script_hash', [scriptHash]);
         console.log('account Id', accountId);
@@ -72,13 +73,13 @@ describe("Overwrite code hash", function () {
         // overwrite
         const blockInfoContractFact = await ethers.getContractFactory("AddressContract");
         const contract1 = await blockInfoContractFact.deploy();
-        await contract1.deployed();
-        const codehash1 = await contract1.getCodehash();
+        await contract1.waitForDeployment();
+        const codehash1 = await contract1.getFunction("getCodehash").staticCall();
 
         let failedToOverwrite = false;
 
         try {
-            const tx = await contract.storeInner(key, codehash1);
+            const tx = await contract.getFunction("storeInner").send(key, codehash1);
             await tx.wait();
             console.log('overwrite success');
         } catch (_e) {
@@ -88,7 +89,7 @@ describe("Overwrite code hash", function () {
 
         expect(failedToOverwrite).to.eq(true);
 
-        const value = await contract.loadInner(key);
+        const value = await contract.getFunction("loadInner").staticCall(key);
         expect(value).to.eq(codehash0);
     });
 });

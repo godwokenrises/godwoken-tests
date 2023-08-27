@@ -11,12 +11,12 @@ describe("Recursion Contract", function () {
   it("Deploy and call recursive functions", async () => {
     const contractFact = await ethers.getContractFactory("RecursionContract");
     const recurContract = await contractFact.deploy();
-    await recurContract.deployed();
+    await recurContract.waitForDeployment();
 
     const maxDepth = 35;
     for (let i = 1; i <= maxDepth; i++) {
-      let pureSumLoop = await recurContract.pureSumLoop(i);
-      let sum = await recurContract.sum(i);
+      let pureSumLoop = await recurContract.getFunction("pureSumLoop").staticCall(i);
+      let sum = await recurContract.getFunction("sum").staticCall(i);
 
       console.log("depth:", i, "\t sum = ", parseInt(sum));
       expect(sum).to.equal(pureSumLoop);

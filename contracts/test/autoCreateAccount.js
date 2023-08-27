@@ -25,8 +25,9 @@ describe("AutoCreateAccount", function () {
 
     const Contract = await ethers.getContractFactory(ERC20_ABI, ERC20_BYTECODE, owner);
     token = await Contract.deploy("pckb", "pCKB", 10000, 1, 18)
-    await token.deployed();
-    console.log("Token deployed to:", token.address);
+    await token.waitForDeployment();
+    const tokenAddress = await token.getAddress();
+    console.log("Token deployed to:", tokenAddress);
   })
 
   it("Auto create account if ckb balance > 0", async () => {
@@ -37,16 +38,16 @@ describe("AutoCreateAccount", function () {
     const ownerBalance = await ethers.provider.getBalance(owner.address);
     console.log("owner balance:", ownerBalance);
 
-  
+
     const randomUserId = await ethAddressToAccountId(randomUser.address, rpc);
     console.log("random user id:", randomUserId)
     assert.isUndefined(randomUserId)
-  
+
     console.log(`timestamp before transfer:` + Date.now());
-    const transferTx = await token.transfer(randomUser.address, (2000n * 10n**18n).toString());
+    const transferTx = await token.transfer(randomUser.address, (2000n * 10n ** 18n).toString());
     await transferTx.wait(2);
     console.log(`timestamp after transfer:` + Date.now());
-    
+
     const ownerBalanceAfterTransfer = await ethers.provider.getBalance(owner.address);
     console.log("owner balance after transfer:", ownerBalanceAfterTransfer);
     const nextFromBalance = await ethers.provider.getBalance(randomUser.address)

@@ -20,8 +20,9 @@ describe("BlockInfo Contract", function () {
 
     const blockInfoContractFact = await ethers.getContractFactory("BlockInfo");
     contract = await blockInfoContractFact.deploy();
-    await contract.deployed();
-    console.log("Deployed contract address:", contract.address);
+    await contract.waitForDeployment();
+    const address = await contract.getAddress();
+    console.log("Deployed contract address:", address);
   });
 
   it("should compare web3 chain id and EVM with same results", async () => {
@@ -37,11 +38,11 @@ describe("BlockInfo Contract", function () {
 
   it("should compare web3 coinbase and coinbase from EVM with same results", async () => {
     // check coinbase
-    const miner = await ethers.provider.miner
-    const contractMiner = await contract.getBlockCoinbase()
+    const miner = (await ethers.provider.getBlock("latest")).miner
+    const contractMiner = await contract.getFunction("getBlockCoinbase").staticCall()
 
-    console.log('contractMiner', contractMiner)
     console.log('miner', miner)
+    console.log('contractMiner', contractMiner)
     // TODO: Uncomment when will be fixed, show as zero address
     // expect(contractMiner).to.be.equal(miner)
   })
@@ -49,11 +50,11 @@ describe("BlockInfo Contract", function () {
   it("should compare web3 block number and block number from EVM with same results", async () => {
     // check block number
     const block = await ethers.provider.getBlock("latest") // tip block from web3 db
-    const contractBlockNumber = await contract.getCurrentBlockNumber() // mem block from godwoken
+    const contractBlockNumber = await contract.getFunction("getCurrentBlockNumber").staticCall() // mem block from godwoken
 
     console.log('blockNumber', block.number)
     console.log('contractBlockNumber', contractBlockNumber)
-    expect(contractBlockNumber.toNumber()).to.be.greaterThanOrEqual(block.number)
+    expect(contractBlockNumber).to.be.greaterThanOrEqual(block.number)
   })
 
   it("should compare web3 block hash and block hash from EVM with same results", async () => {
@@ -70,7 +71,7 @@ describe("BlockInfo Contract", function () {
 
   it("should mine correct event with block number and hash with OK results", async () => {
     // mine and get block info results
-    const tx = await contract.executeCurrentBlockHash().then(tx => tx.wait())
+    const tx = await contract.getFunction("executeCurrentBlockHash").send().then(tx => tx.wait())
 
     const txBlockNumber = tx.blockNumber
     const txBlockHash = tx.blockHash

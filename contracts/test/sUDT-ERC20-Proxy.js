@@ -134,7 +134,7 @@ describe("sUDT-ERC20 Proxy Contract", () => {
         contract.name(),
         contract.symbol(),
         contract.decimals(),
-        contract.callStatic.totalSupply(),
+        await contract.getFunction("totalSupply").staticCall(),
       ]);
 
       console.log({ sudtId, symbol, name, decimals, address, totalSupply });
@@ -147,8 +147,8 @@ describe("sUDT-ERC20 Proxy Contract", () => {
     const sudt = await ethers.getContractAt(abi, transferSudt.address);
 
     const [senderBalance, receiverBalance] = await Promise.all([
-      sudt.callStatic.balanceOf(sender.address),
-      sudt.callStatic.balanceOf(receiver.address),
+      sudt.getFunction("balanceOf").staticCall(sender.address),
+      sudt.getFunction("balanceOf").staticCall(receiver.address),
     ]);
     console.debug(`${transferSudt.name} Balance of ${sender.address}:`, senderBalance);
     console.debug(`${transferSudt.name} Balance of ${receiver.address}:`, receiverBalance);
@@ -157,14 +157,14 @@ describe("sUDT-ERC20 Proxy Contract", () => {
     const tx = await sudt.transfer(receiver.address, amount);
 
     const receipt = await tx.wait();
-    expect(receipt.events.length).to.be.greaterThan(0, "Should have at least one event");
+    expect(receipt.logs.length).to.be.greaterThan(0, "Should have at least one event");
 
-    const [event] = receipt.events;
-    expect(event.event).to.equal("Transfer", "Should be Transfer event");
+    const [event] = receipt.logs;
+    expect(event.fragment.name).to.equal("Transfer", "Should be Transfer event");
 
     const { args } = event;
     expect(args.from).to.equal(sender.address, "Transferred from sender");
     expect(args.to).to.equal(receiver.address, "Transferred to receiver");
-    expect(args.value.toNumber()).to.equal(amount, "Transfer amount should match");
+    expect(args.value).to.equal(amount, "Transfer amount should match");
   });
 });

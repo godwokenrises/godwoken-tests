@@ -21,24 +21,21 @@ describe("MIN GAS PRICE Test", function () {
   before("Deploy and Set", async () => {
     const contractFact = await ethers.getContractFactory("CallTest");
     ethCallContract = await contractFact.deploy();
-    await ethCallContract.deployed();
+    await ethCallContract.waitForDeployment();
   });
 
   it("Eth_sendRawTransaction with no special gasPrice setting", async () => {
-    const tx = await ethCallContract.set(expectedValue);
-    await tx.wait();
-    const receipt = await ethCallContract.provider.getTransactionReceipt(
-      tx.hash
-    );
+    const tx = await ethCallContract.getFunction("set").send(expectedValue);
+    const receipt = await tx.wait();
     expect(receipt.status).to.equal(1);
   });
 
   it("Eth_sendRawTransaction with lower gasPrice", async () => {
 
     /**
-        Axon throws a different error message:
-          "Custom error: The transaction gas price is zero"
-    */
+     Axon throws a different error message:
+     "Custom error: The transaction gas price is zero"
+     */
     if (isAxon()) {
       return;
     }
@@ -62,10 +59,11 @@ describe("MIN GAS PRICE Test", function () {
     if (isAxon()) {
       return true;
     }
+    const address = await ethCallContract.getAddress();
     const noErrMsgKeyWords = ["minimal gas price"];
     const toId = await getAccountIdByContractAddress(
       rpc,
-      ethCallContract.address
+      address
     );
     const toIdLE = u32ToLittleEnd(toId);
     const l2tx = `0xd90000000c0000009400000088000000180000002000000024000000280000002c000000e81601000000000010000000${toIdLE.slice(
@@ -81,6 +79,7 @@ describe("MIN GAS PRICE Test", function () {
     if (isAxon()) {
       return true;
     }
+    const address = await ethCallContract.getAddress();
     const errMsg = [
       "invalid argument",
       "minimal gas price",
@@ -88,7 +87,7 @@ describe("MIN GAS PRICE Test", function () {
     ];
     const toId = await getAccountIdByContractAddress(
       rpc,
-      ethCallContract.address
+      address
     );
     const toIdLE = u32ToLittleEnd(toId);
     console.log(toIdLE);

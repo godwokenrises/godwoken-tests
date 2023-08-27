@@ -2,8 +2,6 @@ const { assert } = require("chai");
 const { ethers } = require("hardhat");
 const { isGwMainnetV1 } = require('../utils/network');
 
-const { BigNumber, constants } = ethers;
-
 describe("Multicall2", function () {
   if (isGwMainnetV1()) {
     return;
@@ -14,20 +12,23 @@ describe("Multicall2", function () {
   let revertTest;
   let getEthBalanceCallData;
   let revertTestCallData;
+  let multicall2Address, revertTestAddress;
 
   before(async function () {
     const Multicall2Contract = await ethers.getContractFactory("Multicall2");
     multicall2 = await Multicall2Contract.deploy();
-    await multicall2.deployed();
-    console.log(`    Multicall address:`, multicall2.address);
-
-    deployerAddress = await multicall2.signer.getAddress();
+    await multicall2.waitForDeployment();
+    multicall2Address = await multicall2.getAddress();
+    const deployTx = multicall2.deploymentTransaction();
+    deployerAddress = deployTx.from;
+    console.log(`    Multicall address:`, multicall2Address);
     console.log("    Deployer address", deployerAddress);
 
     const RevertTestContract = await ethers.getContractFactory("RevertTest");
     revertTest = await RevertTestContract.deploy();
-    await revertTest.deployed();
-    console.log(`    RevertTest address:`, revertTest.address);
+    await revertTest.waitForDeployment();
+    revertTestAddress = await revertTest.getAddress();
+    console.log(`    RevertTest address:`, revertTestAddress);
 
     getEthBalanceCallData = multicall2.interface.encodeFunctionData(
       "getEthBalance",
@@ -40,17 +41,17 @@ describe("Multicall2", function () {
   it("Running: get native balance with Multicall2.getEthBalance", async () => {
     console.log(
       "    Balance:",
-      (await multicall2.callStatic.getEthBalance(deployerAddress)).toString()
+      (await multicall2.getFunction("getEthBalance").staticCall(deployerAddress)).toString()
     );
   });
 
   it("Running: get native balance with Multicall2.aggregate", async () => {
     console.log(
       "    Balance:",
-      BigNumber.from(
+      BigInt(
         (
-          await multicall2.callStatic.aggregate([
-            { target: multicall2.address, callData: getEthBalanceCallData },
+          await multicall2.getFunction("aggregate").staticCall([
+            { target: multicall2Address, callData: getEthBalanceCallData },
           ])
         )[1][0]
       ).toString()
@@ -60,10 +61,10 @@ describe("Multicall2", function () {
   it("Running: get native balance with Multicall2.tryAggregate", async () => {
     console.log(
       "    Balance:",
-      BigNumber.from(
+      BigInt(
         (
-          await multicall2.callStatic.tryAggregate(true, [
-            { target: multicall2.address, callData: getEthBalanceCallData },
+          await multicall2.getFunction("tryAggregate").staticCall(true, [
+            { target: multicall2Address, callData: getEthBalanceCallData },
           ])
         )[0].returnData
       ).toString()
@@ -72,8 +73,8 @@ describe("Multicall2", function () {
 
   it("Running: RevertTest.test() with Multicall2.aggregate", async () => {
     try {
-      await multicall2.callStatic.aggregate([
-        { target: revertTest.address, callData: revertTestCallData },
+      await multicall2.getFunction("aggregate").staticCall([
+        { target: revertTestAddress, callData: revertTestCallData },
       ]);
       throw new Error("should revert here");
     } catch (err) {
@@ -83,8 +84,8 @@ describe("Multicall2", function () {
 
   it("Running: RevertTest.test() with Multicall2.tryAggregate", async () => {
     try {
-      await multicall2.callStatic.tryAggregate(false, [
-        { target: revertTest.address, callData: revertTestCallData },
+      await multicall2.getFunction("tryAggregate").staticCall(false, [
+        { target: revertTestAddress, callData: revertTestCallData },
       ]);
     } catch (err) {
       console.log("    [Incompatibility] Should not revert");
@@ -94,8 +95,8 @@ describe("Multicall2", function () {
 
   it("Running: RevertTest.test() with Multicall2.tryAggregate (require success)", async () => {
     try {
-      await multicall2.callStatic.tryAggregate(true, [
-        { target: revertTest.address, callData: revertTestCallData },
+      await multicall2.getFunction("tryAggregate").staticCall(true, [
+        { target: revertTestAddress, callData: revertTestCallData },
       ]);
       throw new Error("should revert here");
     } catch (err) {
@@ -109,10 +110,10 @@ describe("Multicall2", function () {
         [shouldBeFalse],
         [isGetEthBalanceSuccess, balance],
         [shouldBeTrue],
-      ] = await multicall2.callStatic.tryAggregate(false, [
-        { target: revertTest.address, callData: revertTestCallData },
-        { target: multicall2.address, callData: getEthBalanceCallData },
-        { target: constants.AddressZero, callData: revertTestCallData },
+      ] = await multicall2.getFunction("tryAggregate").staticCall(false, [
+        { target: revertTestAddress, callData: revertTestCallData },
+        { target: multicall2Address, callData: getEthBalanceCallData },
+        { target: ethers.ZeroAddress, callData: revertTestCallData },
       ]);
 
       assert.isTrue(
@@ -121,7 +122,7 @@ describe("Multicall2", function () {
       );
 
       if (isGetEthBalanceSuccess) {
-        console.log("    Balance:", BigNumber.from(balance).toString());
+        console.log("    Balance:", balance);
       }
 
       assert.isFalse(
@@ -140,10 +141,10 @@ describe("Multicall2", function () {
 
   it("Running: Multicall2.tryAggregate([nonexistentContractCall, getNativeBalance, nonexistentContractCall]", async function () {
     try {
-      await multicall2.callStatic.tryAggregate(false, [
-        { target: constants.AddressZero, callData: revertTestCallData },
-        { target: multicall2.address, callData: getEthBalanceCallData },
-        { target: constants.AddressZero, callData: revertTestCallData },
+      await multicall2.getFunction("tryAggregate").staticCall(false, [
+        { target: ethers.ZeroAddress, callData: revertTestCallData },
+        { target: multicall2Address, callData: getEthBalanceCallData },
+        { target: ethers.ZeroAddress, callData: revertTestCallData },
       ]);
     } catch (err) {
       console.log("    [Incompatibility] Should not revert");
@@ -152,18 +153,18 @@ describe("Multicall2", function () {
   });
 
   it("Running: Multicall2.tryAggregate([nonexistentContractCall, nonexistentContractCall]", async () => {
-    await multicall2.callStatic.tryAggregate(false, [
-      { target: constants.AddressZero, callData: revertTestCallData },
-      { target: constants.AddressZero, callData: revertTestCallData },
+    await multicall2.getFunction("tryAggregate").staticCall(false, [
+      { target: ethers.ZeroAddress, callData: revertTestCallData },
+      { target: ethers.ZeroAddress, callData: revertTestCallData },
     ]);
     // Should not revert(throw error)
   });
 
   it("Running: Multicall2.tryAggregate([nonexistentContractCall, nonexistentContractCall, getNativeBalance]", async () => {
-    await multicall2.callStatic.tryAggregate(false, [
-      { target: constants.AddressZero, callData: revertTestCallData },
-      { target: constants.AddressZero, callData: revertTestCallData },
-      { target: multicall2.address, callData: getEthBalanceCallData },
+    await multicall2.getFunction("tryAggregate").staticCall(false, [
+      { target: ethers.ZeroAddress, callData: revertTestCallData },
+      { target: ethers.ZeroAddress, callData: revertTestCallData },
+      { target: multicall2Address, callData: getEthBalanceCallData },
     ]);
     // Should not revert(throw error)
   });

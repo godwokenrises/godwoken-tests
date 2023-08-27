@@ -1,6 +1,7 @@
 const { expect } = require("chai");
 const { ethers } = require("hardhat");
 const { isGwMainnetV1, isAxon } = require("../utils/network");
+const { address } = require("hardhat/internal/core/config/config-validation");
 
 // NOTE: using `tx.wait(2)` for we use instant finality for tests
 
@@ -8,6 +9,7 @@ describe("eth_getFilterChanges", function () {
   if (isGwMainnetV1() || isAxon()) {
     return;
   }
+  let contractAddress;
 
   // NOTE: `eth_getFilterChanges` returns a list of block hashes for a block filter, while a part of hashes
   // may not exist on the canonical chain, so `getBlock()` will return `null` for them.
@@ -18,11 +20,11 @@ describe("eth_getFilterChanges", function () {
     // 2. Deploy contract and make a call
     const logsProducer = await ethers.getContractFactory("LogsProducer");
     const contract = await logsProducer.deploy();
-    await contract.deployed();
+    await contract.waitForDeployment();
 
     const nameOfLogs = 1;
     const numberOfLogs = 1;
-    const tx = await contract.produce(nameOfLogs, numberOfLogs);
+    const tx = await contract.getFunction("produce").send(nameOfLogs, numberOfLogs);
     await tx.wait(2);
 
     // 3. eth_getFilterChanges should return a list of block hashes, check count and order(asc) of them
@@ -44,18 +46,19 @@ describe("eth_getFilterChanges", function () {
     // 1. Deploy contract
     const logsProducer = await ethers.getContractFactory("LogsProducer");
     const contract = await logsProducer.deploy();
-    await contract.deployed();
+    await contract.waitForDeployment();
+    const address = await contract.getAddress();
 
     // 2. Create a filter with address and topics.
     //
     // topics: [signature of event name, $nameOfLogs, $numberOfLogs]
     const nameOfLogs = 2;
     const numberOfLogs = 2;
-    const topics = contract.filters.Event(
+    const eventFilter = contract.filters.Event(
       "0x" + nameOfLogs.toString(16).padStart(64, "0"),
       "0x" + numberOfLogs.toString(16).padStart(64, "0")
-    ).topics;
-    const address = contract.address;
+    )
+    const topics = await eventFilter.getTopicFilter();
     const fromBlock = null;
     const filterId = await ethers.provider.send("eth_newFilter", [
       { address, topics, fromBlock },
@@ -63,12 +66,12 @@ describe("eth_getFilterChanges", function () {
 
     const fn = async () => {
       // 3. Emit $numberOfLogs logs
-      const tx = await contract.produce(nameOfLogs, numberOfLogs);
+      const tx = await contract.getFunction("produce").send(nameOfLogs, numberOfLogs);
       await tx.wait(2);
 
       // 4. We should get `$numberOfLogs` results with order(asc) by id desc
       const receipt = await ethers.provider.getTransactionReceipt(tx.hash);
-      const receiptLogIds = receipt.logs.map((log) => log.logIndex);
+      const receiptLogIds = receipt.logs.map((log) => log.index);
       const logs = await ethers.provider.send("eth_getFilterChanges", [
         filterId,
       ]);
@@ -101,7 +104,7 @@ describe("eth_getFilterLogs", function () {
     const numberOfLogs = 3;
     const logsProducer = await ethers.getContractFactory("LogsProducer");
     const contract = await logsProducer.deploy();
-    await contract.deployed();
+    await contract.waitForDeployment();
 
     const tx = await contract.produce(nameOfLogs, numberOfLogs);
     await tx.wait(2);
@@ -123,18 +126,19 @@ describe("eth_getFilterLogs", function () {
     // 1. Deploy contract
     const logsProducer = await ethers.getContractFactory("LogsProducer");
     const contract = await logsProducer.deploy();
-    await contract.deployed();
+    await contract.waitForDeployment();
+    const address = await contract.getAddress();
 
     // 2. Create a filter with address and topics.
     //
     // topics: [signature of event name, $nameOfLogs, $numberOfLogs]
     const nameOfLogs = 2;
     const numberOfLogs = 2;
-    const topics = contract.filters.Event(
+    const eventFilter = contract.filters.Event(
       "0x" + nameOfLogs.toString(16).padStart(64, "0"),
       "0x" + numberOfLogs.toString(16).padStart(64, "0")
-    ).topics;
-    const address = contract.address;
+    )
+    const topics = await eventFilter.getTopicFilter();
 
     // `fromBlock` default to latest block when call `eth_getFilterLogs` in Geth
     const fromBlock = "earliest";
@@ -144,7 +148,10 @@ describe("eth_getFilterLogs", function () {
 
     let totalReceiptLogIds = [];
 
-    const generateLogId = (log) => `${log.transactionHash}#${+log.logIndex}`;
+    const generateLogId = (log) => {
+      const index = log.logIndex !== undefined ? log.logIndex : log.index;
+      return `${log.transactionHash}#${+index}`;
+    };
 
     const fn = async () => {
       // 3. Emit $numberOfLogs logs
@@ -184,7 +191,8 @@ describe("eth_getLogs", function () {
     // 1. Deploy contract and wait 2 blocks generated
     const logsProducer = await ethers.getContractFactory("LogsProducer");
     const contract = await logsProducer.deploy();
-    await contract.deployed();
+    await contract.waitForDeployment();
+    const address = await contract.getAddress();
 
     const nameOfLogs = 4;
     const numberOfLogs = 4;
@@ -194,18 +202,18 @@ describe("eth_getLogs", function () {
     await tx.wait(2);
 
     const receipt = await ethers.provider.getTransactionReceipt(tx.hash);
-    const receiptLogIds = receipt.logs.map((log) => log.logIndex);
+    const receiptLogIds = receipt.logs.map((log) => log.index);
     const receiptBlockNumber = "0x" + receipt.blockNumber.toString(16);
     const receiptBlockNumberAdd1 =
       "0x" + (receipt.blockNumber + 1).toString(16);
     expect(receiptLogIds).deep.eq([...receiptLogIds].sort());
 
-    const topics = contract.filters.Event(
+    const eventFilter = contract.filters.Event(
       "0x" + nameOfLogs.toString(16).padStart(64, "0"),
       "0x" + numberOfLogs.toString(16).padStart(64, "0")
-    ).topics;
+    )
+    const topics = await eventFilter.getTopicFilter();
 
-    const address = contract.address;
     const cases = [
       { fromBlock: undefined, toBlock: undefined, expected: [] },
       { fromBlock: "earliest", toBlock: undefined, expected: receiptLogIds },
@@ -257,7 +265,7 @@ describe("eth_getLogs", function () {
     } of cases) {
       const filter = { address, topics, fromBlock, toBlock, blockHash };
       try {
-        const logs = await ethers.provider.send("eth_getLogs", [filter]);
+        const logs = await getLogsWithRetry(filter);
         expect(logs.length, `filter: ${JSON.stringify(filter)}`).eq(
           expected.length
         );
@@ -275,3 +283,14 @@ describe("eth_getLogs", function () {
     }
   });
 });
+
+async function getLogsWithRetry(filter, retries = 3, interval = 1000) {
+  for (let i = 0; i < retries; i++) {
+    try {
+      return await ethers.provider.send("eth_getLogs", [filter]);
+    } catch (err) {
+      if (i === retries - 1) throw err; // If it's the last retry, throw the error
+      await new Promise(resolve => setTimeout(resolve, interval)); // Wait for a specified interval before retrying
+    }
+  }
+}

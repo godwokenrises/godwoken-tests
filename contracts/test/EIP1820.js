@@ -33,12 +33,13 @@ describe('EIP 1820', () => {
       // Deploy ERC20
       const Contract = await ethers.getContractFactory(ERC20_ABI, ERC20_BYTECODE, owner);
       const token = await Contract.deploy("pckb", "pCKB", 10000, 1, 18)
-      await token.deployed();
-      console.log(`Token deployed to: ${token.address}, hash: ${token.deployTransaction.hash}`);
+      await token.waitForDeployment();
+      const tokenAddress =await token.getAddress();
+      console.log(`Token deployed to: ${tokenAddress}, hash: ${token.deploymentTransaction().hash}`);
 
       // Create a transaction object
       // Convert currency unit from ether to wei
-      const transferTx = await token.transfer(deployer, ethers.utils.parseEther("0.08"));
+      const transferTx = await token.getFunction("transfer").send(deployer, ethers.parseEther("0.08"));
       await transferTx.wait();
       console.log('prepare deployment ETH', transferTx.hash)
 
