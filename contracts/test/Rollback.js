@@ -64,6 +64,7 @@ describe('RollBack', function () {
   before(async () => {
     const rollBackContractInfo = await ethers.getContractFactory("RollBackTestContract");
     rollBackContract = await rollBackContractInfo.deploy({ value: 50000 });
+    await rollBackContract.waitForDeployment();
     const changeObjContractAddress = await rollBackContract.getFunction("changeObjContract").staticCall();
     changeObjContract = await ethers.getContractAt("ChangeObjContract", changeObjContractAddress)
   })
