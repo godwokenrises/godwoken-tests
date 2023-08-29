@@ -8,9 +8,6 @@ To run contract tests on Godwoken testnet_v1, you can follow the command lines b
 2. `cd godwoken-tests/contracts` - Go to contracts folder
 3. `npm install` - Install dependencies
 4. `npm run test:gw_testnet_v1` - Run tests on Godwoken testnet_v1
-### Enable and Disable rpc log printing
-`npm run addRpcLog`
-`rm -rf node_modules/hardhat && npm install hardhat && chmod +x node_modules/.bin/hardhat`
 
 ## Deploy and test on Godwoken devnet
 

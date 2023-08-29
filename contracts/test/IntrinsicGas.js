@@ -48,7 +48,6 @@ describe("MIN GAS PRICE Test", function () {
       "eth_sendRawTransaction",
     ];
     const method = async () => {
-      // try {
       const tx = await ethCallContract.getFunction("set").populateTransaction(expectedValue);
       const deployTx = ethCallContract.deploymentTransaction()
       const to = await ethCallContract.getAddress()
@@ -73,9 +72,6 @@ describe("MIN GAS PRICE Test", function () {
         "data": tx.data
       }])
       await sendTx.wait();
-      // } catch (error) {
-      //   console.error("Error occurred:", error);
-      // }
     };
     await expectThrowsAsync(method, errMsg);
   });

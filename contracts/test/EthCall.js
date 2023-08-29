@@ -21,7 +21,7 @@ describe("Eth_Call Cache Test", function () {
   });
 
   it("batch call", async () => {
-    const count = 20;
+    const count = 200;
     const p = new Array(count).fill(1).map(async () => {
       return await ethCallContract.getFunction("get").staticCall();
     });
@@ -34,7 +34,7 @@ describe("Eth_Call Cache Test", function () {
   });
 
   it("batch call revert", async () => {
-    const count = 20;
+    const count = 200;
     const triggerValue = 444;
 
     const p = new Array(count).fill(1).map(async () => {

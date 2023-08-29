@@ -79,10 +79,10 @@ describe("Token contract", function () {
       // Transfer 100 tokens from owner to addr1.
       const tx = await hardhatToken.transfer(addr1.address, 100);
       await tx.wait();
-      
+
       // Check balances.
       const finalOwnerBalance = await hardhatToken.balanceOf(owner.address);
-      expect(finalOwnerBalance).to.equal(initialOwnerBalance-100n);
+      expect(finalOwnerBalance).to.equal(initialOwnerBalance - 100n);
 
       const addr1Balance = await hardhatToken.balanceOf(addr1.address);
       expect(addr1Balance).to.equal(100);

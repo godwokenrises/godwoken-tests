@@ -43,8 +43,7 @@ describe("BlockInfo Contract", function () {
 
     console.log('miner', miner)
     console.log('contractMiner', contractMiner)
-    // TODO: Uncomment when will be fixed, show as zero address
-    // expect(contractMiner).to.be.equal(miner)
+    expect(contractMiner).to.be.equal(miner)
   })
 
   it("should compare web3 block number and block number from EVM with same results", async () => {
@@ -59,14 +58,15 @@ describe("BlockInfo Contract", function () {
 
   it("should compare web3 block hash and block hash from EVM with same results", async () => {
     // check block hash
-    const block = await ethers.provider.getBlock("latest")
+    const blockNumber = await ethers.provider.getBlockNumber() - 1;
+    const block = await ethers.provider.getBlock(blockNumber)
     // TODO: Uncomment when will be fixed
     // throw ProviderError: data out-of-bounds (length=28, offset=32, code=BUFFER_OVERRUN, version=abi/5.0.7)
-    // const contractBlockHash = await contract.getBlockHash(block.number)
+    const contractBlockHash = await contract.getBlockHash(block.number)
 
     console.log('blockHash', block.hash)
-    // console.log('contractBlockHash', contractBlockHash)
-    // expect(contractBlockNumber.toNumber()).to.be.equal(block.number)
+    console.log('contractBlockHash', contractBlockHash)
+    expect(contractBlockHash).to.be.equal(block.hash)
   })
 
   it("should mine correct event with block number and hash with OK results", async () => {
@@ -83,11 +83,26 @@ describe("BlockInfo Contract", function () {
     console.log('eventBlockHash', eventBlockHash)
 
     expect(eventBlockNumber).to.be.equal(txBlockNumber)
-    // TODO: Uncomment when will be fixed
-    // should not be equal to zero
-    // expect(eventBlockHash).to.be.not.equal("0x0000000000000000000000000000000000000000000000000000000000000000")
+    // should be equal to zero
+    expect(eventBlockHash).to.be.equal("0x0000000000000000000000000000000000000000000000000000000000000000")
+
+
+    // Triggering the event for the previous block hash
+    const prevTx = await contract.getFunction("executePreviousBlockHash").send().then(tx => tx.wait());
+
+    const prevTxBlockNumber = prevTx.blockNumber - 1;
+    const prevTxBlockHash = (await ethers.provider.getBlock(prevTxBlockNumber)).hash;
+    const prevEventBlockNumber = parseInt(prevTx.logs[0].data.slice(0, 66), 16);
+    const prevEventBlockHash = "0x" + prevTx.logs[0].data.slice(66, 130);
+    console.log('prevTxBlockNumber', prevTxBlockNumber)
+    console.log('prevEventBlockNumber', prevEventBlockNumber)
+    console.log('prevTxBlockHash', prevTxBlockHash)
+    console.log('prevEventBlockHash', prevEventBlockHash)
+
     // should be same as block hash
-    // expect(eventBlockHash).to.be.equal(txBlockHash)
+    expect(prevEventBlockNumber).to.be.equal(prevTxBlockNumber);
+    expect(prevEventBlockHash).to.be.not.equal("0x0000000000000000000000000000000000000000000000000000000000000000");
+    expect(prevEventBlockHash).to.be.equal(prevTxBlockHash);
   })
 });
 

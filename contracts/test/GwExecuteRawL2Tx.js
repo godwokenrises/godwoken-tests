@@ -35,7 +35,7 @@ const executeGwRawTx = async (chainId, toId, polyArgs) => {
 
 describe("gw_execute_raw_l2transaction Cache Test", function () {
   if (isAxon()) {
-      return
+    return
   }
   if (isGwMainnetV1()) {
     return;
@@ -45,7 +45,7 @@ describe("gw_execute_raw_l2transaction Cache Test", function () {
     const contractFact = await ethers.getContractFactory("CallTest");
     ethCallContract = await contractFact.deploy();
     await ethCallContract.waitForDeployment();
-    ethCallContractAddress=await ethCallContract.getAddress();
+    ethCallContractAddress = await ethCallContract.getAddress();
     const tx = await ethCallContract.set(expectedValue);
     await tx.wait();
   });
