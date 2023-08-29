@@ -1,7 +1,6 @@
 const { expect } = require("chai");
 const { ethers } = require("hardhat");
 const { isGwMainnetV1 } = require('../utils/network');
-const { address } = require("hardhat/internal/core/config/config-validation");
 
 describe("CodeHash test cases", function () {
   if (isGwMainnetV1()) {
