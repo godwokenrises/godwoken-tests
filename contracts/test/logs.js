@@ -1,7 +1,6 @@
 const { expect } = require("chai");
 const { ethers } = require("hardhat");
 const { isGwMainnetV1, isAxon } = require("../utils/network");
-const { address } = require("hardhat/internal/core/config/config-validation");
 
 // NOTE: using `tx.wait(2)` for we use instant finality for tests
 
