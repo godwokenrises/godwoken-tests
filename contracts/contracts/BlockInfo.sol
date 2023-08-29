@@ -7,6 +7,11 @@ contract BlockInfo {
         bytes32 hash
     );
 
+    event PreviousBlockEvt(
+        uint256 number,
+        bytes32 hash
+    );
+
     function getCurrentBlockNumber() public view returns (uint256) {
         return block.number;
     }
@@ -39,5 +44,9 @@ contract BlockInfo {
         assembly {
             chainId_ := chainid()
         }
+    }
+
+    function executePreviousBlockHash() public {
+        emit PreviousBlockEvt(block.number - 1, blockhash(block.number - 1));
     }
 }

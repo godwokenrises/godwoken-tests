@@ -14,20 +14,17 @@ describe("MIN GAS PRICE Test", function () {
   if (isGwMainnetV1()) {
     return;
   }
-  
+
 
   before("Deploy and Set", async () => {
     const contractFact = await ethers.getContractFactory("CallTest");
     ethCallContract = await contractFact.deploy();
-    await ethCallContract.deployed();
+    await ethCallContract.waitForDeployment();
   });
 
   it("Eth_sendRawTransaction with no special gasLimit setting", async () => {
-    const tx = await ethCallContract.set(expectedValue);
-    await tx.wait();
-    const receipt = await ethCallContract.provider.getTransactionReceipt(
-      tx.hash
-    );
+    const tx = await ethCallContract.getFunction("set").send(expectedValue);
+    const receipt = await tx.wait();
     expect(receipt.status).to.equal(1);
   });
 
@@ -38,7 +35,7 @@ describe("MIN GAS PRICE Test", function () {
       "eth_sendRawTransaction",
     ];
     const method = async () => {
-      const tx = await ethCallContract.set(expectedValue, { gasLimit: 0 });
+      const tx = await ethCallContract.getFunction("set").send(expectedValue, { gasLimit: 0 });
       await tx.wait();
     };
     await expectThrowsAsync(method, errMsg);
@@ -51,12 +48,14 @@ describe("MIN GAS PRICE Test", function () {
       "eth_sendRawTransaction",
     ];
     const method = async () => {
-      const tx = await ethCallContract.populateTransaction.set(expectedValue);
-      const address = await ethCallContract.signer.getAddress();
+      const tx = await ethCallContract.getFunction("set").populateTransaction(expectedValue);
+      const deployTx = ethCallContract.deploymentTransaction()
+      const to = await ethCallContract.getAddress()
+      const from = deployTx.from
 
-      const gas = await ethCallContract.provider.estimateGas(tx);
-      const balance = await ethCallContract.provider.getBalance(address);
-      const enoughGasPrice = BigInt(balance) / BigInt(gas);
+      const gas = await ethCallContract.getFunction("set").estimateGas(expectedValue);
+      const balance = await ethers.provider.getBalance(from);
+      const enoughGasPrice = balance / gas;
       const insufficientGasPrice = enoughGasPrice + 100n;
 
       console.log(
@@ -64,10 +63,15 @@ describe("MIN GAS PRICE Test", function () {
       );
 
       const gasPrice = "0x" + insufficientGasPrice.toString(16);
-      const gasLimit = gas;
-      tx.gasPrice = gasPrice;
-      tx.gasLimit = gasLimit;
-      await ethCallContract.signer.sendTransaction(tx);
+      const gasLimit = "0x" + gas.toString(16);
+      const sendTx = await ethers.provider.send("eth_sendTransaction", [{
+        from,
+        to,
+        "gas": gasLimit,
+        "gasPrice": gasPrice,
+        "data": tx.data
+      }])
+      await sendTx.wait();
     };
     await expectThrowsAsync(method, errMsg);
   });

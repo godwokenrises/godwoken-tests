@@ -9,7 +9,7 @@ async function main() {
 
   // Query the balance of every test account
   let [b1, b2, _bg, b3, b4] = signers.map(async account => {
-    const balance = await account.getBalance();
+    const balance = await ethers.provider.getBalance(account.address);
     console.log(`native token balance of ${account.address}: ${balance.toString()}`);
     return balance;
   });

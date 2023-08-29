@@ -7,7 +7,8 @@
     "test": "hardhat test --network gw_devnet_v1",
     "test:gw_testnet_v1": "hardhat test --bail --network gw_testnet_v1",
     "test:gw_alphanet_v1": "hardhat test --bail --network gw_alphanet_v1",
-    "test:gw_mainnet_v1": "hardhat test --bail --network gw_mainnet_v1"
+    "test:gw_mainnet_v1": "hardhat test --bail --network gw_mainnet_v1",
+    "addRpcLog": "patch-package"
   },
   "keywords": [
     "Solidity",
@@ -15,11 +16,12 @@
   ],
   "license": "MIT",
   "devDependencies": {
-    "@nomicfoundation/hardhat-toolbox": "^2.0.2",
+    "@nomicfoundation/hardhat-toolbox": "^3.0.0",
     "@openzeppelin/contracts": "^4.9.3",
     "@openzeppelin/contracts-upgradeable": "^4.9.3",
-    "@openzeppelin/hardhat-upgrades": "^1.28.0",
-    "hardhat": "^2.17.1"
+    "@openzeppelin/hardhat-upgrades": "^2.2.1",
+    "hardhat": "^2.17.1",
+    "patch-package": "^8.0.0"
   },
   "dependencies": {
     "@ckb-lumos/base": "^0.17.0",

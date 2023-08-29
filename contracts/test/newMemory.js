@@ -10,11 +10,11 @@ describe("Memory Contract", function () {
   it("Deploy and new some memory", async () => {
     const contractFact = await ethers.getContractFactory("Memory");
     const contract = await contractFact.deploy();
-    await contract.deployed();
+    await contract.waitForDeployment();
 
     const maxMemory = 3_932_160 / 256; // 1024 * 1024 * 3 = 3,932,160 = 3 MB
     for (let step = 1024; step <= maxMemory; step += 1024) {
-      let uint8Length = await contract.newMemory(step);
+      let uint8Length = await contract.getFunction("newMemory").staticCall(step);
       expect(uint8Length).to.equal(step);
     }
   });

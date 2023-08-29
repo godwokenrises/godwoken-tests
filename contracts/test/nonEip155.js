@@ -4,6 +4,7 @@ const rlp = require("rlp");
 const { key } = require("@ckb-lumos/hd");
 const hardhatConfig = require("../hardhat.config");
 const { isAxon } = require("../utils/network");
+const { getTxReceipt } = require("../utils/receipt");
 
 const { ethers } = hardhat;
 
@@ -17,12 +18,12 @@ describe("Non eip155 tx", function () {
     const [owner] = await ethers.getSigners();
 
     const ConsoleContract = await ethers.getContractFactory("Storage");
-    const txRequest = ConsoleContract.getDeployTransaction();
+    const txRequest = await ConsoleContract.getDeployTransaction();
 
     // non-eip155 tx
     // (nonce, gasprice, startgas, to, value, data)
-    const nonce = await owner.getTransactionCount();
-    const gasPrice = await owner.getGasPrice();
+    const nonce = await ethers.provider.getTransactionCount(owner.address);
+    const gasPrice = (await ethers.provider.getFeeData()).gasPrice;
     const gasLimit = await owner.estimateGas(txRequest);
     const to = "0x";
     const value = 0;
@@ -30,15 +31,15 @@ describe("Non eip155 tx", function () {
 
     const rlpData = [
       nonce,
-      gasPrice.toBigInt(),
-      gasLimit.toBigInt(),
+      gasPrice,
+      gasLimit,
       to,
       value,
       data,
     ];
     const rlpEncoded = rlp.encode(rlpData);
 
-    const message = ethers.utils.keccak256(Buffer.from(rlpEncoded)).toString("hex");
+    const message = ethers.keccak256(Buffer.from(rlpEncoded)).toString("hex");
     const ownerPrivateKey =
       hardhatConfig.networks?.[hardhat.network.name]?.accounts[0];
     const signature = key.signRecoverable(message, ownerPrivateKey);
@@ -50,8 +51,8 @@ describe("Non eip155 tx", function () {
 
     const rawTransactionData = [
       nonce,
-      gasPrice.toBigInt(),
-      gasLimit.toBigInt(),
+      gasPrice,
+      gasLimit,
       to,
       value,
       data,
@@ -59,15 +60,12 @@ describe("Non eip155 tx", function () {
       BigInt(r),
       BigInt(s),
     ];
-    const rawTransaction =
-      "0x" + Buffer.from(rlp.encode(rawTransactionData)).toString("hex");
-    const sendResult = await owner.provider?.sendTransaction(rawTransaction);
-    assert.isDefined(sendResult);
-    assert.isNotNull(sendResult);
-    const hash = sendResult?.hash;
-    console.log("tx hash:", hash);
+
+    const rawTransaction = "0x" + Buffer.from(rlp.encode(rawTransactionData)).toString("hex");
+    const txHash = await ethers.provider.send('eth_sendRawTransaction', [rawTransaction]);
+    console.log("tx hash:", txHash);
     // wait commit to block, make sure indexer indexed this tx
-    const txReceipt = await sendResult.wait(2);
+    const txReceipt = await getTxReceipt(txHash);
     assert.isDefined(txReceipt);
     assert.isNotNull(txReceipt);
   });

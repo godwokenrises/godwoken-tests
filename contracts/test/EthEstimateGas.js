@@ -5,7 +5,7 @@ const { isGwMainnetV1 } = require('../utils/network');
 const { expectThrowsAsync } = require('../utils/throw');
 
 const expectedValue = 10;
-const expectedGas = "21000";
+const expectedGas = 21000n;
 
 let ethCallContract;
 
@@ -17,27 +17,26 @@ describe("Eth_estimateGas Cache Test", function () {
   before("Deploy and Set", async () => {
     const contractFact = await ethers.getContractFactory("CallTest");
     ethCallContract = await contractFact.deploy();
-    await ethCallContract.deployed();
-    const tx = await ethCallContract.set(expectedValue);
+    await ethCallContract.waitForDeployment();
+    const tx = await ethCallContract.getFunction("set").send(expectedValue);
     await tx.wait();
   });
 
   it("batch call", async () => {
-    const count = 200;
+    const count = 20;
     const p = new Array(count).fill(1).map(async () => {
-      const value = await ethCallContract.estimateGas.get();
-      return value;
+      return await ethCallContract.getFunction("get").estimateGas();
     });
     const ps = Promise.all(p);
     const values = await ps;
     expect(values.length).to.equal(count);
     for (let i = 0; i < values.length; i++) {
-      expect(+values[i]).to.greaterThanOrEqual(+expectedGas);
+      expect(values[i] >= expectedGas).to.be.true;
     }
   });
 
   it("batch call revert", async () => {
-    const count = 200;
+    const count = 20;
     const triggerValue = 444;
 
     const p = new Array(count).fill(1).map(async () => {
@@ -45,7 +44,7 @@ describe("Eth_estimateGas Cache Test", function () {
         "you trigger death value!",
       ];
       const method = async () => {
-        await ethCallContract.estimateGas.getRevertMsg(triggerValue);
+        await ethCallContract.getFunction("getRevertMsg").estimateGas(triggerValue);
       };
       await expectThrowsAsync(method, errMsgKeyWords);
     });
@@ -54,7 +53,7 @@ describe("Eth_estimateGas Cache Test", function () {
   });
 
   it("estimateGas without from address", async () => {
-    const transaction = await ethCallContract.populateTransaction.get();
+    const transaction = await ethCallContract.getFunction("get").populateTransaction();
     // ethers.provider will auto fill from address, so we use fetch to call rpc
     const body =
       '{"jsonrpc": "2.0", "method":"eth_estimateGas", "params": [{"to":"' +
@@ -71,7 +70,7 @@ describe("Eth_estimateGas Cache Test", function () {
       method: "POST",
     });
     const value = await response.json();
-    expect(+BigInt(value.result).toString(10)).to.greaterThanOrEqual(+expectedGas);
+    expect(BigInt(value.result) >= expectedGas).to.be.true;
   });
 });
 

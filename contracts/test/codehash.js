@@ -23,6 +23,7 @@ describe("CodeHash test cases", function () {
   let contract1 = { address: "" }; // 0xc0dEE6Bbd23103d5Dd4141A459f92961b940F94c
   let contract2 = { address: "" }; // 0xB8407eE45824832c137C23479A3Cd63bd78B2452
   let blockInfoContractFact;
+  let address1, address2;
 
   before(async function () {
     blockInfoContractFact = await ethers.getContractFactory("AddressContract");
@@ -34,24 +35,26 @@ describe("CodeHash test cases", function () {
       contract1 = await ethers.getContractAt("AddressContract", contract1.address);
     } else {
       contract1 = await blockInfoContractFact.deploy({ value: 10000n });
-      await contract1.deployed();
-      console.log("deployed contract1 address:", contract1.address);
+      await contract1.waitForDeployment();
+      address1 = await contract1.getAddress();
+      console.log("deployed contract1 address:", address1);
     }
 
     if (contract2.address) {
       contract2 = await ethers.getContractAt("AddressContract", contract2.address);
     } else {
       contract2 = await blockInfoContractFact.deploy({ value: 101n });
-      await contract2.deployed();
-      console.log("deployed contract2 address:", contract2.address);
+      await contract2.waitForDeployment();
+      address2 = await contract2.getAddress();
+      console.log("deployed contract2 address:", address2);
     }
   });
 
   it("Get codehash", async () => {
-    const codehash1 = await contract1.getCodehash();
+    const codehash1 = await contract1.getFunction("getCodehash").staticCall();
     expect(codehash1).to.equal(CODEHASH);
 
-    const codehash2 = await contract2.getCodehash();
+    const codehash2 = await contract2.getFunction("getCodehash").staticCall();
     expect(codehash2).to.equal(CODEHASH);
   });
 
@@ -63,44 +66,44 @@ describe("CodeHash test cases", function () {
 
   it.skip("opcode - (query log for deploy)", async () => {
     let result = await contract2.deployTransaction.wait();
-    expect(result.events[0].args.msg.latestBalance).to.equal(101n);
-    expect(result.events[0].args.msg.latestAddress).to.equal(contract2.address);
-    expect(result.events[0].args.msg.latestCode).to.equal("0x");
-    expect(result.events[0].args.msg.latestCodeLength).to.equal(0n);
+    expect(result.logs[0].args.msg.latestBalance).to.equal(101n);
+    expect(result.logs[0].args.msg.latestAddress).to.equal(address2);
+    expect(result.logs[0].args.msg.latestCode).to.equal("0x");
+    expect(result.logs[0].args.msg.latestCodeLength).to.equal(0n);
 
     return;
     // Only support getting codehash after the contract created.
     // AssertionError: expected latestCodeHash to equal CODEHASH
-    expect(result.events[0].args[1].latestCodeHash).to.equal(CODEHASH);
+    expect(result.logs[0].args[1].latestCodeHash).to.equal(CODEHASH);
   });
 
   it("opcode query(opcodeWithAddress) ", async () => {
-    let result = await contract1.opcodeWithAddress();
-    let code = await ethers.provider.getCode(contract1.address)
-    expect(result[0]).to.equal(contract1.address)
+    let result = await contract1.getFunction("opcodeWithAddress").staticCall();
+    let code = await ethers.provider.getCode(address1)
+    expect(result[0]).to.equal(address1)
     expect(result[1]).to.equal(10000n)
     expect(result[2]).to.equal(code)
     expect(result[4]).to.equal(CODEHASH);
   });
 
   it("opcode - (ADDRESS,CODESIZE,EXTCODESIZE,SELFBALANCE) query on deploy", async () => {
-    let tx = await contract1.setAddressMsg();
+    let tx = await contract1.getFunction("setAddressMsg").send();
     let result = await tx.wait();
-    expect(result.events[0].args[1].latestBalance).to.equal(10000n);
-    expect(result.events[0].args[1].latestAddress).to.equal(contract1.address);
-    expect(result.events[0].args[1].latestCode).to.not.be.contains(
+    expect(result.logs[0].args[1].latestBalance).to.equal(10000n);
+    expect(result.logs[0].args[1].latestAddress).to.equal(address1);
+    expect(result.logs[0].args[1].latestCode).to.not.be.contains(
       "00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000");
-    expect(result.events[0].args[1].latestCodeLength).to.equal(CODE_LEN);
-    expect(result.events[0].args[1].latestCodeHash).to.equal(CODEHASH);
+    expect(result.logs[0].args[1].latestCodeLength).to.equal(CODE_LEN);
+    expect(result.logs[0].args[1].latestCodeHash).to.equal(CODEHASH);
   });
 
   // unregistered ETH Address
   const unregEthAddr = "0x666c3Be470198290d21f5C86327a556d58446678";
   it("Interact with an unregistered address", async () => {
-    let result = await contract1.getOtherAddr(unregEthAddr);
+    let result = await contract1.getFunction("getOtherAddr").staticCall(unregEthAddr);
     expect(result).equals(unregEthAddr);
 
-    result = await contract1.getOtherAddressBalance(unregEthAddr);
+    result = await contract1.getFunction("getOtherAddressBalance").staticCall(unregEthAddr);
     expect(result).to.equal(0n)
   });
 });
@@ -108,6 +111,6 @@ describe("CodeHash test cases", function () {
 /**
  * How to run this test?
 
-> npx hardhat --network gw_testnet_v1 test test/codehash.js && \
-  npx hardhat --network hardhat test test/codehash.js
+ > npx hardhat --network gw_testnet_v1 test test/codehash.js && \
+ npx hardhat --network hardhat test test/codehash.js
  */

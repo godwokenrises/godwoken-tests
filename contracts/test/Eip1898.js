@@ -16,6 +16,7 @@ describe("Eip1898 eth_getCode test", function () {
     address: "", // You could fill the deployed address here
   };
   const expectEmptyCode = "0x";
+  let contractAddress;
 
   if (isGwMainnetV1()) {
     contract.address = mainnetContractAddr;
@@ -29,20 +30,21 @@ describe("Eip1898 eth_getCode test", function () {
 
     const blockInfoContractFact = await ethers.getContractFactory("BlockInfo");
     contract = await blockInfoContractFact.deploy();
-    await contract.deployTransaction.wait(2);
-    console.log("Deployed contract address:", contract.address);
+    await contract.deploymentTransaction().wait(2);
+    contractAddress = await contract.getAddress()
+    console.log("Deployed contract address:", contractAddress);
   });
 
   it(`eth_getCode [ "0x<address>", { "blockNumber": "0x0" }`, async () => {
-    const resJson = await ethGetCode(contract.address, {
+    const resJson = await ethGetCode(contractAddress, {
       blockNumber: "0x0",
     });
     expect(resJson.result).to.be.equal(expectEmptyCode);
   });
 
   it(`eth_getCode [ "0x<address>", { "blockHash": "genesis block hash" }`, async () => {
-    const genesisBlock = await contract.provider.getBlock("0x0");
-    const resJson = await ethGetCode(contract.address, {
+    const genesisBlock = await ethers.provider.getBlock("0x0");
+    const resJson = await ethGetCode(contractAddress, {
       blockHash: genesisBlock.hash,
     });
     console.log(`res json: ${JSON.stringify(resJson, null, 2)}, expect: ${expectEmptyCode}`)
@@ -50,8 +52,8 @@ describe("Eip1898 eth_getCode test", function () {
   });
 
   it(`eth_getCode [ "0x<address>", { "blockHash": "genesis block hash", , "requireCanonical": false }`, async () => {
-    const genesisBlock = await contract.provider.getBlock("0x0");
-    const resJson = await ethGetCode(contract.address, {
+    const genesisBlock = await ethers.provider.getBlock("0x0");
+    const resJson = await ethGetCode(contractAddress, {
       blockHash: genesisBlock.hash,
       requireCanonical: false,
     });
@@ -59,8 +61,8 @@ describe("Eip1898 eth_getCode test", function () {
   });
 
   it(`eth_getCode [ "0x<address>", { "blockHash": "genesis block hash", , "requireCanonical": true }`, async () => {
-    const genesisBlock = await contract.provider.getBlock("0x0");
-    const resJson = await ethGetCode(contract.address, {
+    const genesisBlock = await ethers.provider.getBlock("0x0");
+    const resJson = await ethGetCode(contractAddress, {
       blockHash: genesisBlock.hash,
       requireCanonical: true,
     });
@@ -69,20 +71,20 @@ describe("Eip1898 eth_getCode test", function () {
 
   it(`eth_getCode [ "0x<address>", { "blockHash": "0x<non-existent-block-hash>" }`, async () => {
     const randomHash = "0x" + crypto.randomBytes(32).toString("hex");
-    const resJson = await ethGetCode(contract.address, {
+    const resJson = await ethGetCode(contractAddress, {
       blockHash: randomHash,
     });
     expect(resJson.error.message).to.be.include("Header not found");
   });
 
   it(`eth_getCode [ "0x<address>", { "blockHash": "latest block hash", "requireCanonical": true }`, async () => {
-    const latestBlock = await contract.provider.getBlock("latest");
-    const resJson = await ethGetCode(contract.address, {
+    const latestBlock = await ethers.provider.getBlock("latest");
+    const resJson = await ethGetCode(contractAddress, {
       blockHash: latestBlock.hash,
       requireCanonical: true,
     });
     expect(resJson.result).to.not.equal(null);
-    expect(resJson.result.length).to.equal(1990);
+    expect(resJson.result.length).to.equal(2200);
     expect(resJson.result.startsWith("0x")).to.equal(true);
   });
 });
@@ -103,7 +105,7 @@ async function ethGetCode(
         blockNumber +
         '", "requireCanonical": ' +
         requireCanonical +
-        '}], "id": "'+id+'"}';
+        '}], "id": "' + id + '"}';
     } else if (blockHash != null) {
       body =
         '{"jsonrpc": "2.0", "method":"eth_getCode", "params": ["' +
@@ -112,7 +114,7 @@ async function ethGetCode(
         blockHash +
         '", "requireCanonical": ' +
         requireCanonical +
-        '}], "id": "'+id+'"}';
+        '}], "id": "' + id + '"}';
     } else {
       throw new Error("blockNumber and blockHash must be given at least one");
     }
@@ -123,14 +125,14 @@ async function ethGetCode(
         address +
         '", {"blockNumber": "' +
         blockNumber +
-        '"}], "id": "'+id+'"}';
+        '"}], "id": "' + id + '"}';
     } else if (blockHash != null) {
       body =
         '{"jsonrpc": "2.0", "method":"eth_getCode", "params": ["' +
         address +
         '", {"blockHash": "' +
         blockHash +
-        '"}], "id": "'+id+'"}';
+        '"}], "id": "' + id + '"}';
     } else {
       throw new Error("blockNumber and blockHash must be given at least one");
     }

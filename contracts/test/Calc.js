@@ -10,23 +10,23 @@ describe("Calc contract", function () {
     it("Deployment computing contract", async function () {
         const Storage = await ethers.getContractFactory("Calc");
         const contract = await Storage.deploy();
-        await contract.deployed()
+        await contract.waitForDeployment()
 
         //Set data
-        const i = await contract.store(256);
+        const i = await contract.getFunction("store").send(256);
         await i.wait();
 
         //Read data
-        const number = await contract.retrieve();
+        const number = await contract.getFunction("retrieve").staticCall();
         expect(number).to.equal(256);
 
         /**
          * Calculate addition & subtraction
          */
-        const sum = await contract.add(8, 6);
+        const sum = await contract.getFunction("add").staticCall(8, 6);
         expect(sum).to.equal(14);
 
-        const sub = await contract.sub(8, 6);
+        const sub = await contract.getFunction("sub").staticCall(8, 6);
         expect(sub).to.equal(2);
     });
 });

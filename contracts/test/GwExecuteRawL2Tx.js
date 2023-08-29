@@ -10,6 +10,7 @@ const { expectThrowsAsync } = require("../utils/throw");
 const expectedValue = 10;
 
 let ethCallContract;
+let ethCallContractAddress;
 
 const rpc = new toolkit.RPC(network.config.url);
 
@@ -34,7 +35,7 @@ const executeGwRawTx = async (chainId, toId, polyArgs) => {
 
 describe("gw_execute_raw_l2transaction Cache Test", function () {
   if (isAxon()) {
-      return
+    return
   }
   if (isGwMainnetV1()) {
     return;
@@ -43,7 +44,8 @@ describe("gw_execute_raw_l2transaction Cache Test", function () {
   before("Deploy and Set", async () => {
     const contractFact = await ethers.getContractFactory("CallTest");
     ethCallContract = await contractFact.deploy();
-    await ethCallContract.deployed();
+    await ethCallContract.waitForDeployment();
+    ethCallContractAddress = await ethCallContract.getAddress();
     const tx = await ethCallContract.set(expectedValue);
     await tx.wait();
   });
@@ -52,9 +54,9 @@ describe("gw_execute_raw_l2transaction Cache Test", function () {
     const count = 100;
     const toId = await getAccountIdByContractAddress(
       rpc,
-      ethCallContract.address
+      ethCallContractAddress
     );
-    const chainId = (await ethCallContract.provider.getNetwork()).chainId;
+    const chainId = (await ethers.provider.getNetwork()).chainId;
     const args =
       "0xffffff504f4c590020bcbe00000000000000000000000000000000000000000000000000000000000000000000000000040000006d4ce63c";
 
@@ -75,9 +77,9 @@ describe("gw_execute_raw_l2transaction Cache Test", function () {
     const count = 100;
     const toId = await getAccountIdByContractAddress(
       rpc,
-      ethCallContract.address
+      ethCallContractAddress
     );
-    const chainId = (await ethCallContract.provider.getNetwork()).chainId;
+    const chainId = (await ethers.provider.getNetwork()).chainId;
     const args =
       "0xffffff504f4c590020bcbe0000000000000000000000000000000000000000000000000000000000000000000000000024000000df57407800000000000000000000000000000000000000000000000000000000000001bc";
 

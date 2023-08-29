@@ -1,0 +1,36 @@
+diff --git a/node_modules/hardhat/internal/core/providers/accounts.js b/node_modules/hardhat/internal/core/providers/accounts.js
+index a1a0593..8d951a8 100644
+--- a/node_modules/hardhat/internal/core/providers/accounts.js
++++ b/node_modules/hardhat/internal/core/providers/accounts.js
+@@ -129,6 +129,16 @@ class LocalAccountsProvider extends chainId_1.ProviderWrapperWithChainId {
+             const privateKey = this._getPrivateKeyForAddress(txRequest.from);
+             const chainId = await this._getChainId();
+             const rawTransaction = await this._getSignedTransaction(txRequest, chainId, privateKey);
++            console.log("eth_sendRawTransaction:", JSON.parse(JSON.stringify(txRequest, (key, value) => {
++                    if (typeof value === 'bigint') {
++                        return value.toString()
++                    } else if (typeof value !== 'undefined' && (key === 'from' || key === 'to' || key === 'data')) {
++                        return '0x' + Buffer.from(value, 'hex').toString('hex')
++                    } else {
++                        return value
++                    }
++                }
++            )));
+             return this._wrappedProvider.request({
+                 method: "eth_sendRawTransaction",
+                 params: [bufferToHex(rawTransaction)],
+diff --git a/node_modules/hardhat/internal/core/providers/http.js b/node_modules/hardhat/internal/core/providers/http.js
+index 144d847..50ad3cb 100644
+--- a/node_modules/hardhat/internal/core/providers/http.js
++++ b/node_modules/hardhat/internal/core/providers/http.js
+@@ -74,6 +74,10 @@ class HttpProvider extends events_1.EventEmitter {
+     async request(args) {
+         const jsonRpcRequest = this._getJsonRpcRequest(args.method, args.params);
+         const jsonRpcResponse = await this._fetchJsonRpcResponse(jsonRpcRequest);
++        if (args.method != "eth_chainId") {
++            console.log("jsonRpcRequest:", jsonRpcRequest);
++            console.log("jsonRpcResponse:", jsonRpcResponse);
++        }
+         if (isErrorResponse(jsonRpcResponse)) {
+             const error = new errors_2.ProviderError(jsonRpcResponse.error.message, jsonRpcResponse.error.code);
+             error.data = jsonRpcResponse.error.data;

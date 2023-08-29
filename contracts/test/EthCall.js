@@ -15,16 +15,15 @@ describe("Eth_Call Cache Test", function () {
   before("Deploy and Set", async () => {
     const contractFact = await ethers.getContractFactory("CallTest");
     ethCallContract = await contractFact.deploy();
-    await ethCallContract.deployed();
-    const tx = await ethCallContract.set(expectedValue);
+    await ethCallContract.waitForDeployment();
+    const tx = await ethCallContract.getFunction("set").send(expectedValue);
     await tx.wait();
   });
 
   it("batch call", async () => {
     const count = 200;
     const p = new Array(count).fill(1).map(async () => {
-      const value = await ethCallContract.get();
-      return value;
+      return await ethCallContract.getFunction("get").staticCall();
     });
     const ps = Promise.all(p);
     const values = await ps;
@@ -41,7 +40,7 @@ describe("Eth_Call Cache Test", function () {
     const p = new Array(count).fill(1).map(async () => {
       const errMsg = "you trigger death value!";
       const method = async () => {
-        await ethCallContract.getRevertMsg(triggerValue);
+        await ethCallContract.getFunction("getRevertMsg").staticCall(triggerValue);
       };
       await expectThrowsAsync(method, errMsg);
     });
@@ -50,7 +49,7 @@ describe("Eth_Call Cache Test", function () {
   });
 
   it("call without from address", async () => {
-    const transaction = await ethCallContract.populateTransaction.get();
+    const transaction = await ethCallContract.getFunction("get").populateTransaction();
     // ethers.provider will auto fill from address, so we use fetch to call rpc
     const body =
       '{"jsonrpc": "2.0", "method":"eth_call", "params": [{"to":"' +

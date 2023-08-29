@@ -1,15 +1,16 @@
 import hardhat from "hardhat"
 import chai from "chai"
 import { isAxon, isGwMainnetV1 } from "../utils/network.js"
+import { getTxReceipt } from "../utils/receipt.js";
 
 const { ethers } = hardhat
 const { expect } = chai
-const { BigNumber } = ethers
 
-let gasPrice, faucetAccount, EOA0, EOA1, newEOA0, CA0
+let gasPrice, gasPriceHex, faucetAccount, EOA0, EOA1, newEOA0, CA0
 
 if (!(isGwMainnetV1() || isAxon())) {
-  gasPrice = await getGasPrice(ethers.provider);
+  gasPrice = (await ethers.provider.getFeeData()).gasPrice
+  gasPriceHex = "0x" + gasPrice.toString(16);
   //external account0 and external account1 get a fixed balance
   const signers = await ethers.getSigners();
   faucetAccount = signers[0].address;
@@ -19,8 +20,8 @@ if (!(isGwMainnetV1() || isAxon())) {
   //deploy contract,get contract account
   const baseFallbackReceive = await ethers.getContractFactory("baseFallbackReceive");
   const contract = await baseFallbackReceive.deploy();
-  await contract.deployed();
-  CA0 = contract.address; //contract account address
+  await contract.waitForDeployment();
+  CA0 = await contract.getAddress(); //contract account address
 }
 
 describe("gw transfer success", function () {
@@ -40,8 +41,8 @@ describe("gw transfer success", function () {
 
   before(async function () {
     this.timeout(15000);
-    await transfer(faucetAccount, EOA0, BigNumber.from("460000").mul(gasPrice).toHexString().replaceAll("0x0", "0x"));
-    await transfer(faucetAccount, EOA1, BigNumber.from("1").toHexString().replaceAll("0x0", "0x"));
+    await transfer(faucetAccount, EOA0, "0x" + (BigInt("460000") * gasPrice).toString(16));
+    await transfer(faucetAccount, EOA1, "0x" + BigInt("1").toString(16));
   });
 
   for (let i = 0; i < tests.length; i++) {
@@ -49,22 +50,22 @@ describe("gw transfer success", function () {
     it(test.name, async () => {
       const from_balance = await ethers.provider.getBalance(test.from)
       const to_balance = await ethers.provider.getBalance(test.to)
-      console.log(`before transfer from_balance(${test.from.substring(0, 6)}):${from_balance} to_balance(${test.to.substring(0, 6)}):${to_balance}`)
+      console.log(`before transfer from_balance(${test.from}):${from_balance} to_balance(${test.to}):${to_balance}`)
       const estimatedGas = await estGas(test.from, test.to, test.value, test.data)
       const response = await transfer(test.from, test.to, test.value, test.data)
       const from_balance_sent = await ethers.provider.getBalance(test.from)
       const to_balance_sent = await ethers.provider.getBalance(test.to)
-      console.log(`after transfer from_balance(${test.from.substring(0, 6)}):${from_balance_sent} to_balance(${test.to.substring(0, 6)}):${to_balance_sent} gasPrice:${parseInt(gasPrice, 16)} fee:${response.gasUsed.mul(gasPrice).toString()} estimatedGas:${parseInt(estimatedGas, 16)}`)
+      console.log(`after transfer from_balance(${test.from}):${from_balance_sent} to_balance(${test.to}):${to_balance_sent} gasPrice:${parseInt(gasPrice, 16)} fee:${response.gasUsed * gasPrice} estimatedGas:${parseInt(estimatedGas, 16)}`)
       expect(response.gasUsed).to.be.equal(test.expectGasUsed)
       expect(estimatedGas).to.be.least(response.gasUsed)
       if (test.from === test.to) {
         //from_balance-from_balance_sent=gasUsed*gasPrice
-        expect(from_balance.sub(from_balance_sent)).to.be.equal(response.gasUsed.mul(gasPrice))
+        expect(from_balance - from_balance_sent).to.be.equal(response.gasUsed * gasPrice)
       } else {
         //from_balance-from_balance_sent=value+gasUsed*gasPrice
         //to_balance_sent-to_balance=value
-        expect(from_balance.sub(from_balance_sent)).to.be.equal(BigNumber.from(test.value).add(response.gasUsed.mul(gasPrice)))
-        expect(to_balance_sent.sub(to_balance)).to.be.equal(BigNumber.from(test.value))
+        expect(from_balance - from_balance_sent).to.be.equal(BigInt(test.value) + response.gasUsed * gasPrice)
+        expect(to_balance_sent - to_balance).to.be.equal(BigInt(test.value))
       }
     }).timeout(20000)
   }
@@ -80,19 +81,19 @@ describe("gw transfer failed", function () {
 
   before(async function () {
     this.timeout(10000);
-    await transfer(faucetAccount, EOA1, BigNumber.from("230000").mul(gasPrice).toHexString().replaceAll("0x0", "0x"));
+    await transfer(faucetAccount, EOA1, "0x" + (BigInt("230000") * gasPrice).toString(16));
   });
 
   it("gasLimit not enough", async () => {
     const from_balance = await ethers.provider.getBalance(from)
     const to_balance = await ethers.provider.getBalance(to)
-    console.log(`before transfer from_balance(${from.substring(0, 6)}):${from_balance} to_balance(${to.substring(0, 6)}):${to_balance}`)
+    console.log(`before transfer from_balance(${from}):${from_balance} to_balance(${to}):${to_balance}`)
     try {
       await ethers.provider.send("eth_sendTransaction", [{
         "from": from,
         "to": to,
         "gas": "0x100",
-        "gasPrice": gasPrice,
+        "gasPrice": gasPriceHex,
         "value": "0x1"
       }])
     } catch (e) {
@@ -100,7 +101,7 @@ describe("gw transfer failed", function () {
     } finally {
       const from_balance_sent = await ethers.provider.getBalance(from)
       const to_balance_sent = await ethers.provider.getBalance(to)
-      console.log(`after transfer from_balance(${from.substring(0, 6)}):${from_balance_sent} to_balance(${to.substring(0, 6)}):${to_balance_sent}`)
+      console.log(`after transfer from_balance(${from}):${from_balance_sent} to_balance(${to}):${to_balance_sent}`)
       expect(from_balance).to.be.equal(from_balance_sent)
       expect(to_balance).to.be.equal(to_balance_sent)
     }
@@ -151,7 +152,6 @@ describe("gw transfer failed", function () {
     while (receipt === null) {
       console.log("Transaction is still pending")
       receipt = await ethers.provider.getTransactionReceipt(res.hash)
-      await sleep(2000)
     }
     expect(receipt.status).equals(0)
   }).timeout(15000)
@@ -168,7 +168,7 @@ describe("gw transfer failed", function () {
     } finally {
       const from_balance_sent = await ethers.provider.getBalance(from)
       const to_balance_sent = await ethers.provider.getBalance(to)
-      console.log(`after transfer from_balance(${from.substring(0, 6)}):${from_balance_sent} to_balance(${to.substring(0, 6)}):${to_balance_sent}`)
+      console.log(`after transfer from_balance(${from}):${from_balance_sent} to_balance(${to}):${to_balance_sent}`)
       expect(from_balance).to.be.equal(from_balance_sent)
       expect(to_balance).to.be.equal(to_balance_sent)
     }
@@ -179,15 +179,15 @@ describe("gw transfer failed", function () {
       "from": from,
       "to": to,
       "gas": "0xb3b0",
-      "gasPrice": gasPrice,
+      "gasPrice": gasPriceHex,
       "value": "0x1"
     }])
     const txInfo = await ethers.provider.getTransaction(txHash)
     const nonce = await ethers.provider.getTransactionCount(txInfo.from)
-    await getTxReceipt(ethers.provider, txHash, 100)
+    await getTxReceipt(txHash)
     const from_balance = await ethers.provider.getBalance(from)
     const to_balance = await ethers.provider.getBalance(to)
-    console.log(`before transfer from_balance(${from.substring(0, 6)}):${from_balance} to_balance(${to.substring(0, 6)}):${to_balance}`)
+    console.log(`before transfer from_balance(${from}):${from_balance} to_balance(${to}):${to_balance}`)
     try {
       await (await ethers.getSigners())[0].sendTransaction({
         "to": to,
@@ -199,7 +199,7 @@ describe("gw transfer failed", function () {
     } finally {
       const from_balance_sent = await ethers.provider.getBalance(from)
       const to_balance_sent = await ethers.provider.getBalance(to)
-      console.log(`after transfer from_balance(${from.substring(0, 6)}):${from_balance_sent} to_balance(${to.substring(0, 6)}):${to_balance_sent}`)
+      console.log(`after transfer from_balance(${from}):${from_balance_sent} to_balance(${to}):${to_balance_sent}`)
       expect(from_balance).to.be.equal(from_balance_sent)
       expect(to_balance).to.be.equal(to_balance_sent)
     }
@@ -212,11 +212,11 @@ async function transfer(from, to, value, data) {
     from,
     to,
     "gas": "0xb3b0", // 46000
-    "gasPrice": gasPrice,
+    "gasPrice": gasPriceHex,
     "value": value,
     "data": data
   }])
-  let response = await getTxReceipt(ethers.provider, tx, 100)
+  let response = await getTxReceipt(tx)
   expect(response.status).to.be.equal(1)
   return response
 }
@@ -226,35 +226,10 @@ async function estGas(from, to, value, data) {
     from,
     to,
     "gas": "0xb3b0",
-    "gasPrice": gasPrice,
+    "gasPrice": gasPriceHex,
     "value": value,
     "data": data
   }])
-}
-
-async function getTxReceipt(provider, txHash, count) {
-  let response
-  for (let i = 0; i < count; i++) {
-    response = await provider.getTransactionReceipt(txHash);
-    if (response == null) {
-      await sleep(2000)
-      continue;
-    }
-    if (response.confirmations >= 1) {
-      return response
-    }
-    await sleep(2000)
-  }
-  return response
-}
-
-async function getGasPrice(provider) {
-  let gasPrice = await provider.getGasPrice();
-  return gasPrice.toHexString().replaceAll("0x0", "0x");
-}
-
-async function sleep(timeOut) {
-  await new Promise(r => setTimeout(r, timeOut));
 }
 
 /**
