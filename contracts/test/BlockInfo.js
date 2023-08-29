@@ -60,8 +60,6 @@ describe("BlockInfo Contract", function () {
     // check block hash
     const blockNumber = await ethers.provider.getBlockNumber() - 1;
     const block = await ethers.provider.getBlock(blockNumber)
-    // TODO: Uncomment when will be fixed
-    // throw ProviderError: data out-of-bounds (length=28, offset=32, code=BUFFER_OVERRUN, version=abi/5.0.7)
     const contractBlockHash = await contract.getBlockHash(block.number)
 
     console.log('blockHash', block.hash)
