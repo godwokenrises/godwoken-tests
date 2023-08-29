@@ -5,7 +5,6 @@ import { getTxReceipt } from "../utils/receipt.js";
 
 const { ethers } = hardhat
 const { expect } = chai
-const { BigNumber } = ethers
 
 let gasPrice, gasPriceHex, faucetAccount, EOA0, EOA1, newEOA0, CA0
 
