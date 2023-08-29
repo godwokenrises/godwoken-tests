@@ -50,7 +50,7 @@ describe("Overwrite code hash", function () {
         const OverwriteCodeHash = await ethers.getContractFactory("OverwriteCodeHash");
         const contract = await OverwriteCodeHash.deploy();
         await contract.waitForDeployment();
-        const contractAddress= await contract.getAddress();
+        const contractAddress = await contract.getAddress();
         console.log(`contract address: ${contractAddress}`);
 
         // query godwoken account id
