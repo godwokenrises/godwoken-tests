@@ -159,6 +159,7 @@ describe("sUDT-ERC20 Proxy Contract", () => {
     const receipt = await tx.wait();
     expect(receipt.logs.length).to.be.greaterThan(0, "Should have at least one event");
 
+    // https://docs.ethers.org/v6/single-page/#api_contract__EventLog
     const [event] = receipt.logs;
     expect(event.fragment.name).to.equal("Transfer", "Should be Transfer event");
 
