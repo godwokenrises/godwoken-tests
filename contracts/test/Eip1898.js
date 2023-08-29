@@ -84,7 +84,7 @@ describe("Eip1898 eth_getCode test", function () {
       requireCanonical: true,
     });
     expect(resJson.result).to.not.equal(null);
-    expect(resJson.result.length).to.equal(1990);
+    expect(resJson.result.length).to.equal(2200);
     expect(resJson.result.startsWith("0x")).to.equal(true);
   });
 });
