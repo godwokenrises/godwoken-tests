@@ -35,6 +35,7 @@ describe("Revertal", function () {
     contractAddr = await revertalContract.getAddress();
   });
 
+  // TODO: Enable this test after the issue is fixed: https://github.com/ethers-io/ethers.js/pull/4057
   it.skip("call Revertal.revert_null()", async () => {
     // 'missing revert data in call exception; Transaction reverted without a reason string
     // [ See: https://links.ethers.org/v5-errors-CALL_EXCEPTION ]
