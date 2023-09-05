@@ -54,7 +54,7 @@ jobs:
           ${{ runner.os }}-node_modules-
     - name: Deposit into accounts
       working-directory: godwoken-tests/contracts
-      run:
+      run: |
         npm install
         npx hardhat test scripts/deposit-accounts.js --network ${{ matrix.axon-network }}
     - name: Test | Run polyjuice tests
