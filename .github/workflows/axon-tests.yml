@@ -52,6 +52,11 @@ jobs:
         key: ${{ runner.os }}-node_modules-${{ github.sha }}
         restore-keys: |
           ${{ runner.os }}-node_modules-
+    - name: Deposit into accounts
+      working-directory: godwoken-tests/contracts
+      run: |
+        npm install
+        npx hardhat run scripts/deposit-accounts.js --network ${{ matrix.axon-network }}
     - name: Test | Run polyjuice tests
       working-directory: godwoken-tests/testcases/polyjuice-tests
       run: |
