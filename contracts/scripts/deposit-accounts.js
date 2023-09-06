@@ -3,6 +3,7 @@ const { ethers } = require("hardhat");
 async function main() {
   const MIN_BALANCE = ethers.parseEther("100");
   // 0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266
+  // see https://github.com/axonweb3/axon/blob/283195/devtools/chain/specs/single_node/chain-spec.toml#L13-L21
   const PRIVATE_KEY = "0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80";
   const provider = ethers.provider;
   const wallet = new ethers.Wallet(PRIVATE_KEY, provider);
