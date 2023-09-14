@@ -9,11 +9,6 @@ const { getTxReceipt } = require("../utils/receipt");
 const { ethers } = hardhat;
 
 describe("Non eip155 tx", function () {
-  //FIXME
-  if (isAxon()) {
-    return;
-  }
-
   it("Send non eip155 tx", async function () {
     const [owner] = await ethers.getSigners();
 
