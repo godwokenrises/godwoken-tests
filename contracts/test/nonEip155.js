@@ -8,6 +8,12 @@ const { getTxReceipt } = require("../utils/receipt");
 
 const { ethers } = hardhat;
 
+// non-EIP-155 transactions are mainly to support EIP-1820. Many projects use
+// this method to support multi-chain contracts using the same address.
+//
+// EIP-155: The currently existing signature scheme using v = 27 and v = 28
+// remains valid and continues to operate under the same rules as it did
+// previously.
 describe("Non eip155 tx", function () {
   it("Send non eip155 tx", async function () {
     const [owner] = await ethers.getSigners();
