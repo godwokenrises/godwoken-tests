@@ -34,12 +34,12 @@ module.exports = {
       accounts: [`0x${TEST_PK1}`, `0x${TEST_PK2}`, `${PRIVATE_KEY0}`, `${PRIVATE_KEY1}`],
     },
     gw_testnet_v1: {
-      url: `https://v1.testnet.godwoken.io/rpc/instant-finality-hack`,
+      url: `https://new-testnet.godwoken.cf/rpc/instant-finality-hack`,
       accounts: [`0x${TEST_PK1}`, `0x${TEST_PK2}`, `0x${TEST_PK3}`, `${PRIVATE_KEY0}`, `${PRIVATE_KEY1}`],
       chainId: 71401,
     },
     gw_alphanet_v1: { // for internal testing
-      url: `https://gw-alphanet-v1.godwoken.cf/instant-finality-hack`,
+      url: `https://new-alphanet.godwoken.cf/instant-finality-hack`,
       accounts: [`0x${TEST_PK1}`, `0x${TEST_PK2}`, `${PRIVATE_KEY0}`, `${PRIVATE_KEY1}`],
       chainId: 202206,
       gasPrice: 1,
