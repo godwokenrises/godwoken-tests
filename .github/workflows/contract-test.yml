@@ -21,7 +21,7 @@ concurrency:
 
 jobs:
   contract-tests:
-    if: github.repository == 'godwokenrises/godwoken-tests'
+    if: github.repository == 'simon-tl/godwoken-tests'
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
