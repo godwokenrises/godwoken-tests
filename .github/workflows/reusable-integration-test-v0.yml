@@ -57,13 +57,13 @@ jobs:
     # Check multiple repos (nested)
     # see: https://github.com/actions/checkout#checkout-multiple-repos-nested
     - name: Checkout godwoken-tests
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
       with:
         repository: godwokenrises/godwoken-tests
         ref: v0
         submodules: 'recursive'
     - name: Checkout Kicker # multiple repos (nested)
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
       with:
         repository: godwokenrises/godwoken-kicker
         ref: ${{ inputs.kicker_ref || 'rc-0.10.0' }}
