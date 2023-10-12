@@ -39,7 +39,7 @@ jobs:
       if: ${{ env.KEY1 != '' && env.KEY2 != '' && env.KEY3 != '' }}
       run: echo "available=true" >> $GITHUB_OUTPUT
 
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
       with:
         submodules: 'recursive'
 

@@ -11,7 +11,7 @@ jobs:
     if: github.repository == 'godwokenrises/godwoken-tests'
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           ref: compatibility-godwoken
           repository: gpBlockchain/openzeppelin-contracts
