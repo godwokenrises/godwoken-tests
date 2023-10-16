@@ -98,7 +98,7 @@ jobs:
     # set up buildx/BuildKit runner in the context,
     # make the Docker cache exportable and thus properly cacheable
     - name: Set up Docker Buildx
-      uses: docker/setup-buildx-action@v2
+      uses: docker/setup-buildx-action@v3
 
     # Ensure clean state
     - name: Run Godwoken-Kicker clean
