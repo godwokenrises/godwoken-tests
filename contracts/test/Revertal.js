@@ -19,7 +19,7 @@
 
 const { expect } = require("chai");
 const { ethers } = require("hardhat");
-const { isGwMainnetV1, isHardhatNetwork, isAxon } = require('../utils/network');
+const { isGwMainnetV1, isAxon, isGw } = require('../utils/network');
 
 describe("Revertal", function () {
   // Skip for gw_mainnet_v1 network
@@ -35,8 +35,7 @@ describe("Revertal", function () {
     contractAddr = await revertalContract.getAddress();
   });
 
-  // TODO: Enable this test after the issue is fixed: https://github.com/ethers-io/ethers.js/pull/4057
-  it.skip("call Revertal.revert_null()", async () => {
+  it("call Revertal.revert_null()", async () => {
     // 'missing revert data in call exception; Transaction reverted without a reason string
     // [ See: https://links.ethers.org/v5-errors-CALL_EXCEPTION ]
     // (data="0x", error={"name":"ProviderError","_stack":"ProviderError: execution reverted
@@ -67,22 +66,28 @@ describe("Revertal", function () {
     expect(data).eq("0x08c379a000000000000000000000000000000000000000000000000000000000000000200000000000000000000000000000000000000000000000000000000000000009726561736f6e58595a0000000000000000000000000000000000000000000000");
   })
 
-  it.skip("call Revertal.revert_custom_error()", async () => {
+  it("call Revertal.revert_custom_error()", async () => {
     const err = await revertalContract.getFunction("revert_custom_error").staticCall("reasonABC").catch(err => err);
-    const { message, data, errorSignature } = err;
-    expect(errorSignature).eq("CustomError(string)")
-    expect(message).contains("reasonABC");
+    const { message, data } = err;
+    if (isAxon()) {
+      expect(message).contains("execution reverted: reasonABC");
+    } else if (isGw()) {
+      expect(message).contains("execution reverted");
+    }
     expect(data).eq("0x8d6ea8be00000000000000000000000000000000000000000000000000000000000000200000000000000000000000000000000000000000000000000000000000000009726561736f6e4142430000000000000000000000000000000000000000000000");
   })
 
-  it.skip("call Revertal.panic()", async () => {
+  it("call Revertal.panic()", async () => {
     // 'call revert exception; VM Exception while processing transaction: reverted with panic code 1
     // [ See: https://links.ethers.org/v5-errors-CALL_EXCEPTION ]
     // (method="panic()", errorArgs=[{"type":"BigNumber","hex":"0x01"}], errorName="Panic", errorSignature="Panic(uint256)", reason=null, code=CALL_EXCEPTION, version=abi/5.7.0)'
     const err = await revertalContract.getFunction("panic").staticCall().catch(err => err);
-    const { message, data, errorSignature } = err;
-    expect(message).contains("reverted with panic code 1");
-    expect(errorSignature).eq("Panic(uint256)");
+    const { message, data } = err;
+    if (isAxon()) {
+      expect(message).contains("execution reverted");
+    } else if (isGw()) {
+      expect(message).contains("reverted: panic code 0x1");
+    }
     expect(data).eq("0x4e487b710000000000000000000000000000000000000000000000000000000000000001");
   })
 
