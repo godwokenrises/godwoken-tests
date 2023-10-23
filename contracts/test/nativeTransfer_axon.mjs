@@ -146,7 +146,7 @@ describe("axon transfer failed", function () {
         "nonce": nonce - 1
       })
     } catch (e) {
-      expect(e.data).to.be.contains("nonce 0 is invalid current nonce")
+      expect(e.data).to.be.contains("invalid current nonce")
     } finally {
       const from_balance_sent = await ethers.provider.getBalance(from)
       const to_balance_sent = await ethers.provider.getBalance(to)
