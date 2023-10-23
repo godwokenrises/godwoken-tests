@@ -66,7 +66,7 @@ module.exports = {
     axon_alphanet: {
       url: "https://rpc-alphanet-axon.ckbapp.dev/",
       accounts: [`0x${TEST_PK1}`, `0x${TEST_PK2}`, AXON_DEV_KEY, `${PRIVATE_KEY0}`, `${PRIVATE_KEY1}`],
-      chainId: 2022,
+      chainId: 1098411886,
     },
     hardhat: {
       hardfork: "berlin",
