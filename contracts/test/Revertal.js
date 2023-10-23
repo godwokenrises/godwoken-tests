@@ -52,7 +52,9 @@ describe("Revertal", function () {
     } catch (error) {
       // error was catched in Godwoken networks
       expect(error.message).contains("execution reverted");
-      expect(error.data).to.equal("0x");
+      if (isAxon()) {
+        expect(error.data).to.equal("0x");
+      }
     }
   })
 
@@ -72,7 +74,7 @@ describe("Revertal", function () {
     if (isAxon()) {
       expect(message).contains("execution reverted: reasonABC");
     } else if (isGw()) {
-      expect(message).contains("execution reverted");
+      expect(message).eq("execution reverted");
     }
     expect(data).eq("0x8d6ea8be00000000000000000000000000000000000000000000000000000000000000200000000000000000000000000000000000000000000000000000000000000009726561736f6e4142430000000000000000000000000000000000000000000000");
   })
@@ -86,20 +88,23 @@ describe("Revertal", function () {
     if (isAxon()) {
       expect(message).contains("execution reverted");
     } else if (isGw()) {
-      expect(message).contains("reverted: panic code 0x1");
+      expect(message).eq("execution reverted: panic code 0x1 (Assertion error)");
     }
     expect(data).eq("0x4e487b710000000000000000000000000000000000000000000000000000000000000001");
   })
 
   // panic code 0x11 (Arithmetic operation underflowed or overflowed outside of an unchecked block)
-  it.skip("call Revertal.arithmetic_overflow()", async () => {
+  it("call Revertal.arithmetic_overflow()", async () => {
     // 'call revert exception; VM Exception while processing transaction: reverted with panic code 17
     // [ See: https://links.ethers.org/v5-errors-CALL_EXCEPTION ]
     // (method="arithmetic_overflow()", errorArgs=[{"type":"BigNumber","hex":"0x11"}], errorName="Panic", errorSignature="Panic(uint256)", reason=null, code=CALL_EXCEPTION, version=abi/5.7.0)'
     const err = await revertalContract.getFunction("arithmetic_overflow").staticCall().catch(err => err);
-    const { message, data, errorSignature } = err;
-    expect(message).contains("reverted with panic code 17");
-    expect(errorSignature).eq("Panic(uint256)");
+    const { message, data } = err;
+    if (isAxon()) {
+      expect(message).contains("execution reverted");
+    } else if (isGw()) {
+      expect(message).eq("execution reverted: panic code 0x11 (Arithmetic operation underflowed or overflowed outside of an unchecked block)");
+    }
     expect(data).eq("0x4e487b710000000000000000000000000000000000000000000000000000000000000011");
   })
 });
