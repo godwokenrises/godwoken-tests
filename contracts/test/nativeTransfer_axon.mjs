@@ -97,7 +97,7 @@ describe("axon transfer failed", function () {
         "value": "0x1"
       }])
     } catch (e) {
-      expect(e.toString()).to.be.contains("The transaction gas limit less than 21000")
+      expect(e.toString()).to.be.contains("Gas limit is less than 21000")
     } finally {
       const from_balance_sent = await ethers.provider.getBalance(from)
       const to_balance_sent = await ethers.provider.getBalance(to)
@@ -115,7 +115,7 @@ describe("axon transfer failed", function () {
     try {
       await transfer(from, to, "0x845951614014880000000")
     } catch (e) {
-      expect(e.toString()).to.be.contains("ExceedBalance")
+      expect(e.data).to.be.contains("exceeds balance")
     } finally {
       const from_balance_sent = await ethers.provider.getBalance(from)
       const to_balance_sent = await ethers.provider.getBalance(to)
@@ -146,7 +146,7 @@ describe("axon transfer failed", function () {
         "nonce": nonce - 1
       })
     } catch (e) {
-      expect(e.toString()).to.be.contains("InvalidNonce")
+      expect(e.data).to.be.contains("nonce 0 is invalid current nonce")
     } finally {
       const from_balance_sent = await ethers.provider.getBalance(from)
       const to_balance_sent = await ethers.provider.getBalance(to)
