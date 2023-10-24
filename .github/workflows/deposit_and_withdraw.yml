@@ -21,13 +21,13 @@ jobs:
     if: github.repository == 'godwokenrises/godwoken-tests'
 
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
       with:
         submodules: 'recursive'
         repository: Flouse/godwoken-examples
         ref: v1
 
-    - uses: actions/setup-node@v3
+    - uses: actions/setup-node@v4
       with:
         node-version: '16'
     - name: Get yarn cache directory path
