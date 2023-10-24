@@ -142,7 +142,7 @@ jobs:
     #     docker restart docker_godwoken_1
     #     docker-compose --file docker/docker-compose.yml logs --tail 6
 
-    - uses: actions/setup-node@v3
+    - uses: actions/setup-node@v4
       with:
         node-version: '18'
     - name: Get npm cache directory
