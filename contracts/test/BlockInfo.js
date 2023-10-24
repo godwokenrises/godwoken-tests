@@ -84,9 +84,11 @@ describe("BlockInfo Contract", function () {
     // should be equal to zero
     expect(eventBlockHash).to.be.equal("0x0000000000000000000000000000000000000000000000000000000000000000")
 
-
     // Triggering the event for the previous block hash
-    const prevTx = await contract.getFunction("executePreviousBlockHash").send().then(tx => tx.wait());
+    const prevTx = await contract.getFunction("executePreviousBlockHash").send().then(tx => {
+      console.log("call BlockInfo.executePreviousBlockHash, tx_hash, :", tx.hash);
+      return tx.wait()
+    });
 
     const prevTxBlockNumber = prevTx.blockNumber - 1;
     const prevTxBlockHash = (await ethers.provider.getBlock(prevTxBlockNumber)).hash;
