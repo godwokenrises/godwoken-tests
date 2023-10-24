@@ -34,7 +34,7 @@ jobs:
         command: [ batch-claim-l1, batch-claim-l2 ]
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-node@v3
+      - uses: actions/setup-node@v4
         with:
           node-version: '16'
           cache: 'npm'
@@ -57,7 +57,7 @@ jobs:
     if: needs.check-secrets.outputs.available && ${{ github.event.inputs.prepare-sudt }}
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-node@v3
+      - uses: actions/setup-node@v4
         with:
           node-version: '16'
 
