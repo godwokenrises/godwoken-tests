@@ -24,7 +24,7 @@ describe("Eip1898 eth_getCode test", function () {
 
   before(async function () {
     if (contractAddress) {
-      contract = await ethers.getContractAt("BlockInfo", contract.address);
+      contract = await ethers.getContractAt("BlockInfo", contractAddress);
       return;
     }
 
