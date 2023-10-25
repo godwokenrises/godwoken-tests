@@ -19,12 +19,12 @@ describe("Eip1898 eth_getCode test", function () {
   let contractAddress;
 
   if (isGwMainnetV1()) {
-    contract.address = mainnetContractAddr;
+    contractAddress = mainnetContractAddr;
   }
 
   before(async function () {
-    if (contract.address) {
-      contract = await ethers.getContractAt("BlockInfo", contract.address);
+    if (contractAddress) {
+      contract = await ethers.getContractAt("BlockInfo", contractAddress);
       return;
     }
 
