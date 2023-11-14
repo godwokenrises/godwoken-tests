@@ -28,7 +28,7 @@ jobs:
         with:
           node-version: '16'
 
-      - uses: actions/github-script@v6
+      - uses: actions/github-script@v7
         id: start-time
         with:
           script: return Date.now()
