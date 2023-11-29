@@ -51,11 +51,3 @@ jobs:
       env:
         PRIVATE_KEY: ${{ secrets.GW_MAINNET_V1_PK1 }}
         PRIVATE_KEY2: ${{ secrets.GW_MAINNET_V1_PK2 }}
-    - name: Run tests on mainnet-readonly.godwoken.cf
-      working-directory: contracts
-      run: |
-        sed -i "s|v1.mainnet.godwoken.io|mainnet-readonly.godwoken.cf|g" hardhat.config.js
-        npm run test:gw_mainnet_v1
-      env:
-        PRIVATE_KEY: ${{ secrets.GW_MAINNET_V1_PK1 }}
-        PRIVATE_KEY2: ${{ secrets.GW_MAINNET_V1_PK2 }}
