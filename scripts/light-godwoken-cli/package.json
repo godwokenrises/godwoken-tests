@@ -25,7 +25,7 @@
     "@ckb-lumos/lumos": "^0.17.0",
     "@ckb-lumos/codec": "^0.17.0",
     "@ckitjs/ckit": "^0.2.0",
-    "axios": "^0.27.2",
+    "axios": "^1.6.0",
     "ckb-js-toolkit": "^0.10.2",
     "commander": "^9.3.0",
     "dotenv": "^16.0.1",
