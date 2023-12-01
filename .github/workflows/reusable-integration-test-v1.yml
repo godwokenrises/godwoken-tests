@@ -187,7 +187,7 @@ jobs:
         yarn install && yarn build-all
 
     - name: Wait 1 layer2 blocks passed
-      uses: actions/github-script@v6
+      uses: actions/github-script@v7
       with:
         script: |
           const { waitXl2BlocksPassed } = require("./scripts/helper");
@@ -206,7 +206,7 @@ jobs:
         ./kicker deposit-v0 10000 # Use ckb-miner key
     
     - name: Wait 1 layer2 blocks passed
-      uses: actions/github-script@v6
+      uses: actions/github-script@v7
       with:
         script: |
           const { waitXl2BlocksPassed } = require("./scripts/helper");
@@ -233,7 +233,7 @@ jobs:
         exit 1
 
     - name: Wait 1 layer2 blocks passed
-      uses: actions/github-script@v6
+      uses: actions/github-script@v7
       with:
         script: |
           const { waitXl2BlocksPassed } = require("./scripts/helper");
