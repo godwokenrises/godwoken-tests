@@ -10,7 +10,9 @@ let gasPrice, gasPriceHex, faucetAccount, EOA0, EOA1, newEOA0, CA0
 
 if (!(isGwMainnetV1() || isAxon())) {
   gasPrice = (await ethers.provider.getFeeData()).gasPrice
-  gasPriceHex = "0x" + gasPrice.toString(16);
+  const gasPriceNumber = Number(gasPrice)
+  const adjustedGasPrice = Math.round(gasPriceNumber * 1.1)
+  gasPriceHex = "0x" + adjustedGasPrice.toString(16);
   //external account0 and external account1 get a fixed balance
   const signers = await ethers.getSigners();
   faucetAccount = signers[0].address;
