@@ -31,7 +31,9 @@ describe("Revertal", function () {
   let contractAddr;
 
   before(async function () {
-    revertalContract = await ethers.deployContract("Revertal");
+    const Revertal = await ethers.getContractFactory("Revertal");
+    const deployTransaction = await Revertal.deploy();
+    revertalContract = await deployTransaction.waitForDeployment();
     contractAddr = await revertalContract.getAddress();
   });
 
