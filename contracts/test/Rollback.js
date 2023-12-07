@@ -142,7 +142,7 @@ describe('RollBack', function () {
           txData.testWay
         );
 
-        const MAX_GAS_LIMIT = 30000000
+        const MAX_GAS_LIMIT = 50000000
         let gasLimit;
         if (estimatedGas > MAX_GAS_LIMIT) {
           console.error(`Estimated Gas (${estimatedGas.toString()}) exceeds ${MAX_GAS_LIMIT}`);
