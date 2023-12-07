@@ -127,11 +127,47 @@ describe('RollBack', function () {
         // getState
         const preState = await changeObjContract.getFunction("getJournals").staticCall(prepareData.deployOpt.newAddress, prepareData.deployOpt.salt, prepareData.deployOpt.isRevert, prepareData.transferOpt.toAddress)
 
-        const tx = await rollBackContract.getFunction("changeWithRevert").send(prepareData.deployOpt.newAddress, prepareData.deployOpt.salt, prepareData.transferOpt.toAddress, test_way)
+        // https://github.com/cryptape/acceptance-internal/issues/562
+        const txData = {
+          newAddress: prepareData.deployOpt.newAddress,
+          salt: prepareData.deployOpt.salt,
+          toAddress: prepareData.transferOpt.toAddress,
+          testWay: test_way
+        };
+
+        const estimatedGas = await rollBackContract.getFunction("changeWithRevert").estimateGas(
+          txData.newAddress,
+          txData.salt,
+          txData.toAddress,
+          txData.testWay
+        );
+
+        const MAX_GAS_LIMIT = 50000000
+        let gasLimit;
+        if (estimatedGas > MAX_GAS_LIMIT) {
+          console.error(`Estimated Gas (${estimatedGas.toString()}) exceeds ${MAX_GAS_LIMIT}`);
+          gasLimit = MAX_GAS_LIMIT;
+        } else {
+          gasLimit = estimatedGas;
+        }
+
+        const tx = await rollBackContract.getFunction("changeWithRevert").send(
+          txData.newAddress,
+          txData.salt,
+          txData.toAddress,
+          txData.testWay,
+          { gasLimit: gasLimit }
+        );
+
+        // const tx = await rollBackContract.getFunction("changeWithRevert").send(prepareData.deployOpt.newAddress, prepareData.deployOpt.salt, prepareData.transferOpt.toAddress, test_way)
 
         const receipt = await tx.wait()
 
-        expect(receipt.logs.length).to.be.equal(0)
+        if (estimatedGas > MAX_GAS_LIMIT) {
+          console.log("changeWithRevert gasUsed: ",receipt.gasUsed.toString())
+        }
+
+          expect(receipt.logs.length).to.be.equal(0)
 
         // getState ,should not eq last state
         const afterState = await changeObjContract.getFunction("getJournals").staticCall(prepareData.deployOpt.newAddress, prepareData.deployOpt.salt, prepareData.deployOpt.isRevert, prepareData.transferOpt.toAddress)
@@ -157,7 +193,7 @@ describe('RollBack', function () {
 
       // getState ,should not eq last state
       const afterState = await changeObjContract.getFunction("getJournals").staticCall(prepareData.deployOpt.newAddress, prepareData.deployOpt.salt, prepareData.deployOpt.isRevert, prepareData.transferOpt.toAddress)
-        expect(preState.toString()).to.be.equal(afterState.toString());
+      expect(preState.toString()).to.be.equal(afterState.toString());
     })
 
     it("eth_call", async () => {
