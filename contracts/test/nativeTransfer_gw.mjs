@@ -9,8 +9,9 @@ const { expect } = chai
 let gasPrice, gasPriceHex, faucetAccount, EOA0, EOA1, newEOA0, CA0
 
 if (!(isGwMainnetV1() || isAxon())) {
-  gasPrice = (await ethers.provider.getFeeData()).gasPrice
-  gasPriceHex = "0x" + gasPrice.toString(16);
+  const gasPriceNumber = Number((await ethers.provider.getFeeData()).gasPrice)
+  gasPrice = BigInt(Math.round(gasPriceNumber * 1.1))
+  gasPriceHex = "0x" + gasPrice.toString(16)
   //external account0 and external account1 get a fixed balance
   const signers = await ethers.getSigners();
   faucetAccount = signers[0].address;
@@ -183,8 +184,8 @@ describe("gw transfer failed", function () {
       "value": "0x1"
     }])
     const txInfo = await ethers.provider.getTransaction(txHash)
-    const nonce = await ethers.provider.getTransactionCount(txInfo.from)
     await getTxReceipt(txHash)
+    const nonce = await ethers.provider.getTransactionCount(txInfo.from)
     const from_balance = await ethers.provider.getBalance(from)
     const to_balance = await ethers.provider.getBalance(to)
     console.log(`before transfer from_balance(${from}):${from_balance} to_balance(${to}):${to_balance}`)

@@ -134,8 +134,8 @@ describe("axon transfer failed", function () {
       "value": "0x1"
     }])
     const txInfo = await retryGetTransaction(ethers.provider, txHash, 5);
-    const nonce = await ethers.provider.getTransactionCount(txInfo.from)
     await getTxReceipt(txHash)
+    const nonce = await ethers.provider.getTransactionCount(txInfo.from)
     const from_balance = await ethers.provider.getBalance(from)
     const to_balance = await ethers.provider.getBalance(to)
     console.log(`before transfer from_balance(${from}):${from_balance} to_balance(${to}):${to_balance}`)
