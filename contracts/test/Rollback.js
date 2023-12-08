@@ -142,11 +142,12 @@ describe('RollBack', function () {
           txData.testWay
         );
 
-        const MAX_GAS_LIMIT = 50000000
+        // https://github.com/axonweb3/axon/blob/0.3.0-alpha.1/protocol/src/constants/configs.rs#L3-L6
+        const AXON_MAX_GAS_LIMIT = 30000000
         let gasLimit;
-        if (estimatedGas > MAX_GAS_LIMIT) {
-          console.error(`Estimated Gas (${estimatedGas.toString()}) exceeds ${MAX_GAS_LIMIT}`);
-          gasLimit = MAX_GAS_LIMIT;
+        if (estimatedGas > AXON_MAX_GAS_LIMIT) {
+          console.error(`Estimated Gas (${estimatedGas.toString()}) exceeds ${AXON_MAX_GAS_LIMIT}`);
+          gasLimit = AXON_MAX_GAS_LIMIT;
         } else {
           gasLimit = estimatedGas;
         }
@@ -163,7 +164,7 @@ describe('RollBack', function () {
 
         const receipt = await tx.wait()
 
-        if (estimatedGas > MAX_GAS_LIMIT) {
+        if (estimatedGas > AXON_MAX_GAS_LIMIT) {
           console.log("changeWithRevert gasUsed: ",receipt.gasUsed.toString())
         }
 
