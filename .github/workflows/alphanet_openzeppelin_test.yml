@@ -115,7 +115,7 @@ jobs:
           bash try.sh npm run test:pipeline5-19
       - name: Publish reports
         if: always()
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: jfoa-build-reports-${{ runner.os }}
           path: mochawesome-report/
