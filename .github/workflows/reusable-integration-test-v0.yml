@@ -362,7 +362,7 @@ jobs:
         docker-compose logs > /tmp/kicker.log
     - name: Archive logs
       if: always()
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: kicker-logs
         path: |
@@ -370,7 +370,7 @@ jobs:
     
     - name: Archive the dumped transactions in kicker/workspace/debug-tx-dump
       if: always()
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: debug-tx-dump
         path: |
