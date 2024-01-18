@@ -54,13 +54,13 @@ jobs:
       id: yarn-cache-dir
       run: echo "dir=$(yarn cache dir)" >> $GITHUB_OUTPUT
     - name: Hardhat cache
-      uses: actions/cache@v3
+      uses: actions/cache@v4
       id: hardhat-cache
       with:
         path: ~/.cache/hardhat-nodejs
         key: ${{ runner.os }}-hardhat-nodejs-${{ hashFiles('contracts/package-lock.json', 'testcases/account-abstraction/yarn.lock') }}
     - name: Node Cache for contracts directory
-      uses: actions/cache@v3
+      uses: actions/cache@v4
       id: npm-and-yarn-cache # use this to check for `cache-hit` (`steps.yarn-cache.outputs.cache-hit != 'true'`)
       with:
         path: |
